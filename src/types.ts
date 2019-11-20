@@ -23,8 +23,8 @@ export interface ITakeCause extends ICause {
     kind: 'TAKE';
 }
 
-export interface ICallCause<Arguments, CallResponse> extends ICause {
-    effect: (callable: (args: Arguments) => CallResponse, args: Arguments) => CallResponse;
+export interface ICallCause<Arguments extends any[], CallResponse> extends ICause {
+    effect: (...args: Arguments) => CallResponse;
     args: Arguments;
 }
 
