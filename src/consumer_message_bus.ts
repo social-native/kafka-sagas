@@ -37,7 +37,7 @@ export class ConsumerMessageBus {
 
                 // if this is a transactionId we actually care about, broadcast
                 if (this.transactionIds.has(action.transactionId)) {
-                    this.broadcast(action);
+                    this.broadcastTransactionEvent(action);
                 }
             }
         });
@@ -53,7 +53,7 @@ export class ConsumerMessageBus {
         });
     }
 
-    private broadcast(action: IAction) {
+    private broadcastTransactionEvent(action: IAction) {
         const key = {topic: action.topic, transactionId: action.transactionId};
 
         const resolver = this.subscribers.get(key);
