@@ -27,10 +27,43 @@ jobs:
         steps:
             - *npm-config
             - checkout
+            - setup_remote_docker
             - *restore-cache
             - run: npm install
             - *save-cache
-            - run: npm run test
+            - run:
+                  name: Start Containers
+                  command: docker-compose -f .circleci/docker-compose.yaml up -d
+            - run:
+                  name: Install wait-port
+                  command: |
+                      docker-compose -f .circleci/docker-compose.yaml \
+                        exec -T circleci-node \
+                        npm i -g wait-port
+            - run:
+                  name: Wait for Mysql To Be Responsive
+                  command: |
+                      docker-compose -f .circleci/docker-compose.yaml \
+                        exec -T circleci-node \
+                        wait-port -t 60000 mysql57:3306
+            - run:
+                  name: Wait for Kafka Rest Proxy To Be Responsive
+                  command: |
+                      docker-compose -f .circleci/docker-compose.yaml \
+                        exec -T circleci-node \
+                        wait-port -t 60000 rest-proxy:8082
+            - run:
+                  name: Wait for Kafka Connect To Be Responsive
+                  command: |
+                      docker-compose -f .circleci/docker-compose.yaml \
+                        exec -T circleci-node \
+                        wait-port -t 60000 connect:8083
+            - run:
+                  name: Run Tests in Test Container
+                  command: |
+                      docker-compose -f .circleci/docker-compose.yaml \
+                        exec -T circleci-node \
+                        npm run test:ci -- --ci
 
     build-verification:
         <<: *defaults

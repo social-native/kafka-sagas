@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EffectBuilder #actionChannel returns an action channel effect description 1`] = `
+Object {
+  "buffer": ActionChannelBuffer {
+    "actions": Array [],
+    "observers": Array [],
+  },
+  "kind": "ACTION_CHANNEL",
+  "observer": [Function],
+  "pattern": "smart",
+  "topics": Array [
+    "smart",
+  ],
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #actionChannel returns an action channel effect description 2`] = `
+Object {
+  "buffer": ActionChannelBuffer {
+    "actions": Array [],
+    "observers": Array [],
+  },
+  "kind": "ACTION_CHANNEL",
+  "observer": [Function],
+  "pattern": Array [
+    "smart",
+    "dumb",
+  ],
+  "topics": Array [
+    "smart",
+    "dumb",
+  ],
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #all returns an all effect combinator description 1`] = `
+Object {
+  "combinator": [Function],
+  "effects": Array [
+    Object {
+      "kind": "PUT",
+      "pattern": "asf",
+      "payload": undefined,
+      "topic": "asf",
+      "transactionId": "test-transaction-id",
+    },
+    Object {
+      "kind": "PUT",
+      "pattern": "bsf",
+      "payload": undefined,
+      "topic": "bsf",
+      "transactionId": "test-transaction-id",
+    },
+  ],
+  "kind": "COMBINATOR",
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #all returns an all effect combinator description 2`] = `
+Object {
+  "combinator": [Function],
+  "effects": Object {
+    "a": Object {
+      "kind": "PUT",
+      "pattern": "asf",
+      "payload": undefined,
+      "topic": "asf",
+      "transactionId": "test-transaction-id",
+    },
+    "b": Object {
+      "kind": "PUT",
+      "pattern": "asf",
+      "payload": undefined,
+      "topic": "asf",
+      "transactionId": "test-transaction-id",
+    },
+  },
+  "kind": "COMBINATOR",
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #call returns a call effect description 1`] = `
+Object {
+  "args": Array [],
+  "effect": [Function],
+  "kind": "CALL",
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #put returns a put effect description 1`] = `
+Object {
+  "kind": "PUT",
+  "pattern": "pattern",
+  "payload": undefined,
+  "topic": "pattern",
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #put returns a put effect description 2`] = `
+Object {
+  "kind": "PUT",
+  "pattern": "pattern",
+  "payload": Object {
+    "something": true,
+  },
+  "topic": "pattern",
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #race returns a race effect combinator description 1`] = `
+Object {
+  "combinator": [Function],
+  "effects": Array [
+    Object {
+      "kind": "PUT",
+      "pattern": "asf",
+      "payload": undefined,
+      "topic": "asf",
+      "transactionId": "test-transaction-id",
+    },
+    Object {
+      "kind": "PUT",
+      "pattern": "bsf",
+      "payload": undefined,
+      "topic": "bsf",
+      "transactionId": "test-transaction-id",
+    },
+  ],
+  "kind": "COMBINATOR",
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #race returns a race effect combinator description 2`] = `
+Object {
+  "combinator": [Function],
+  "effects": Object {
+    "a": Object {
+      "kind": "PUT",
+      "pattern": "asf",
+      "payload": undefined,
+      "topic": "asf",
+      "transactionId": "test-transaction-id",
+    },
+    "b": Object {
+      "kind": "PUT",
+      "pattern": "asf",
+      "payload": undefined,
+      "topic": "asf",
+      "transactionId": "test-transaction-id",
+    },
+  },
+  "kind": "COMBINATOR",
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #take given an action channel pattern returns a take effect description with the action channel's buffer 1`] = `
+Object {
+  "kind": "TAKE_ACTION_CHANNEL",
+  "observer": [Function],
+  "patterns": "plemp",
+  "topics": Array [
+    "plemp",
+  ],
+  "transactionId": "test-transaction-id",
+}
+`;
+
+exports[`EffectBuilder #take given simple patterns returns a take effect description with an ephemeral buffer 1`] = `
+Object {
+  "kind": "TAKE",
+  "observer": [Function],
+  "patterns": "test",
+  "topics": Array [
+    "test",
+  ],
+  "transactionId": "test-transaction-id",
+}
+`;

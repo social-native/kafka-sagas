@@ -1,10 +1,11 @@
 module.exports = {
-    roots: ['<rootDir>/src', '<rootDir>/__tests__'],
+    roots: ['<rootDir>/src/__tests__'],
     transform: {
         '^.+\\.ts$': 'ts-jest'
     },
     automock: false,
     moduleFileExtensions: ['ts', 'js', 'json'],
-    modulePaths: ['<rootDir>/src', '<rootDir>/__tests__'],
-    testRegex: '(/__tests__/.*|(\\.|/))test.ts?$'
+    modulePaths: ['<rootDir>/src'],
+    testRegex: '(/__tests__/.*|(\\.|/))test.ts?$',
+    verbose: true
 };

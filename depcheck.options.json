@@ -19,10 +19,7 @@
         "@social-native/snpkg-dependency-check",
         "@social-native/snpkg-generate-config-ci",
         "@social-native/snpkg-package-version-validation",
-        "babel-core",
-        "babel-plugin-transform-runtime",
-        "babel-runtime",
-        "parcel-bundler"
+        "dotenv-cli"
     ],
     "specials": []
 }

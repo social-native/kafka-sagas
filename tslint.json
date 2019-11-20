@@ -21,7 +21,8 @@
         "quotemark": [true, "single", "avoid-escape"],
         "ordered-imports": false,
         "arrow-parens": false,
-        "only-arrow-functions": false
+        "only-arrow-functions": false,
+        "semicolon": false
     },
     "rulesDirectory": ["node_modules/tslint-eslint-rules/dist/rules"]
 }
