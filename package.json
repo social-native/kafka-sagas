@@ -1,6 +1,6 @@
 {
     "name": "@social-native/snpkg-snapi-background-worker",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "",
     "main": "dist/index.cjs.js",
     "module": "dist/index.es.js",
@@ -29,34 +29,56 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/social-native/package-name.git"
+        "url": "git+https://github.com/social-native/snpkg-snapi-background-worker.git"
     },
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/social-native/package-name/issues"
+        "url": "https://github.com/social-native/snpkg-snapi-background-worker/issues"
     },
-    "homepage": "https://github.com/social-native/package-name#readme",
+    "homepage": "https://github.com/social-native/snpkg-snapi-background-worker#readme",
     "dependencies": {
-        "@social-native/snpkg-generate-config-ci": "^0.2.0"
+        "@social-native/snpkg-client-graphql-client": "^0.2.1",
+        "@social-native/snpkg-generate-config-ci": "^0.2.0",
+        "apollo-cache-inmemory": "^1.6.3",
+        "apollo-client": "^2.6.4",
+        "apollo-link-http": "^1.5.16",
+        "bluebird": "^3.7.1",
+        "graphql": "^14.5.8",
+        "graphql-tag": "^2.10.1",
+        "kafkajs": "^1.11.0",
+        "mobx": "^5.14.2",
+        "uuid": "^3.3.3"
     },
-    "peerDependencies": {},
+    "peerDependencies": {
+        "bluebird": "^3.7.1",
+        "@social-native/snpkg-generate-config-ci": "^0.2.0",
+        "@social-native/snpkg-client-graphql-client": "^0.2.1",
+        "apollo-client": "^2.6.4",
+        "mobx": "^5.14.2",
+        "apollo-cache-inmemory": "^1.6.3",
+        "apollo-link-http": "^1.5.16",
+        "graphql-tag": "^2.10.1",
+        "graphql": "^14.5.8"
+    },
     "devDependencies": {
         "@social-native/snpkg-dependency-check": "^0.1.0",
         "@social-native/snpkg-package-version-validation": "^3.1.0",
-        "@social-native/snpkg-client-graphql-client": "^0.2.1",
+        "@types/bluebird": "^3.5.29",
         "@types/jest": "^24.0.13",
         "@types/react": "^16.9.11",
         "@types/react-dom": "^16.9.4",
         "@types/styled-components": "^4.1.20",
+        "@types/uuid": "^3.4.6",
         "babel-core": "^6.26.3",
         "babel-plugin-transform-runtime": "^6.23.0",
         "babel-runtime": "^6.26.0",
+        "dotenv-cli": "^3.0.0",
         "jest": "^24.5.0",
         "mobx": "^5.14.2",
         "mobx-react": "^6.1.4",
         "nodemon": "^1.18.10",
         "parcel-bundler": "^1.12.4",
-        "prettier": "^1.16.4",
+        "prettier": "~1.19.1",
         "react": "^16.11.0",
         "react-dom": "^16.11.0",
         "rimraf": "^2.6.3",
@@ -70,6 +92,6 @@
         "tslint-config-prettier": "^1.18.0",
         "tslint-eslint-rules": "^5.4.0",
         "tslint-immutable": "^5.5.2",
-        "typescript": "^3.4.1"
+        "typescript": "^3.7.2"
     }
 }
