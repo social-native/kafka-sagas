@@ -34,7 +34,11 @@ export class ConsumerMessageBus {
             autoCommitThreshold: 1,
             eachMessage: async ({message}) => {
                 const action = buildActionFromPayload(topic, message);
-                this.broadcast(action);
+
+                // if this is a transactionId we actually care about, broadcast
+                if (this.transactionIds.has(action.transactionId)) {
+                    this.broadcast(action);
+                }
             }
         });
     }
@@ -43,7 +47,7 @@ export class ConsumerMessageBus {
         this.transactionIds.add(transactionId);
     }
 
-    public listenForTransactionEventsFromConsumer(topic: string, transactionId: string) {
+    public awaitEventBroadcast(topic: string, transactionId: string) {
         return new Bluebird((resolve: (action: IAction) => any) => {
             this.subscribers.set({topic, transactionId}, resolve);
         });
@@ -59,6 +63,7 @@ export class ConsumerMessageBus {
         }
 
         resolver(action);
+
+        this.subscribers.delete(key);
     }
 }
-
