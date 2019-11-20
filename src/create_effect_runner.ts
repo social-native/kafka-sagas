@@ -1,4 +1,11 @@
-import {IAction, IBaseSagaContext, ICause, IPutCause, ITakeCause, ICallCause} from 'types';
+import {
+    IAction,
+    IBaseSagaContext,
+    IEffectDescription,
+    IPutEffectDescription,
+    ITakeEffectDescription,
+    ICallEffectDescription
+} from 'types';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {ProducerMessageBus} from './producer_message_bus';
 
@@ -8,20 +15,20 @@ export function createEffectRunner(
 ) {
     // tslint:disable-next-line: cyclomatic-complexity
     async function runGeneratorFsm(machine: Generator, lastValue: any = null): Promise<any> {
-        const {done, value: cause}: IteratorResult<unknown> = machine.next(lastValue);
+        const {done, value: effectDescription}: IteratorResult<unknown> = machine.next(lastValue);
 
-        if (done && !cause) {
+        if (done && !effectDescription) {
             return lastValue;
         }
 
-        if (isTakeCause(cause)) {
-            for (const topic of cause.patterns) {
+        if (isTakeEffectDescription(effectDescription)) {
+            for (const topic of effectDescription.patterns) {
                 // Add the transactionId to the transactions we are watching out for.
-                consumerMessageBus.startTransaction(cause.transactionId);
+                consumerMessageBus.startTransaction(effectDescription.transactionId);
                 await consumerMessageBus.addSubscription(topic);
                 const response = await consumerMessageBus.awaitEventBroadcast(
                     topic,
-                    cause.transactionId
+                    effectDescription.transactionId
                 );
 
                 // The broadcasted result will be sent back to the saga.
@@ -29,14 +36,17 @@ export function createEffectRunner(
             }
         }
 
-        if (isPutCause(cause)) {
-            await producerMessageBus.putPayloadToTopic(cause.pattern, cause.payload);
+        if (isPutEffectDescription(effectDescription)) {
+            await producerMessageBus.putPayloadToTopic(
+                effectDescription.pattern,
+                effectDescription.payload
+            );
 
             return runGeneratorFsm(machine);
         }
 
-        if (isCallCause(cause)) {
-            const response = await cause.effect(...cause.args);
+        if (isCallEffectDescription(effectDescription)) {
+            const response = await effectDescription.effect(...effectDescription.args);
 
             return runGeneratorFsm(machine, response);
         }
@@ -54,14 +64,20 @@ export function createEffectRunner(
     };
 }
 
-function isTakeCause(cause: ICause): cause is ITakeCause {
-    return cause.kind === 'TAKE';
+function isTakeEffectDescription(
+    effectDescription: IEffectDescription
+): effectDescription is ITakeEffectDescription {
+    return effectDescription.kind === 'TAKE';
 }
 
-function isPutCause(cause: ICause): cause is IPutCause<any> {
-    return cause.kind === 'PUT';
+function isPutEffectDescription(
+    effectDescription: IEffectDescription
+): effectDescription is IPutEffectDescription<any> {
+    return effectDescription.kind === 'PUT';
 }
 
-function isCallCause(cause: ICause): cause is ICallCause<any[], any> {
-    return cause.kind === 'CALL';
+function isCallEffectDescription(
+    effectDescription: IEffectDescription
+): effectDescription is ICallEffectDescription<any[], any> {
+    return effectDescription.kind === 'CALL';
 }

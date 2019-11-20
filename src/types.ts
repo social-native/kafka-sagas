@@ -1,34 +1,38 @@
 import effectBuilder from './effect_builder';
 import ApolloClient from 'apollo-client';
 
-export type PutEffect<Payload> = (pattern: Pattern, payload?: Payload) => IPutCause<Payload>;
+export type PutEffect<Payload> = (
+    pattern: Pattern,
+    payload?: Payload
+) => IPutEffectDescription<Payload>;
 
-export type TakeEffect = (patterns: Pattern | Pattern[]) => ITakeCause;
+export type TakeEffect = (patterns: Pattern | Pattern[]) => ITakeEffectDescription;
 
 export type CallEffect<Fn extends (...args: any[]) => any> = (
     callable: (args: Parameters<Fn>) => ReturnType<Fn>,
     args: Parameters<Fn>
-) => ICallCause<Parameters<Fn>, ReturnType<Fn>>;
+) => ICallEffectDescription<Parameters<Fn>, ReturnType<Fn>>;
 
 export type Pattern = string;
 
-export interface IPutCause<Payload extends {}> extends ICause {
+export interface IPutEffectDescription<Payload extends {}> extends IEffectDescription {
     pattern: Pattern;
     payload?: Payload;
     kind: 'PUT';
 }
 
-export interface ITakeCause extends ICause {
+export interface ITakeEffectDescription extends IEffectDescription {
     patterns: Pattern[];
     kind: 'TAKE';
 }
 
-export interface ICallCause<Arguments extends any[], CallResponse> extends ICause {
+export interface ICallEffectDescription<Arguments extends any[], CallResponse>
+    extends IEffectDescription {
     effect: (...args: Arguments) => CallResponse;
     args: Arguments;
 }
 
-export interface ICause {
+export interface IEffectDescription {
     transactionId: string;
     kind: 'PUT' | 'CALL' | 'TAKE';
 }
