@@ -1,7 +1,8 @@
 import {GqlClient} from '@social-native/snpkg-client-graphql-client';
 import {Kafka} from 'kafkajs';
-import createEffectBuilder from './effect_builder';
+import effectBuilder from './effect_builder';
 import {ConsumerMessageBus} from 'consumer_message_bus';
+import {buildActionFromPayload} from 'build_action_from_payload';
 
 const {
     GQL_ACCESS_TOKEN,
@@ -48,32 +49,36 @@ export default async function({topic, saga}: {topic: string, saga: GeneratorFunc
     });
 
     const childConsumerMessageBus = new ConsumerMessageBus(kafka, topic);
+    // where we left off
+    createEffectRunner({childConsumerMessageBus, kafka}: {childConsumerMessageBus: ChildConsumerMessageBus});
 
     await rootConsumer.run({
         autoCommit: true,
         autoCommitThreshold: 1,
-        async eachMessage({topic, message}) {
+        async eachMessage({message}) {
+            const initialAction = buildActionFromPayload(topic, message);
             const context = {
-                effects: createEffectBuilder(childConsumerMessageBus),
+                effects: effectBuilder(initialAction.transactionId),
                 gqlClient: gqlClient.client
             };
+
+            for (const cause of saga(initialAction, context)) {
+                await runEffect(cause.);
+            //     if (cause.kind === 'TAKE_EVERY') {
+            //     }
+
+            //     if (cause.kind)
+            //     if (cause) {
+            //         return await createEffect(cause);
+            //     } else {
+            //         if (cause.kind === 'TAKE_EVERY') {
+            //             await createEffect(cause);
+            //             break;
+            //         }
+
+            //         return await createEffect(cause);
+            //     }
+            // }
         }
     });
-
-    for (const cause of saga()) {
-        // we may have started this work before so rehydrate
-        const deserializedCause = sagaStore.findOrStore(cause);
-
-        if (deserializedCause) {
-            return await createEffect(deserializedCause);
-        } else {
-            if (cause.kind === 'TAKE_EVERY') {
-                await createEffect(deserializedCause);
-                break;
-            }
-
-            return await createEffect(cause);
-        }
-
-    }
 }

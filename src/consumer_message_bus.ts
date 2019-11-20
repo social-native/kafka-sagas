@@ -1,9 +1,9 @@
 import Bluebird from 'bluebird';
 import uuid from 'uuid';
-import {Consumer, Kafka, KafkaMessage} from 'kafkajs';
+import {Consumer, Kafka} from 'kafkajs';
 
-import {isTransactionAction} from './type_guard';
 import {IAction} from './types';
+import {buildActionFromPayload} from 'build_action_from_payload';
 
 export class ConsumerMessageBus {
     private consumers: Map<string, Consumer> = new Map();
@@ -62,12 +62,3 @@ export class ConsumerMessageBus {
     }
 }
 
-function buildActionFromPayload(topic: string, message: KafkaMessage) {
-    const extracted = JSON.parse(message.value.toString());
-
-    if (!isTransactionAction(extracted)) {
-        throw new Error('Message is missing either transactionId and/or payload, idiot');
-    }
-
-    return {topic, ...extracted};
-}

@@ -1,10 +1,8 @@
-import uuid from 'uuid';
 import {PutEffect, TakeEffect, CallEffect} from 'types';
 // import {createConsumer} from './initialize_worker';
 // import {ConsumerMessageBus} from 'consumer_message_bus';
 
-export default async function effectBuilder() {
-    const transactionId = uuid.v4();
+export default async function effectBuilder(transactionId: string) {
 
     const put = <Payload>(
         ...args: Parameters<PutEffect<Payload>>
