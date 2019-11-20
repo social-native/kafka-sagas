@@ -6,12 +6,11 @@ export function createEffectRunner(
     consumerMessageBus: ConsumerMessageBus,
     producerMessageBus: ProducerMessageBus
 ) {
-
     // tslint:disable-next-line: cyclomatic-complexity
     async function runGeneratorFsm(machine: Generator, lastValue: any = null): Promise<any> {
         const {done, value: cause}: IteratorResult<unknown> = machine.next(lastValue);
 
-        if (done) {
+        if (done && !cause) {
             return lastValue;
         }
 
@@ -31,10 +30,7 @@ export function createEffectRunner(
         }
 
         if (isPutCause(cause)) {
-            await producerMessageBus.putPayloadToTopic(
-                cause.pattern,
-                cause.payload
-            );
+            await producerMessageBus.putPayloadToTopic(cause.pattern, cause.payload);
 
             return runGeneratorFsm(machine);
         }
