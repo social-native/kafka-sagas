@@ -62,7 +62,7 @@ export default async function({topic, saga}: {topic: string, saga: GeneratorFunc
         async eachMessage({message}) {
             const initialAction = buildActionFromPayload(topic, message);
 
-            effectRunner.runEffects(
+            return effectRunner.runEffects(
                 initialAction,
                 {
                     effects: effectBuilder(initialAction.transactionId),
