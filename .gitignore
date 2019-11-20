@@ -87,3 +87,5 @@ typings/
 tmp
 
 dist
+
+.vscode
