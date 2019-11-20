@@ -15,7 +15,7 @@ export class ConsumerMessageBus {
 
     constructor(private kafka: Kafka, private rootTopic: string) {}
 
-    public async addSubscription(topic: string) {
+    public async addSubscriptionIfNecessary(topic: string) {
         if (this.consumers.has(topic)) {
             return;
         }
@@ -29,7 +29,7 @@ export class ConsumerMessageBus {
         await consumer.subscribe({topic});
         this.consumers.set(topic, consumer);
 
-        await consumer.run({
+        return consumer.run({
             autoCommit: true,
             autoCommitThreshold: 1,
             eachMessage: async ({message}) => {

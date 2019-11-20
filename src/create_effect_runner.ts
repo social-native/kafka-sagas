@@ -25,7 +25,7 @@ export function createEffectRunner(
             for (const topic of effectDescription.patterns) {
                 // Add the transactionId to the transactions we are watching out for.
                 consumerMessageBus.startTransaction(effectDescription.transactionId);
-                await consumerMessageBus.addSubscription(topic);
+                await consumerMessageBus.addSubscriptionIfNecessary(topic);
                 const response = await consumerMessageBus.awaitEventBroadcast(
                     topic,
                     effectDescription.transactionId
