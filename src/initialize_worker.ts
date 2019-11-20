@@ -3,6 +3,8 @@ import {Kafka} from 'kafkajs';
 import effectBuilder from './effect_builder';
 import {ConsumerMessageBus} from 'consumer_message_bus';
 import {buildActionFromPayload} from 'build_action_from_payload';
+import {ProducerMessageBus} from 'producer_message_bus';
+import {createEffectRunner} from 'create_effect_runner';
 
 const {
     GQL_ACCESS_TOKEN,
@@ -20,14 +22,14 @@ if (!KAFKA_BROKERS) {
 }
 
 export default async function({topic, saga}: {topic: string, saga: GeneratorFunction}) {
-    const gqlClient = new GqlClient({
+    const _gqlClient = new GqlClient({
         accessToken: GQL_ACCESS_TOKEN,
         uri: GQL_URI
     });
 
-    await gqlClient.createClient();
+    const gqlClient = await _gqlClient.createClient();
 
-    if (!gqlClient.client) {
+    if (!gqlClient) {
         throw new Error('Failed to initialize apollo client');
     }
 
@@ -49,36 +51,25 @@ export default async function({topic, saga}: {topic: string, saga: GeneratorFunc
     });
 
     const childConsumerMessageBus = new ConsumerMessageBus(kafka, topic);
-    // where we left off
-    createEffectRunner({childConsumerMessageBus, kafka}: {childConsumerMessageBus: ChildConsumerMessageBus});
+    const producerMessageBus = new ProducerMessageBus(kafka);
+    await producerMessageBus.connect();
+
+    const effectRunner = createEffectRunner(childConsumerMessageBus, producerMessageBus);
 
     await rootConsumer.run({
         autoCommit: true,
         autoCommitThreshold: 1,
         async eachMessage({message}) {
             const initialAction = buildActionFromPayload(topic, message);
-            const context = {
-                effects: effectBuilder(initialAction.transactionId),
-                gqlClient: gqlClient.client
-            };
 
-            for (const cause of saga(initialAction, context)) {
-                await runEffect(cause.);
-            //     if (cause.kind === 'TAKE_EVERY') {
-            //     }
-
-            //     if (cause.kind)
-            //     if (cause) {
-            //         return await createEffect(cause);
-            //     } else {
-            //         if (cause.kind === 'TAKE_EVERY') {
-            //             await createEffect(cause);
-            //             break;
-            //         }
-
-            //         return await createEffect(cause);
-            //     }
-            // }
+            effectRunner.runEffects(
+                initialAction,
+                {
+                    effects: effectBuilder(initialAction.transactionId),
+                    gqlClient
+                },
+                saga
+            );
         }
     });
 }
