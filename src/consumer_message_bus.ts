@@ -13,7 +13,10 @@ interface IStream<Action extends IAction> {
 export class ConsumerMessageBus {
     private consumers: Map<string, Consumer> = new Map();
     private transactionIds: Set<string> = new Set();
-    private observersOfTopic: Map<{topic: string; transactionId: string}, Array<(action: Action) => null>> = new Map();
+    private observersOfTopic: Map<
+        {topic: string; transactionId: string},
+        Array<(action: Action) => null>
+    > = new Map();
 
     constructor(private kafka: Kafka, private rootTopic: string) {}
 
@@ -28,7 +31,7 @@ export class ConsumerMessageBus {
         });
 
         await consumer.connect();
-        await consumer.subscribe({stream: topic});
+        await consumer.subscribe({topic});
         this.consumers.set(topic, consumer);
 
         return consumer.run({
@@ -55,8 +58,8 @@ export class ConsumerMessageBus {
 
     public subscribeToTopicEvents({transactionId, topic, observer: newObserver}: TODO) {
         const key = {transactionId, topic};
-        const observers = this.observersOfTopic.get(key) || []
-        this.observersOfTopic.set(key, [...observers, newObserver])
+        const observers = this.observersOfTopic.get(key) || [];
+        this.observersOfTopic.set(key, [...observers, newObserver]);
     }
 
     public unsubscribeFromTopicEvents() {
@@ -66,6 +69,6 @@ export class ConsumerMessageBus {
     private broadcastTopicEvent(topic: string, action: IAction) {
         const key = {transactionId: action.transactionId, topic};
         const observers = this.observersOfTopic.get(key) || [];
-        observers.forEach(notify => notify(action))
+        observers.forEach(notify => notify(action));
     }
 }
