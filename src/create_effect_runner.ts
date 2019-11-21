@@ -9,32 +9,6 @@ import {
 } from 'types';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {ProducerMessageBus} from './producer_message_bus';
-import {generateTopicForSpecificTransaction} from './kafka_topics';
-import {EphemeralBuffer} from 'buffers';
-
-function isFunction(functionToCheck: any): functionToCheck is (...args: any[]) => any {
-    return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
-}
-
-function getTopicsFromEffectDescription<
-    EffectDescription extends IActionChannelEffectDescription<any> | ITakeEffectDescription
->(effectDescription: EffectDescription): string[] {
-    const {pattern, transactionId} = effectDescription;
-    if (Array.isArray(pattern)) {
-        return pattern;
-    }
-
-    if (isFunction(pattern)) {
-        const anyTopicInTransaction = generateTopicForSpecificTransaction(transactionId, '*');
-        return [anyTopicInTransaction];
-    }
-
-    if (typeof pattern === 'string') {
-        return [pattern];
-    }
-
-    throw new Error('Cannot handle patterns of type ' + typeof pattern);
-}
 
 export async function initalizeRunEffect(
     consumerMessageBus: ConsumerMessageBus,
@@ -42,55 +16,30 @@ export async function initalizeRunEffect(
 ) {
     return async function(effectDescription) {
         if (isActionChannelDescription(effectDescription)) {
-            for (const topic of getTopicsFromEffectDescription(effectDescription)) {
-                const streamDescription = {
-                    topic,
-                    transactionId: effectDescription.transactionId,
-                    buffer: effectDescription.buffer,
-                    observer: (action: Action) => {
-                        if (isFunction(effectDescription.pattern)) {
-                            if (effectDescription.pattern(action)) {
-                                effectDescription.buffer.put(action);
-                            }
-                        } else {
-                            effectDescription.buffer.put(action);
-                        }
-                    }
-                };
-                await consumerMessageBus.addTransactionStream(streamDescription);
-                consumerMessageBus.subscribeToTopicEvents(streamDescription);
-                return streamDescription;
+            for (const topic of effectDescription.topics) {
+                await consumerMessageBus.streamEffectTopic(effectDescription);
+                const subscriptionInfo = {transactionId, topic, observer: effectDescription.observer()}
+                consumerMessageBus.subscribeToTopicEvents(subscriptionInfo);
             }
+            return effectDescription
         }
 
         if (isTakeEffectDescription(effectDescription)) {
             // If this effect already has a stream buffer for events matching the pattern,
             // then just take from the buffer
-            if (effectDescription.buffer) {
-                const result = await buffer.take();
-                return runGeneratorFsm(machine, result);
+            if (isTakeEffectActionChannelDescription(effectDescription) {
+                return await effectDescription.buffer.take();
             }
 
-            const buffer = new EphemeralBuffer();
-            for (const topic of getTopicsFromEffectDescription(effectDescription)) {
-                const streamDescription = {
-                    topic,
-                    transactionId: effectDescription.transactionId,
-                    buffer,
-                    observer: (action: Action) => {
-                        if (isFunction(effectDescription.pattern)) {
-                            if (effectDescription.pattern(action)) {
-                                buffer.put(action);
-                            }
-                        } else {
-                            buffer.put(action);
-                        }
-                    }
-                };
-                await consumerMessageBus.addTransactionStream(streamDescription);
-                consumerMessageBus.subscribeToTopicEvents(streamDescription);
-                return await buffer.take();
+            let events = []
+            for (const topic of effectDescription.topics) {
+                await consumerMessageBus.streamEffectTopic(effectDescription);
+                const subscriptionInfo = {transactionId, topic, observer: effectDescription.observer()}
+                consumerMessageBus.subscribeToTopicEvents(subscriptionInfo);
+                events.push(buffer.take());
             }
+            // TODO on return cancel all other takes
+            return await Promise.race(events)
         }
 
         if (isPutEffectDescription(effectDescription)) {

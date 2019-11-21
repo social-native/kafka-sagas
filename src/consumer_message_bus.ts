@@ -17,8 +17,8 @@ export class ConsumerMessageBus {
 
     constructor(private kafka: Kafka, private rootTopic: string) {}
 
-    public async addTransactionStream(stream: IStream) {
-        if (this.consumers.has(stream.topic)) {
+    public async streamEffectTopic(topic: string) {
+        if (this.consumers.has(topic)) {
             return;
         }
 
@@ -28,18 +28,18 @@ export class ConsumerMessageBus {
         });
 
         await consumer.connect();
-        await consumer.subscribe({stream: stream.topic});
-        this.consumers.set(stream.topic, consumer);
+        await consumer.subscribe({stream: topic});
+        this.consumers.set(topic, consumer);
 
         return consumer.run({
             autoCommit: true,
             autoCommitThreshold: 1,
             eachMessage: async ({message}) => {
-                const action = buildActionFromPayload(stream.topic, message);
+                const action = buildActionFromPayload(topic, message);
 
                 // if this is a transactionId we actually care about, broadcast
                 if (this.transactionIds.has(action.transactionId)) {
-                    this.broadcastTopicEvent(stream.topic, action);
+                    this.broadcastTopicEvent(topic, action);
                 }
             }
         });
@@ -53,7 +53,7 @@ export class ConsumerMessageBus {
         this.transactionIds.delete(transactionId);
     }
 
-    public subscribeToTopicEvents({transactionId, topic, observer: newObserver}: IStream) {
+    public subscribeToTopicEvents({transactionId, topic, observer: newObserver}: TODO) {
         const key = {transactionId, topic};
         const observers = this.observersOfTopic.get(key) || []
         this.observersOfTopic.set(key, [...observers, newObserver])
