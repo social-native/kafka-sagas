@@ -10,76 +10,36 @@ import {
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {ProducerMessageBus} from './producer_message_bus';
 
-function isFunction(functionToCheck: any): functionToCheck is (...args: any[]) => any {
-    return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
-}
-
-function getTopicsFromEffectDescription(
-    actionChannelEffectDescription: IActionChannelEffectDescription<any>
-): string[] {
-    if (Array.isArray(actionChannelEffectDescription.pattern)) {
-        return actionChannelEffectDescription.pattern;
-    }
-
-    if (isFunction(actionChannelEffectDescription.pattern)) {
-        return [`${actionChannelEffectDescription.transactionId}-*`];
-    }
-
-    if (typeof actionChannelEffectDescription.pattern === 'string') {
-        return [actionChannelEffectDescription.pattern];
-    }
-
-    throw new Error(
-        'Cannot handle patterns of type ' + typeof actionChannelEffectDescription.pattern
-    );
-}
-
-export function createEffectRunner(
+export async function initalizeRunEffect(
     consumerMessageBus: ConsumerMessageBus,
     producerMessageBus: ProducerMessageBus
 ) {
-    // tslint:disable-next-line: cyclomatic-complexity
-    async function runGeneratorFsm(machine: Generator, lastValue: any = null): Promise<any> {
-        const {done, value: effectDescription}: IteratorResult<unknown> = machine.next(lastValue);
-
-        if (done) {
-            return lastValue;
-        }
-
-        // if (isEffectCombinator(effectDescription)) {
-        //     if (isAllCombinator(effectDescription)) {
-        //         return Promise.all(effectDescription.map(eff => consumerMessageBus.match(matcher))
-        //     }
-
-        // } else {
-        //     const matcher = getMatcher(effectDescription)
-        //     const response = await consumerMessageBus.match(matcher)
-        // }
-
+    return async function(effectDescription) {
         if (isActionChannelDescription(effectDescription)) {
-            for (const topic of getTopicsFromEffectDescription(effectDescription)) {
-                const streamDescription = {
-                    topic,
-                    transactionId: effectDescription.transactionId,
-                    doesMatch: () => true
-                };
-                await consumerMessageBus.addStream(streamDescription);
-                consumerMessageBus.onStreamEvent(
-                    streamDescription,
-                    addEventToBuffer(effectDescription.buffer)
-                );
+            for (const topic of effectDescription.topics) {
+                await consumerMessageBus.streamEffectTopic(effectDescription);
+                const subscriptionInfo = {transactionId, topic, observer: effectDescription.observer()}
+                consumerMessageBus.subscribeToTopicEvents(subscriptionInfo);
             }
+            return effectDescription
         }
 
         if (isTakeEffectDescription(effectDescription)) {
-            const simpleBuffer;
-            if (effectDescription.patterns && effectDescription.isActionBuffer) {
-                await effectDescription.buffer.onEvent;
-            } else {
-                const buffers = effectDescription.patterns.map(p => new simpleBuffer(p));
-                consumerMessageBus.onStreamEvent(streamDescription, addEventToBuffer(buffers));
-                await Promise.first([buffers.listen]);
+            // If this effect already has a stream buffer for events matching the pattern,
+            // then just take from the buffer
+            if (isTakeEffectActionChannelDescription(effectDescription) {
+                return await effectDescription.buffer.take();
             }
+
+            let events = []
+            for (const topic of effectDescription.topics) {
+                await consumerMessageBus.streamEffectTopic(effectDescription);
+                const subscriptionInfo = {transactionId, topic, observer: effectDescription.observer()}
+                consumerMessageBus.subscribeToTopicEvents(subscriptionInfo);
+                events.push(buffer.take());
+            }
+            // TODO on return cancel all other takes
+            return await Promise.race(events)
         }
 
         if (isPutEffectDescription(effectDescription)) {
@@ -88,13 +48,36 @@ export function createEffectRunner(
                 effectDescription.payload
             );
 
-            return runGeneratorFsm(machine);
+            return;
         }
 
         if (isCallEffectDescription(effectDescription)) {
-            const response = await effectDescription.effect(...effectDescription.args);
+            return await effectDescription.effect(...effectDescription.args);
+        }
+    };
+}
+export function createEffectRunner(
+    consumerMessageBus: ConsumerMessageBus,
+    producerMessageBus: ProducerMessageBus
+) {
+    const runEffect = initalizeRunEffect(consumerMessageBus, producerMessageBus);
+    // tslint:disable-next-line: cyclomatic-complexity
+    async function runGeneratorFsm(machine: Generator, lastValue: any = null): Promise<any> {
+        const {done, value: effectDescription}: IteratorResult<unknown> = machine.next(lastValue);
 
-            return runGeneratorFsm(machine, response);
+        if (done) {
+            return lastValue;
+        }
+
+        if (isEffectCombinator(effectDescription)) {
+            const effects = getEffectsFromEffectDescription(effectDescription);
+            const combinator = getCombinatorFromEffectDescription(effectDescription);
+            // Combinator is similar Promise.all or Promise.race
+            const result = await combinator(effects.map(runEffect));
+            return runGeneratorFsm(machine, result);
+        } else {
+            const result = await runEffect(effectDescription);
+            return runGeneratorFsm(machine, result);
         }
     }
 
@@ -136,5 +119,3 @@ function isActionChannelDescription(
 ): effectDescription is IActionChannelEffectDescription<any, any> {
     return effectDescription.kind === 'ACTION_CHANNEL';
 }
-
-function isActionChannel() {}
