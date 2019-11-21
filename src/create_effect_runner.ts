@@ -4,10 +4,35 @@ import {
     IEffectDescription,
     IPutEffectDescription,
     ITakeEffectDescription,
-    ICallEffectDescription
+    ICallEffectDescription,
+    IActionChannelEffectDescription
 } from 'types';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {ProducerMessageBus} from './producer_message_bus';
+
+function isFunction(functionToCheck: any): functionToCheck is (...args: any[]) => any {
+    return functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+}
+
+function getTopicsFromEffectDescription(
+    actionChannelEffectDescription: IActionChannelEffectDescription<any>
+): string[] {
+    if (Array.isArray(actionChannelEffectDescription.pattern)) {
+        return actionChannelEffectDescription.pattern;
+    }
+
+    if (isFunction(actionChannelEffectDescription.pattern)) {
+        return [`${actionChannelEffectDescription.transactionId}-*`];
+    }
+
+    if (typeof actionChannelEffectDescription.pattern === 'string') {
+        return [actionChannelEffectDescription.pattern];
+    }
+
+    throw new Error(
+        'Cannot handle patterns of type ' + typeof actionChannelEffectDescription.pattern
+    );
+}
 
 export function createEffectRunner(
     consumerMessageBus: ConsumerMessageBus,
@@ -17,22 +42,43 @@ export function createEffectRunner(
     async function runGeneratorFsm(machine: Generator, lastValue: any = null): Promise<any> {
         const {done, value: effectDescription}: IteratorResult<unknown> = machine.next(lastValue);
 
-        if (done && !effectDescription) {
+        if (done) {
             return lastValue;
         }
 
-        if (isTakeEffectDescription(effectDescription)) {
-            for (const topic of effectDescription.patterns) {
-                // Add the transactionId to the transactions we are watching out for.
-                consumerMessageBus.startTransaction(effectDescription.transactionId);
-                await consumerMessageBus.addSubscriptionIfNecessary(topic);
-                const response = await consumerMessageBus.awaitEventBroadcast(
-                    topic,
-                    effectDescription.transactionId
-                );
+        // if (isEffectCombinator(effectDescription)) {
+        //     if (isAllCombinator(effectDescription)) {
+        //         return Promise.all(effectDescription.map(eff => consumerMessageBus.match(matcher))
+        //     }
 
-                // The broadcasted result will be sent back to the saga.
-                return runGeneratorFsm(machine, response);
+        // } else {
+        //     const matcher = getMatcher(effectDescription)
+        //     const response = await consumerMessageBus.match(matcher)
+        // }
+
+        if (isActionChannelDescription(effectDescription)) {
+            for (const topic of getTopicsFromEffectDescription(effectDescription)) {
+                const streamDescription = {
+                    topic,
+                    transactionId: effectDescription.transactionId,
+                    doesMatch: () => true
+                };
+                await consumerMessageBus.addStream(streamDescription);
+                consumerMessageBus.onStreamEvent(
+                    streamDescription,
+                    addEventToBuffer(effectDescription.buffer)
+                );
+            }
+        }
+
+        if (isTakeEffectDescription(effectDescription)) {
+            const simpleBuffer;
+            if (effectDescription.patterns && effectDescription.isActionBuffer) {
+                await effectDescription.buffer.onEvent;
+            } else {
+                const buffers = effectDescription.patterns.map(p => new simpleBuffer(p));
+                consumerMessageBus.onStreamEvent(streamDescription, addEventToBuffer(buffers));
+                await Promise.first([buffers.listen]);
             }
         }
 
@@ -59,7 +105,10 @@ export function createEffectRunner(
             context: Context,
             saga: GeneratorFunction
         ) {
-            return await runGeneratorFsm(saga(initialAction, context));
+            consumerMessageBus.startTransaction(initialAction.transactionId);
+            const result = await runGeneratorFsm(saga(initialAction, context));
+            consumerMessageBus.stopTransaction(initialAction.transactionId);
+            return result;
         }
     };
 }
@@ -81,3 +130,11 @@ function isCallEffectDescription(
 ): effectDescription is ICallEffectDescription<any[], any> {
     return effectDescription.kind === 'CALL';
 }
+
+function isActionChannelDescription(
+    effectDescription: IEffectDescription
+): effectDescription is IActionChannelEffectDescription<any, any> {
+    return effectDescription.kind === 'ACTION_CHANNEL';
+}
+
+function isActionChannel() {}

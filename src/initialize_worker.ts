@@ -21,7 +21,7 @@ if (!KAFKA_BROKERS) {
     throw new Error('Missing or empty env.KAFKA_BROKERS');
 }
 
-export default async function({topic, saga}: {topic: string, saga: GeneratorFunction}) {
+export default async function({topic, saga}: {topic: string; saga: GeneratorFunction}) {
     const _gqlClient = new GqlClient({
         accessToken: GQL_ACCESS_TOKEN,
         uri: GQL_URI

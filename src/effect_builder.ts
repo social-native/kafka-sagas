@@ -1,9 +1,14 @@
-import {PutEffect, TakeEffect, CallEffect} from 'types';
-// import {createConsumer} from './initialize_worker';
-// import {ConsumerMessageBus} from 'consumer_message_bus';
+import {
+    PutEffect,
+    TakeEffect,
+    CallEffect,
+    ActionChannel,
+    IAction,
+    IActionBuffer,
+    TakePattern
+} from 'types';
 
-export default async function effectBuilder(transactionId: string) {
-
+export default function effectBuilder(transactionId: string) {
     const put = <Payload>(
         ...args: Parameters<PutEffect<Payload>>
     ): ReturnType<PutEffect<Payload>> => ({
@@ -13,9 +18,9 @@ export default async function effectBuilder(transactionId: string) {
         kind: 'PUT'
     });
 
-    const take: TakeEffect = patterns => ({
+    const take: TakeEffect = <Patterns = TakePattern>(patterns: Patterns) => ({
         transactionId,
-        patterns: Array.isArray(patterns) ? patterns : [patterns],
+        patterns,
         kind: 'TAKE'
     });
 
@@ -29,19 +34,30 @@ export default async function effectBuilder(transactionId: string) {
         args
     });
 
-    // const actionChannel = async (pattern: Pattern) => {
-    //     consumerMessageBus.addSubscription(pattern);
-    //     await subscribe(pattern);
+    const actionChannel = <Action extends IAction>(
+        pattern: Parameters<ActionChannel<Action>>[0],
+        actionBuffer?: Parameters<ActionChannel<Action>>[1]
+    ): ReturnType<ActionChannel<Action>> => {
+        const defaultActionBuffer: IActionBuffer<Action> = {
+            isEmpty: () => true,
+            put: action => action,
+            take: () => ({transactionId, topic: 'stddfn'} as Action)
+        };
 
-    //     return {
-    //         topic: pattern,
-    //         kind: 'ACTION_CHANNEL'
-    //     };
-    // };
+        const buffer = actionBuffer || defaultActionBuffer;
+
+        return {
+            transactionId,
+            pattern,
+            buffer,
+            kind: 'ACTION_CHANNEL'
+        };
+    };
 
     return {
         put,
         take,
-        call
+        call,
+        actionChannel
     };
 }
