@@ -125,9 +125,9 @@ export function createEffectRunner(
             const combinator = getCombinatorFromEffectDescription(effectDescription);
             // Combinator is similar Promise.all or Promise.race
             const result = await combinator(effects.map(runEffect));
-            return runGeneratorFsm(machine, streamDescription);
+            return runGeneratorFsm(machine, result);
         } else {
-            const result = runEffect(effectDescription);
+            const result = await runEffect(effectDescription);
             return runGeneratorFsm(machine, result);
         }
     }
