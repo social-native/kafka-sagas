@@ -41,7 +41,7 @@ export async function makeEffectRunner(
         if (isTakeEffectDescription(effectDescription)) {
             const events = [];
             for (const topic of effectDescription.topics) {
-                await consumerMessageBus.streamEffectTopic(effectDescription);
+                await consumerMessageBus.streamEffectTopic(topic);
                 const subscriptionInfo = {
                     transactionId: effectDescription.transactionId,
                     topic,
@@ -50,7 +50,7 @@ export async function makeEffectRunner(
                 consumerMessageBus.subscribeToTopicEvents(subscriptionInfo);
                 events.push(effectDescription.buffer.take());
             }
-            // TODO on return cancel all other takes
+            /** @TODO on return cancel all other takes */
             return await Promise.race(events);
         }
 
@@ -85,11 +85,13 @@ export function createEffectRunner(
             const {effects, combinator} = effectDescription;
 
             if (Array.isArray(effects)) {
+                return runGeneratorFsm(machine, await combinator(effects.map(runEffect)));
             } else if (typeof effects === 'object') {
+                return runGeneratorFsm(machine, await combinator();
             }
 
             // Combinator is similar Promise.all or Promise.race
-            const result = await combinator(effects.map(runEffect));
+            const result = await combinator(effects);
             return runGeneratorFsm(machine, result);
         } else {
             const result = await runEffect(effectDescription);

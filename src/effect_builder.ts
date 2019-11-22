@@ -1,10 +1,12 @@
+import Bluebird from 'bluebird';
+import {racePromiseRecord as racePromise} from './promise_race_object';
+
 import {
     PutEffect,
     TakeEffect,
     CallEffect,
     IAction,
     IActionBuffer,
-    TakePattern,
     AllCombinatorEffect,
     RaceCombinatorEffect,
     ActionChannelEffect,
@@ -16,7 +18,7 @@ import {generateTopicForSpecificTransaction} from './kafka_topics';
 import {
     isTakePatternActuallyActionChannelEffectDescription,
     takeInputIsActionPattern
-} from 'type_guard';
+} from './type_guard';
 
 function generateTopics<Action extends IAction>(
     pattern: ActionPattern<Action>,
@@ -121,16 +123,18 @@ export default function effectBuilder(transactionId: string) {
         return {
             transactionId,
             kind: 'COMBINATOR',
-            combinator: Promise.all,
+            combinator: Bluebird.all,
             effects
         };
     };
 
-    const race: RaceCombinatorEffect = (effects: Parameters<AllCombinatorEffect>[0]) => {
+    const race = <Action extends IAction>(
+        effects: Parameters<RaceCombinatorEffect<Action>>[0]
+    ): ReturnType<RaceCombinatorEffect<Action>> => {
         return {
             transactionId,
             kind: 'COMBINATOR',
-            combinator: Promise.race,
+            combinator: racePromise,
             effects
         };
     };
