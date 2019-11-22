@@ -1,4 +1,3 @@
-import Bluebird from 'bluebird';
 import {IAction, IBaseSagaContext, IEffectDescription} from 'types';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {ProducerMessageBus} from './producer_message_bus';

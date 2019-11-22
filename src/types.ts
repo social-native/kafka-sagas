@@ -9,6 +9,19 @@ import {ActionBuffer} from 'buffers';
 export type ActionChannel = IActionChannelEffectDescription;
 
 /**
+ * RunSaga
+ */
+
+export type RunSaga<Result = any, SpecificError extends Error = Error> = (
+    options: IRunSagaOptions,
+    saga: Saga,
+    ...args: any[]
+) => ITask<Result, SpecificError>;
+
+// TODO fill me in - requires a lot more implementation
+export interface IRunSagaOptions {}
+
+/**
  * Effects
  */
 export type PutEffect<Payload> = (
@@ -19,6 +32,23 @@ export type PutEffect<Payload> = (
 export type TakeEffect<Action extends IAction> = (
     pattern: TakePattern
 ) => ITakeEffectDescription<Action>;
+
+export interface ITask<Result = any, SpecificError extends Error = Error> {
+    isRunning(): boolean;
+    isCancelled(): boolean;
+    result(): Result | undefined;
+    error(): SpecificError | undefined;
+    toPromise(): Promise<Result | SpecificError>;
+    cancel(): void;
+}
+
+type InferForkActionParam<T> = T extends Record<keyof T, infer P> ? Record<keyof T, P> : undefined;
+
+export type Fork<
+    Action = {},
+    SpecificError extends Error = Error,
+    InferedAction = InferForkActionParam<Action>
+> = (saga: Saga, action?: InferedAction) => ITask<Action, SpecificError>;
 
 export type CallEffect<Fn extends (...args: any[]) => any> = (
     callable: (args: Parameters<Fn>) => ReturnType<Fn>,
@@ -117,6 +147,8 @@ export interface IEffectDescription {
 /**
  * Saga
  */
+export type Saga = GeneratorFunction;
+
 export interface IBaseSagaContext {
     transactionId: string;
     effects: ReturnType<typeof effectBuilder>;
