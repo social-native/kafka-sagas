@@ -1,21 +1,14 @@
 import uuid from 'uuid';
 import {Consumer, Kafka} from 'kafkajs';
 
-import {IAction} from './types';
+import {IAction, ActionObserver} from './types';
 import {buildActionFromPayload} from 'build_action_from_payload';
-
-interface IStream<Action extends IAction> {
-    transactionId: string;
-    topic: string;
-    observer: (action: Action) => null;
-}
 
 export class ConsumerMessageBus {
     private consumers: Map<string, Consumer> = new Map();
-    private transactionIds: Set<string> = new Set();
-    private observersOfTopic: Map<
-        {topic: string; transactionId: string},
-        Array<(action: Action) => null>
+    private observersByTransaction: Map<
+        string,
+        Map<string, Array<ActionObserver<IAction>>>
     > = new Map();
 
     constructor(private kafka: Kafka, private rootTopic: string) {}
@@ -41,34 +34,47 @@ export class ConsumerMessageBus {
                 const action = buildActionFromPayload(topic, message);
 
                 // if this is a transactionId we actually care about, broadcast
-                if (this.transactionIds.has(action.transactionId)) {
-                    this.broadcastTopicEvent(topic, action);
+                if (this.observersByTransaction.has(action.transactionId)) {
+                    this.broadcastAction(topic, action);
                 }
             }
         });
     }
 
     public startTransaction(transactionId: string) {
-        this.transactionIds.add(transactionId);
+        this.observersByTransaction.set(transactionId, new Map());
     }
 
     public stopTransaction(transactionId: string) {
-        this.transactionIds.delete(transactionId);
+        this.observersByTransaction.delete(transactionId);
     }
 
-    public subscribeToTopicEvents({transactionId, topic, observer: newObserver}: TODO) {
-        const key = {transactionId, topic};
-        const observers = this.observersOfTopic.get(key) || [];
-        this.observersOfTopic.set(key, [...observers, newObserver]);
+    public subscribeToTopicEvents({
+        transactionId,
+        topic,
+        observer
+    }: {
+        transactionId: string;
+        topic: string;
+        observer: ActionObserver<IAction>;
+    }) {
+        const topicObserversForTransaction =
+            this.observersByTransaction.get(transactionId) || new Map();
+
+        const topicObservers = topicObserversForTransaction.get(topic) || [];
+
+        topicObserversForTransaction.set(topic, [...topicObservers, observer]);
     }
 
-    public unsubscribeFromTopicEvents() {
-        // TODO
-    }
+    private broadcastAction(topic: string, action: IAction) {
+        const topicObserversForTransaction = this.observersByTransaction.get(action.transactionId);
 
-    private broadcastTopicEvent(topic: string, action: IAction) {
-        const key = {transactionId: action.transactionId, topic};
-        const observers = this.observersOfTopic.get(key) || [];
-        observers.forEach(notify => notify(action));
+        if (!topicObserversForTransaction) {
+            return;
+        }
+
+        const topicObservers = topicObserversForTransaction.get(topic) || [];
+
+        topicObservers.forEach(notify => notify(action));
     }
 }

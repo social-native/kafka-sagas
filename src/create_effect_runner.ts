@@ -1,45 +1,57 @@
-import {
-    IAction,
-    IBaseSagaContext,
-    IEffectDescription,
-    IPutEffectDescription,
-    ITakeEffectDescription,
-    ICallEffectDescription,
-    IActionChannelEffectDescription
-} from 'types';
+import Bluebird from 'bluebird';
+import {IAction, IBaseSagaContext, IEffectDescription} from 'types';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {ProducerMessageBus} from './producer_message_bus';
+import {
+    isActionChannelEffectDescription,
+    isTakeEffectDescription,
+    isPutEffectDescription,
+    isCallEffectDescription,
+    isTakeActionChannelEffectDescription,
+    isEffectCombinatorDescription
+} from 'type_guard';
 
-export async function initalizeRunEffect(
+export async function makeEffectRunner(
     consumerMessageBus: ConsumerMessageBus,
     producerMessageBus: ProducerMessageBus
 ) {
-    return async function(effectDescription) {
-        if (isActionChannelDescription(effectDescription)) {
+    // tslint:disable-next-line: cyclomatic-complexity
+    return async function<EffectDescription extends IEffectDescription>(
+        effectDescription: EffectDescription
+    ) {
+        if (isActionChannelEffectDescription(effectDescription)) {
             for (const topic of effectDescription.topics) {
-                await consumerMessageBus.streamEffectTopic(effectDescription);
-                const subscriptionInfo = {transactionId, topic, observer: effectDescription.observer()}
+                await consumerMessageBus.streamEffectTopic(topic);
+                const subscriptionInfo = {
+                    transactionId: effectDescription.transactionId,
+                    topic,
+                    observer: effectDescription.observer
+                };
                 consumerMessageBus.subscribeToTopicEvents(subscriptionInfo);
             }
-            return effectDescription
+            return effectDescription;
+        }
+
+        // If this effect already has a stream buffer for events matching the pattern,
+        // then just take from the buffer
+        if (isTakeActionChannelEffectDescription(effectDescription)) {
+            return await effectDescription.buffer.take();
         }
 
         if (isTakeEffectDescription(effectDescription)) {
-            // If this effect already has a stream buffer for events matching the pattern,
-            // then just take from the buffer
-            if (isTakeEffectActionChannelDescription(effectDescription) {
-                return await effectDescription.buffer.take();
-            }
-
-            let events = []
+            const events = [];
             for (const topic of effectDescription.topics) {
                 await consumerMessageBus.streamEffectTopic(effectDescription);
-                const subscriptionInfo = {transactionId, topic, observer: effectDescription.observer()}
+                const subscriptionInfo = {
+                    transactionId: effectDescription.transactionId,
+                    topic,
+                    observer: effectDescription.observer
+                };
                 consumerMessageBus.subscribeToTopicEvents(subscriptionInfo);
-                events.push(buffer.take());
+                events.push(effectDescription.buffer.take());
             }
             // TODO on return cancel all other takes
-            return await Promise.race(events)
+            return await Promise.race(events);
         }
 
         if (isPutEffectDescription(effectDescription)) {
@@ -60,7 +72,7 @@ export function createEffectRunner(
     consumerMessageBus: ConsumerMessageBus,
     producerMessageBus: ProducerMessageBus
 ) {
-    const runEffect = initalizeRunEffect(consumerMessageBus, producerMessageBus);
+    const runEffect = makeEffectRunner(consumerMessageBus, producerMessageBus);
     // tslint:disable-next-line: cyclomatic-complexity
     async function runGeneratorFsm(machine: Generator, lastValue: any = null): Promise<any> {
         const {done, value: effectDescription}: IteratorResult<unknown> = machine.next(lastValue);
@@ -69,9 +81,13 @@ export function createEffectRunner(
             return lastValue;
         }
 
-        if (isEffectCombinator(effectDescription)) {
-            const effects = getEffectsFromEffectDescription(effectDescription);
-            const combinator = getCombinatorFromEffectDescription(effectDescription);
+        if (isEffectCombinatorDescription(effectDescription)) {
+            const {effects, combinator} = effectDescription;
+
+            if (Array.isArray(effects)) {
+            } else if (typeof effects === 'object') {
+            }
+
             // Combinator is similar Promise.all or Promise.race
             const result = await combinator(effects.map(runEffect));
             return runGeneratorFsm(machine, result);
@@ -94,28 +110,4 @@ export function createEffectRunner(
             return result;
         }
     };
-}
-
-function isTakeEffectDescription(
-    effectDescription: IEffectDescription
-): effectDescription is ITakeEffectDescription {
-    return effectDescription.kind === 'TAKE';
-}
-
-function isPutEffectDescription(
-    effectDescription: IEffectDescription
-): effectDescription is IPutEffectDescription<any> {
-    return effectDescription.kind === 'PUT';
-}
-
-function isCallEffectDescription(
-    effectDescription: IEffectDescription
-): effectDescription is ICallEffectDescription<any[], any> {
-    return effectDescription.kind === 'CALL';
-}
-
-function isActionChannelDescription(
-    effectDescription: IEffectDescription
-): effectDescription is IActionChannelEffectDescription<any, any> {
-    return effectDescription.kind === 'ACTION_CHANNEL';
 }

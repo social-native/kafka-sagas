@@ -1,8 +1,8 @@
-import {IActionBuffer, IAction} from '../types';
+import {IActionBuffer, IAction, PromiseResolver} from '../types';
 
 export default class BaseBuffer<Action extends IAction> implements IActionBuffer<Action> {
     protected actions: Action[] = [];
-    protected observers: Array<typeof Promise['resolve']> = [];
+    protected observers: Array<PromiseResolver<Action>> = [];
 
     public isEmpty() {
         return this.actions.length === 0;
@@ -17,12 +17,9 @@ export default class BaseBuffer<Action extends IAction> implements IActionBuffer
         throw new Error('notifyObservers is not implemented in the base class');
     }
 
-    public async take(): Promise<Action> {
-        let resolve;
-        const promise = new Promise(r => (resolve = r));
-        if (resolve) {
-            this.observers.push(resolve);
-        }
-        return promise as Promise<Action>;
+    public take(): Promise<Action> {
+        const promise = new Promise<Action>(resolve => this.observers.push(resolve));
+        this.notifyObservers();
+        return promise;
     }
 }

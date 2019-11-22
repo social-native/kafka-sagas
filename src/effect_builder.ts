@@ -2,16 +2,26 @@ import {
     PutEffect,
     TakeEffect,
     CallEffect,
-    ActionChannel,
     IAction,
     IActionBuffer,
-    TakePattern
+    TakePattern,
+    AllCombinatorEffect,
+    RaceCombinatorEffect,
+    ActionChannelEffect,
+    ActionPattern
 } from './types';
 import {isFunction} from './utils';
 import {ActionBuffer, EphemeralBuffer} from './buffers';
-import { generateTopicForSpecificTransaction } from './kafka_topics';
+import {generateTopicForSpecificTransaction} from './kafka_topics';
+import {
+    isTakePatternActuallyActionChannelEffectDescription,
+    takeInputIsActionPattern
+} from 'type_guard';
 
-function generateTopics(pattern: TakePattern, transactionId: string): string[] {
+function generateTopics<Action extends IAction>(
+    pattern: ActionPattern<Action>,
+    transactionId: string
+): string[] {
     if (Array.isArray(pattern)) {
         return pattern;
     }
@@ -28,8 +38,11 @@ function generateTopics(pattern: TakePattern, transactionId: string): string[] {
     throw new Error('Cannot handle patterns of type ' + typeof pattern);
 }
 
-function generateTopicStreamObserver(pattern, buffer) {
-    observer: (action: Action) => {
+function generateTopicStreamObserver<Action extends IAction, Buffest extends IActionBuffer<Action>>(
+    pattern: ActionPattern<Action>,
+    buffer: Buffest
+) {
+    return (action: Action) => {
         if (isFunction(pattern)) {
             if (pattern(action)) {
                 buffer.put(action);
@@ -45,29 +58,33 @@ export default function effectBuilder(transactionId: string) {
         ...args: Parameters<PutEffect<Payload>>
     ): ReturnType<PutEffect<Payload>> => {
         const pattern = args[0];
-
         return {
             pattern,
+            topic: generateTopicForSpecificTransaction(transactionId, pattern),
             payload: args[1],
             transactionId,
             kind: 'PUT'
         };
     };
 
-    const take: TakeEffect = <Patterns = TakePattern>(patterns: Patterns) => {
-        if (isActionChannelDescription(patterns)) {
-            return {patterns, kind: 'TAKE_ACTION_CHANNEL'};
+    const take = <Action extends IAction>(patterns: Parameters<TakeEffect<Action>>[0]) => {
+        if (isTakePatternActuallyActionChannelEffectDescription(patterns)) {
+            return {...patterns, kind: 'TAKE_ACTION_CHANNEL'};
         }
 
         const buffer = new EphemeralBuffer();
+
+        if (!takeInputIsActionPattern(patterns)) {
+            throw new Error('Extremely unexpected error: patterns includes action channel');
+        }
 
         return {
             transactionId,
             patterns,
             kind: 'TAKE',
             buffer,
-            topics: generateTopics(pattern),
-            observer: () => generateTopicStreamObserver(pattern, buffer)
+            topics: generateTopics(patterns, transactionId),
+            observer: generateTopicStreamObserver(patterns, buffer)
         };
     };
 
@@ -82,9 +99,9 @@ export default function effectBuilder(transactionId: string) {
     });
 
     const actionChannel = <Action extends IAction>(
-        pattern: Parameters<ActionChannel<Action>>[0],
-        actionBuffer?: Parameters<ActionChannel<Action>>[1]
-    ): ReturnType<ActionChannel<Action>> => {
+        pattern: Parameters<ActionChannelEffect<Action>>[0],
+        actionBuffer?: Parameters<ActionChannelEffect<Action>>[1]
+    ): ReturnType<ActionChannelEffect<Action>> => {
         const defaultActionBuffer: IActionBuffer<Action> = new ActionBuffer();
         const buffer = actionBuffer || defaultActionBuffer;
 
@@ -93,8 +110,28 @@ export default function effectBuilder(transactionId: string) {
             pattern,
             buffer,
             kind: 'ACTION_CHANNEL',
-            topics: generateTopics(pattern),
-            observer: () => generateTopicStreamObserver(pattern, buffer)
+            topics: generateTopics(pattern, transactionId),
+            observer: generateTopicStreamObserver(pattern, buffer)
+        };
+    };
+
+    const all = <Action extends IAction>(
+        effects: Parameters<AllCombinatorEffect<Action>>[0]
+    ): ReturnType<AllCombinatorEffect<Action>> => {
+        return {
+            transactionId,
+            kind: 'COMBINATOR',
+            combinator: Promise.all,
+            effects
+        };
+    };
+
+    const race: RaceCombinatorEffect = (effects: Parameters<AllCombinatorEffect>[0]) => {
+        return {
+            transactionId,
+            kind: 'COMBINATOR',
+            combinator: Promise.race,
+            effects
         };
     };
 
@@ -102,6 +139,8 @@ export default function effectBuilder(transactionId: string) {
         put,
         take,
         call,
-        actionChannel
+        actionChannel,
+        all,
+        race
     };
 }

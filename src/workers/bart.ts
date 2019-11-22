@@ -1,11 +1,11 @@
-import {IAction, IBaseSagaContext} from '../types';
+import {IAction, IBaseSagaContext, ActionChannel} from '../types';
 
-function* myFirstSaga(initialAction: IAction, context: IBaseSagaContext) {
+function* myFirstSaga(_initialAction: IAction, context: IBaseSagaContext) {
     const {
-        effects: {actionChannel, put, take}
+        effects: {actionChannel, put, take, race, timeout}
     } = context;
 
-    const channel = yield actionChannel<IAction<{bart: string}>>(
+    const channel: ActionChannel = yield actionChannel<IAction<{bart: string}>>(
         aktion => !!aktion.payload && aktion.payload.bart === 'simpson'
     );
 
@@ -16,6 +16,11 @@ function* myFirstSaga(initialAction: IAction, context: IBaseSagaContext) {
 
         yield put('bart-found', {
             name: action.payload.name
+        });
+
+        const {timeout, isSuspendedFromSchool} = yield race({
+            timeout: timeout(3000),
+            isSuspendedFromSchool: take('BART_IS_SUSPENDED_FROM_SCHOOL')
         });
     }
 }
