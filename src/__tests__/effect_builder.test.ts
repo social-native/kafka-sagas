@@ -23,7 +23,7 @@ describe(EffectBuilder.name, function() {
 
         describe('given an action channel pattern', function() {
             it("returns a take effect description with the action channel's buffer", function() {
-                const {buffer, ...rest} = builder.take<undefined>(builder.actionChannel('plemp'));
+                const {buffer, ...rest} = builder.take(builder.actionChannel<any>('plemp'));
                 expect(rest).toMatchSnapshot();
                 expect(buffer).toBeInstanceOf(ActionChannelBuffer);
             });
