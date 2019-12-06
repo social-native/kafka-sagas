@@ -36,7 +36,7 @@ describe(ConsumerMessageBus.name, function() {
             ]);
 
             // give it some time to deliver
-            await Bluebird.delay(300);
+            await Bluebird.delay(1000);
 
             await bus.disconnectConsumers();
 
