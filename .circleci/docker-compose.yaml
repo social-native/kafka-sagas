@@ -124,6 +124,7 @@ services:
             SQL_DB_USER: root
             SQL_DB_PASSWORD: admin
             SQL_DB_DATABASE: circle_test
+            TERM: xterm-256color
         working_dir: /code
         command: /bin/bash
         tty: true
