@@ -15,19 +15,19 @@ describe(SagaRunner.name, function() {
         }> = [
             {
                 patternKind: 'string',
-                topics: ['test-topic-1'],
-                pattern: 'test-topic-1'
+                topics: ['test-topic-1-pattern-1'],
+                pattern: 'test-topic-1-pattern-1'
             },
             {
                 patternKind: 'string[]',
-                topics: ['test-topic-1', 'test-topic-2'],
-                pattern: ['test-topic-1', 'test-topic-2']
+                topics: ['test-topic-1-pattern-2', 'test-topic-2-pattern-2'],
+                pattern: ['test-topic-1-pattern-2', 'test-topic-2-pattern-2']
             },
             {
                 patternKind: 'PredicateRecord',
-                topics: ['test-topic-1'],
+                topics: ['test-topic-1-pattern-3'],
                 pattern: {
-                    pattern: 'test-topic-1',
+                    pattern: 'test-topic-1-pattern-3',
                     predicate: () => true
                 }
             }
@@ -36,9 +36,9 @@ describe(SagaRunner.name, function() {
         for (const {patternKind, pattern, topics} of patterns) {
             describe(`given a pattern of kind ${patternKind}`, function() {
                 it(
-                    'begins streaming from the topic into a channel and returns it',
+                    `begins streaming from the topic into a channel and returns it`,
                     async function() {
-                        withTopicCleanup(topics)(async () => {
+                        await withTopicCleanup(topics)(async () => {
                             const runnerUtils = await runnerUtilityFactory();
                             const {runner, effectBuilder, spy} = runnerUtils;
                             const observerRegisteredSpy = spy.consumer('registerTopicObserver');
@@ -60,7 +60,7 @@ describe(SagaRunner.name, function() {
                                 }
                             ]);
 
-                            await Bluebird.delay(1000);
+                            await Bluebird.delay(300);
 
                             expect(await channel.buffer.take()).toMatchSnapshot();
 
@@ -73,7 +73,7 @@ describe(SagaRunner.name, function() {
                 it(
                     'uses the buffer provided if one is provided',
                     async function() {
-                        withTopicCleanup(topics)(async () => {
+                        await withTopicCleanup(topics)(async () => {
                             const runnerUtils = await runnerUtilityFactory();
                             const {runner, effectBuilder, spy} = runnerUtils;
                             const observerRegisteredSpy = spy.consumer('registerTopicObserver');
@@ -95,7 +95,7 @@ describe(SagaRunner.name, function() {
                                 }
                             ]);
 
-                            await Bluebird.delay(1000);
+                            await Bluebird.delay(300);
 
                             expect(await buffer.take()).toMatchSnapshot();
 
@@ -111,7 +111,7 @@ describe(SagaRunner.name, function() {
             it(
                 'only buffers actions that adhere to the predicate',
                 async function() {
-                    withTopicCleanup(['test-topic-1'])(async ([topic]) => {
+                    await withTopicCleanup(['test-topic-1'])(async ([topic]) => {
                         const runnerUtils = await runnerUtilityFactory();
                         const {runner, effectBuilder, spy} = runnerUtils;
                         const observerRegisteredSpy = spy.consumer('registerTopicObserver');
@@ -144,7 +144,7 @@ describe(SagaRunner.name, function() {
                             }
                         ]);
 
-                        await Bluebird.delay(1000);
+                        await Bluebird.delay(300);
 
                         expect(await channel.buffer.take()).toMatchSnapshot();
 

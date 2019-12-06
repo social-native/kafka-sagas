@@ -5,7 +5,7 @@ Array [
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-1",
+      "topic": "test-topic-1-pattern-3",
       "transactionId": "static-transaction-id",
     },
   ],
@@ -15,7 +15,7 @@ Array [
 exports[`SagaRunner actionChannel given a pattern of kind PredicateRecord begins streaming from the topic into a channel and returns it 2`] = `
 Array [
   Array [
-    "test-topic-1",
+    "test-topic-1-pattern-3",
   ],
 ]
 `;
@@ -25,7 +25,7 @@ Object {
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
-  "topic": "test-topic-1",
+  "topic": "test-topic-1-pattern-3",
   "transaction_id": "static-transaction-id",
 }
 `;
@@ -35,7 +35,7 @@ Array [
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-1",
+      "topic": "test-topic-1-pattern-3",
       "transactionId": "static-transaction-id",
     },
   ],
@@ -45,7 +45,7 @@ Array [
 exports[`SagaRunner actionChannel given a pattern of kind PredicateRecord uses the buffer provided if one is provided 2`] = `
 Array [
   Array [
-    "test-topic-1",
+    "test-topic-1-pattern-3",
   ],
 ]
 `;
@@ -55,7 +55,7 @@ Object {
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
-  "topic": "test-topic-1",
+  "topic": "test-topic-1-pattern-3",
   "transaction_id": "static-transaction-id",
 }
 `;
@@ -65,7 +65,7 @@ Array [
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-1",
+      "topic": "test-topic-1-pattern-1",
       "transactionId": "static-transaction-id",
     },
   ],
@@ -75,7 +75,7 @@ Array [
 exports[`SagaRunner actionChannel given a pattern of kind string begins streaming from the topic into a channel and returns it 2`] = `
 Array [
   Array [
-    "test-topic-1",
+    "test-topic-1-pattern-1",
   ],
 ]
 `;
@@ -85,7 +85,7 @@ Object {
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
-  "topic": "test-topic-1",
+  "topic": "test-topic-1-pattern-1",
   "transaction_id": "static-transaction-id",
 }
 `;
@@ -95,7 +95,7 @@ Array [
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-1",
+      "topic": "test-topic-1-pattern-1",
       "transactionId": "static-transaction-id",
     },
   ],
@@ -105,7 +105,7 @@ Array [
 exports[`SagaRunner actionChannel given a pattern of kind string uses the buffer provided if one is provided 2`] = `
 Array [
   Array [
-    "test-topic-1",
+    "test-topic-1-pattern-1",
   ],
 ]
 `;
@@ -115,7 +115,7 @@ Object {
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
-  "topic": "test-topic-1",
+  "topic": "test-topic-1-pattern-1",
   "transaction_id": "static-transaction-id",
 }
 `;
@@ -125,14 +125,14 @@ Array [
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-1",
+      "topic": "test-topic-1-pattern-2",
       "transactionId": "static-transaction-id",
     },
   ],
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-2",
+      "topic": "test-topic-2-pattern-2",
       "transactionId": "static-transaction-id",
     },
   ],
@@ -142,10 +142,10 @@ Array [
 exports[`SagaRunner actionChannel given a pattern of kind string[] begins streaming from the topic into a channel and returns it 2`] = `
 Array [
   Array [
-    "test-topic-1",
+    "test-topic-1-pattern-2",
   ],
   Array [
-    "test-topic-2",
+    "test-topic-2-pattern-2",
   ],
 ]
 `;
@@ -155,7 +155,7 @@ Object {
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
-  "topic": "test-topic-1",
+  "topic": "test-topic-1-pattern-2",
   "transaction_id": "static-transaction-id",
 }
 `;
@@ -165,14 +165,14 @@ Array [
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-1",
+      "topic": "test-topic-1-pattern-2",
       "transactionId": "static-transaction-id",
     },
   ],
   Array [
     Object {
       "observer": [Function],
-      "topic": "test-topic-2",
+      "topic": "test-topic-2-pattern-2",
       "transactionId": "static-transaction-id",
     },
   ],
@@ -182,10 +182,10 @@ Array [
 exports[`SagaRunner actionChannel given a pattern of kind string[] uses the buffer provided if one is provided 2`] = `
 Array [
   Array [
-    "test-topic-1",
+    "test-topic-1-pattern-2",
   ],
   Array [
-    "test-topic-2",
+    "test-topic-2-pattern-2",
   ],
 ]
 `;
@@ -195,7 +195,7 @@ Object {
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
-  "topic": "test-topic-1",
+  "topic": "test-topic-1-pattern-2",
   "transaction_id": "static-transaction-id",
 }
 `;
