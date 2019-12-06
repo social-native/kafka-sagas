@@ -18,6 +18,10 @@ export class ProducerMessageBus {
             idempotent: true,
             ...producerConfig
         });
+
+        this.connect = this.connect.bind(this);
+        this.putAction = this.putAction.bind(this);
+        this.disconnect = this.disconnect.bind(this);
     }
 
     public async putAction<Action extends IAction>(action: Action) {
