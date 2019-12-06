@@ -33,7 +33,24 @@ describe(SagaRunner.name, function() {
                         ])
                     );
 
-                    expect(payload).toMatchSnapshot();
+                    expect(payload).toMatchInlineSnapshot(`
+                        Array [
+                          Object {
+                            "payload": Object {
+                              "bart_simpson": "first",
+                            },
+                            "topic": "test-all-1",
+                            "transaction_id": "static-transaction-id",
+                          },
+                          Object {
+                            "payload": Object {
+                              "bart_simpson": "second",
+                            },
+                            "topic": "test-all-1",
+                            "transaction_id": "static-transaction-id",
+                          },
+                        ]
+                    `);
 
                     await closeBuses();
                 });
@@ -69,7 +86,24 @@ describe(SagaRunner.name, function() {
                         })
                     );
 
-                    expect(payload).toMatchSnapshot();
+                    expect(payload).toMatchInlineSnapshot(`
+                        Object {
+                          "one": Object {
+                            "payload": Object {
+                              "bart_simpson": "first",
+                            },
+                            "topic": "test-all-1",
+                            "transaction_id": "static-transaction-id",
+                          },
+                          "two": Object {
+                            "payload": Object {
+                              "bart_simpson": "second",
+                            },
+                            "topic": "test-all-1",
+                            "transaction_id": "static-transaction-id",
+                          },
+                        }
+                    `);
 
                     await closeBuses();
                 });

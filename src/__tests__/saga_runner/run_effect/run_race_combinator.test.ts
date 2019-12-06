@@ -41,7 +41,15 @@ describe(SagaRunner.name, function() {
                         effectBuilder.race([effectBuilder.take(fast), effectBuilder.take(slow)])
                     );
 
-                    expect(payload).toMatchSnapshot();
+                    expect(payload).toMatchInlineSnapshot(`
+                        Object {
+                          "payload": Object {
+                            "bart_simpson": "first",
+                          },
+                          "topic": "race-fast",
+                          "transaction_id": "static-transaction-id",
+                        }
+                    `);
 
                     await closeBuses();
                 });
@@ -88,7 +96,18 @@ describe(SagaRunner.name, function() {
                         })
                     );
 
-                    expect(payload).toMatchSnapshot();
+                    expect(payload).toMatchInlineSnapshot(`
+                        Object {
+                          "fast": Object {
+                            "payload": Object {
+                              "bart_simpson": "first",
+                            },
+                            "topic": "race-fast",
+                            "transaction_id": "static-transaction-id",
+                          },
+                          "slow": null,
+                        }
+                    `);
 
                     await closeBuses();
                 });

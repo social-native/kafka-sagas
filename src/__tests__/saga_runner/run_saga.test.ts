@@ -42,7 +42,7 @@ describe(SagaRunner.name, function() {
                     await consumer.run({
                         async eachMessage() {
                             /** Simulate some latency */
-                            await Bluebird.delay(1000);
+                            await Bluebird.delay(300);
 
                             const heads = coinFlip();
 

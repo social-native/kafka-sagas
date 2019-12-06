@@ -20,7 +20,7 @@ describe(ActionChannelBuffer.name, function() {
         buffer.put(firstAction);
         buffer.put(secondAction);
 
-        await Bluebird.delay(1000);
+        await Bluebird.delay(300);
 
         expect(firstResult).toEqual(firstAction);
         expect(secondResult).toEqual(secondResult);

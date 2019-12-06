@@ -18,7 +18,13 @@ describe(SagaRunner.name, function() {
             await util.runner.runEffect(callEffectDescription);
             await util.closeBuses();
 
-            expect(spy.mock.calls).toMatchSnapshot();
+            expect(spy.mock.calls).toMatchInlineSnapshot(`
+                Array [
+                  Array [
+                    "is not a turtle",
+                  ],
+                ]
+            `);
         });
     });
 });

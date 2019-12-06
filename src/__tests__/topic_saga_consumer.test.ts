@@ -32,7 +32,7 @@ describe(TopicSagaConsumer.name, function() {
 
                 await topicConsumer.run();
 
-                await Bluebird.delay(2000);
+                await Bluebird.delay(300);
 
                 await producer.send({
                     acks: -1,
@@ -48,9 +48,21 @@ describe(TopicSagaConsumer.name, function() {
                     ]
                 });
 
-                await Bluebird.delay(2000);
+                await Bluebird.delay(300);
 
-                expect(spy.mock.calls).toMatchSnapshot();
+                expect(spy.mock.calls).toMatchInlineSnapshot(`
+                    Array [
+                      Array [
+                        Object {
+                          "payload": Object {
+                            "dogs_go": "awoo",
+                          },
+                          "topic": "topic-saga-consumer",
+                          "transaction_id": "test-trx-id-bark",
+                        },
+                      ],
+                    ]
+                `);
 
                 await topicConsumer.disconnect();
                 await producer.disconnect();

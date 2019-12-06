@@ -22,7 +22,7 @@ describe(EphemeralBuffer.name, function() {
         buffer.put(firstAction);
         buffer.put(secondAction);
 
-        await Bluebird.delay(1000);
+        await Bluebird.delay(300);
 
         expect(missedResult).toBeUndefined();
         expect(receivedResult).toEqual(firstAction);

@@ -22,7 +22,15 @@ describe(SagaRunner.name, function() {
 
                     const payload = await runner.runEffect(effectBuilder.take(channel));
 
-                    expect(payload).toMatchSnapshot();
+                    expect(payload).toMatchInlineSnapshot(`
+                        Object {
+                          "payload": Object {
+                            "bart_simpson": "good",
+                          },
+                          "topic": "test-put",
+                          "transaction_id": "static-transaction-id",
+                        }
+                    `);
 
                     await closeBuses();
                 });

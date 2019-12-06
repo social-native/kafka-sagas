@@ -34,7 +34,15 @@ describe(SagaRunner.name, function() {
 
                     await closeBuses();
 
-                    expect(payload).toMatchSnapshot();
+                    expect(payload).toMatchInlineSnapshot(`
+                        Object {
+                          "payload": Object {
+                            "bart_simpson": "eat_my_shorts",
+                          },
+                          "topic": "take-action-channel-test",
+                          "transaction_id": "static-transaction-id",
+                        }
+                    `);
                 });
             },
             DEFAULT_TEST_TIMEOUT
