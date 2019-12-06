@@ -42,21 +42,13 @@ describe(TopicEventEmitter, function() {
                         ]
                     });
 
+                    await Bluebird.delay(3000);
+
                     await producer.disconnect();
                     await topicEventEmitter.disconnect();
 
-                    await Bluebird.delay(3000);
-
-                    expect(onSub.mock.calls).toMatchInlineSnapshot(`
-                        Array [
-                          Array [],
-                        ]
-                    `);
-                    expect(onUnsub.mock.calls).toMatchInlineSnapshot(`
-                        Array [
-                          Array [],
-                        ]
-                    `);
+                    expect(onSub.mock.calls.length).toEqual(1);
+                    expect(onUnsub.mock.calls.length).toEqual(1);
                 }
             );
         },
