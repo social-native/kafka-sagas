@@ -92,7 +92,7 @@ describe(SagaRunner.name, function() {
                                     }
                                 }
                             ]);
-                        }, 5000);
+                        }, 1000);
 
                         setTimeout(async () => {
                             await seedTopic(fast, [
@@ -103,7 +103,7 @@ describe(SagaRunner.name, function() {
                                     }
                                 }
                             ]);
-                        }, 2000);
+                        }, 500);
 
                         const payload = await runner.runEffect(effectBuilder.take([slow, fast]));
 
