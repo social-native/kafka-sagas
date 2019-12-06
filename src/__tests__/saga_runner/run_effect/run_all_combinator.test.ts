@@ -2,6 +2,7 @@ import {SagaRunner} from 'saga_runner';
 import {withTopicCleanup} from '../../kafka_utils';
 import {runnerUtilityFactory} from '../runner_utility_factory';
 import {DEFAULT_TEST_TIMEOUT} from '../../constants';
+import Bluebird from 'bluebird';
 
 describe(SagaRunner.name, function() {
     describe('all', function() {
@@ -19,6 +20,8 @@ describe(SagaRunner.name, function() {
                             bart_simpson: 'first'
                         })
                     );
+
+                    await Bluebird.delay(2000);
 
                     await runner.runEffect(
                         effectBuilder.put(topic, {
