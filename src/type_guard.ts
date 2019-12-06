@@ -10,6 +10,7 @@ import {
     ICombinatatorEffectDescription,
     IPredicateRecord
 } from './types';
+import {EffectDescriptionKind} from './enums';
 
 export function isTransactionAction<Payload>(messageValue: IAction | any): messageValue is IAction<Payload> {
     return messageValue && messageValue.transaction_id;
@@ -18,19 +19,19 @@ export function isTransactionAction<Payload>(messageValue: IAction | any): messa
 export function isTakeEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is ITakeEffectDescription {
-    return effectDescription.kind === 'TAKE';
+    return effectDescription.kind === EffectDescriptionKind.TAKE;
 }
 
 export function isPutEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is IPutEffectDescription<any> {
-    return effectDescription.kind === 'PUT';
+    return effectDescription.kind === EffectDescriptionKind.PUT;
 }
 
 export function isCallEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is ICallEffectDescription<any[], any> {
-    return effectDescription.kind === 'CALL';
+    return effectDescription.kind === EffectDescriptionKind.CALL;
 }
 
 export function isEffectCombinatorDescription<Action extends IAction>(
@@ -45,13 +46,13 @@ export function isEffectCombinatorDescription<Action extends IAction>(
 export function isActionChannelEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is IActionChannelEffectDescription<any> {
-    return effectDescription.kind === 'ACTION_CHANNEL';
+    return effectDescription.kind === EffectDescriptionKind.ACTION_CHANNEL;
 }
 
 export function isTakeActionChannelEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is IActionChannelEffectDescription<any> {
-    return effectDescription.kind === 'TAKE_ACTION_CHANNEL';
+    return effectDescription.kind === EffectDescriptionKind.TAKE_ACTION_CHANNEL;
 }
 
 export function actionPatternIsPredicateRecord<Action extends IAction>(
@@ -68,7 +69,10 @@ export function actionPatternIsPredicateRecord<Action extends IAction>(
 export function isTakePatternActuallyActionChannelEffectDescription(
     effectDescription: TakePattern | IActionChannelEffectDescription
 ): effectDescription is IActionChannelEffectDescription<any> {
-    return (effectDescription as IActionChannelEffectDescription).kind === 'ACTION_CHANNEL';
+    return (
+        (effectDescription as IActionChannelEffectDescription).kind ===
+        EffectDescriptionKind.ACTION_CHANNEL
+    );
 }
 
 export function takeInputIsActionPattern<Action extends IAction>(
@@ -87,6 +91,6 @@ export function takeInputIsActionChannelEffectDescription<Action extends IAction
     return (
         typeof input !== 'string' &&
         !Array.isArray(input) &&
-        (input as IActionChannelEffectDescription<Action>).kind === 'ACTION_CHANNEL'
+        (input as IActionChannelEffectDescription<Action>).kind === EffectDescriptionKind.ACTION_CHANNEL
     );
 }

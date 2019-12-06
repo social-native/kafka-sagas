@@ -1,7 +1,7 @@
 import {KafkaMessage} from 'kafkajs';
 import {isTransactionAction} from './type_guard';
 import uuid from 'uuid';
-import {IAction} from 'types';
+import {IAction} from './types';
 
 export function buildActionFromPayload<Payload>(topic: string, message: KafkaMessage): IAction<Payload> {
     const extracted = JSON.parse(message.value.toString());

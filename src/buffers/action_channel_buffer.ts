@@ -1,4 +1,4 @@
-import {IAction, IActionBuffer, PromiseResolver} from 'types';
+import {IAction, IActionBuffer, PromiseResolver} from '../types';
 
 export default class ActionChannelBuffer<Action extends IAction> implements IActionBuffer<Action> {
     protected actions: Action[] = [];

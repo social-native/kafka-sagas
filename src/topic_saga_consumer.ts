@@ -5,7 +5,7 @@ import {ConsumerMessageBus} from './consumer_message_bus';
 import {buildActionFromPayload} from './build_action_from_payload';
 import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
-import {SagaContext, Saga} from 'types';
+import {SagaContext, Saga} from './types';
 import uuid from 'uuid';
 
 export class TopicSagaConsumer<

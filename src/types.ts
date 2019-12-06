@@ -1,6 +1,7 @@
 import {EffectBuilder} from './effect_builder';
-import {ActionChannelBuffer, EphemeralBuffer} from 'buffers';
-import {SagaRunner} from 'saga_runner';
+import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
+import {SagaRunner} from './saga_runner';
+import {EffectDescriptionKind} from './enums';
 
 /**
  * Aliases
@@ -71,14 +72,14 @@ export interface IActionBuffer<Action extends IAction> {
 export interface IPutEffectDescription<Payload extends {}> extends IEffectDescription {
     pattern: string;
     payload?: Payload;
-    kind: 'PUT';
+    kind: EffectDescriptionKind.PUT;
     topic: string;
 }
 
 export interface ITakeEffectDescription<Action extends IAction = IAction>
     extends IEffectDescription {
     patterns: TakePattern;
-    kind: 'TAKE';
+    kind: EffectDescriptionKind.TAKE;
     topics: string[];
     buffer: EphemeralBuffer<Action>;
     observer: ActionObserver<Action>;
@@ -87,7 +88,7 @@ export interface ITakeEffectDescription<Action extends IAction = IAction>
 export interface ITakeActionChannelEffectDescription<Action extends IAction = IAction>
     extends IEffectDescription {
     patterns: ActionChannelInput<Action>;
-    kind: 'TAKE_ACTION_CHANNEL';
+    kind: EffectDescriptionKind.TAKE_ACTION_CHANNEL;
     buffer: ActionChannelBuffer<Action>;
     topics: string[];
     observer: ActionObserver<Action>;
@@ -102,7 +103,7 @@ export interface ICallEffectDescription<Arguments extends any[], CallResponse>
 export interface IActionChannelEffectDescription<Action extends IAction = IAction>
     extends IEffectDescription {
     pattern: ActionChannelInput<Action>;
-    kind: 'ACTION_CHANNEL';
+    kind: EffectDescriptionKind.ACTION_CHANNEL;
     buffer: ActionChannelBuffer<Action>;
     topics: string[];
     observer: ActionObserver<Action>;
@@ -121,12 +122,12 @@ export type RecordCombinator<Action extends IAction> = <
 export interface ICombinatatorEffectDescription<Action extends IAction> extends IEffectDescription {
     effects: IEffectDescription[] | Record<string, IEffectDescription>;
     combinator: ArrayCombinator<Action> | RecordCombinator<Action>;
-    kind: 'COMBINATOR';
+    kind: EffectDescriptionKind.COMBINATOR;
 }
 
 export interface IEffectDescription {
     transactionId: string;
-    kind: 'PUT' | 'CALL' | 'TAKE' | 'ACTION_CHANNEL' | 'TAKE_ACTION_CHANNEL' | 'COMBINATOR';
+    kind: keyof typeof EffectDescriptionKind;
 }
 
 /**

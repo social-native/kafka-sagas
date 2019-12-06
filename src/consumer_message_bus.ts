@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import {Consumer, Kafka, ConsumerConfig} from 'kafkajs';
 
 import {IAction, ActionObserver} from './types';
-import {buildActionFromPayload} from 'build_action_from_payload';
+import {buildActionFromPayload} from './build_action_from_payload';
 
 export class ConsumerMessageBus {
     private consumers: Map<string, Consumer> = new Map();

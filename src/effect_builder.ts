@@ -20,7 +20,8 @@ import {
 } from './type_guard';
 
 import {racePromise} from './promise_combinators/race_promise';
-import {allPromise} from 'promise_combinators/all_promise';
+import {allPromise} from './promise_combinators/all_promise';
+import {EffectDescriptionKind} from './enums';
 
 export class EffectBuilder {
     constructor(protected transactionId: string) {
@@ -43,7 +44,7 @@ export class EffectBuilder {
             topic: pattern,
             payload,
             transactionId: this.transactionId,
-            kind: 'PUT'
+            kind: EffectDescriptionKind.PUT
         };
     };
 
@@ -64,7 +65,7 @@ export class EffectBuilder {
             return {
                 transactionId: this.transactionId,
                 patterns: patterns.pattern,
-                kind: 'TAKE_ACTION_CHANNEL',
+                kind: EffectDescriptionKind.TAKE_ACTION_CHANNEL,
                 buffer: patterns.buffer,
                 topics: this.generateTopics(patterns),
                 observer: this.generateTopicStreamObserver<
@@ -84,7 +85,7 @@ export class EffectBuilder {
             const takeEffectDescription: ITakeEffectDescription<IAction<Payload>> = {
                 transactionId: this.transactionId,
                 patterns,
-                kind: 'TAKE',
+                kind: EffectDescriptionKind.TAKE,
                 buffer,
                 topics: this.generateTopics(patterns),
                 observer: this.generateTopicStreamObserver<
@@ -124,7 +125,7 @@ export class EffectBuilder {
             transactionId: this.transactionId,
             pattern: input,
             buffer,
-            kind: 'ACTION_CHANNEL',
+            kind: EffectDescriptionKind.ACTION_CHANNEL,
             topics: this.generateTopics(input),
             observer: this.generateTopicStreamObserver(input, buffer)
         };
@@ -135,7 +136,7 @@ export class EffectBuilder {
     ): ReturnType<AllCombinatorEffect<Payload>> {
         return {
             transactionId: this.transactionId,
-            kind: 'COMBINATOR',
+            kind: EffectDescriptionKind.COMBINATOR,
             combinator: allPromise,
             effects
         };
@@ -146,7 +147,7 @@ export class EffectBuilder {
     ): ReturnType<RaceCombinatorEffect<Payload>> {
         return {
             transactionId: this.transactionId,
-            kind: 'COMBINATOR',
+            kind: EffectDescriptionKind.COMBINATOR,
             combinator: racePromise,
             effects
         };
