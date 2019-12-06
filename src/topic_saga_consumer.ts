@@ -10,12 +10,12 @@ import uuid from 'uuid';
 
 export class TopicSagaConsumer<
     InitialActionPayload,
-    Context extends Record<string, any> = Record<string, any>,
+    Context extends Record<string, any> = Record<string, any>
 > {
     private consumer: Consumer;
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
-    private getContext: () => Context;
+    private getContext: () => Context | Promise<Context>;
 
     private consumerMessageBus: ConsumerMessageBus;
     private producerMessageBus: ProducerMessageBus;
@@ -30,8 +30,8 @@ export class TopicSagaConsumer<
     }: {
         kafka: Kafka;
         topic: string;
-        saga: Saga<InitialActionPayload, SagaContext<Context>>
-        getContext: () => Context;
+        saga: Saga<InitialActionPayload, SagaContext<Context>>;
+        getContext: () => Context | Promise<Context>;
     }) {
         this.consumer = kafka.consumer({
             groupId: `${topic}-${uuid.v4()}`,
@@ -63,8 +63,11 @@ export class TopicSagaConsumer<
             autoCommit: true,
             autoCommitThreshold: 1,
             eachMessage: async ({message}) => {
-                const initialAction = buildActionFromPayload<InitialActionPayload>(this.topic, message);
-                const externalContext = this.getContext();
+                const initialAction = buildActionFromPayload<InitialActionPayload>(
+                    this.topic,
+                    message
+                );
+                const externalContext = await this.getContext();
 
                 return runner.runSaga<InitialActionPayload, SagaContext<Context>>(
                     initialAction,
