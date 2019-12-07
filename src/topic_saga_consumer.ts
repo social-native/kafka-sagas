@@ -15,7 +15,7 @@ export class TopicSagaConsumer<
     private consumer: Consumer;
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
-    private getContext: () => Context | Promise<Context>;
+    private getContext: () => Promise<Context>;
 
     private consumerMessageBus: ConsumerMessageBus;
     private producerMessageBus: ProducerMessageBus;
@@ -24,14 +24,14 @@ export class TopicSagaConsumer<
         kafka,
         topic,
         saga,
-        getContext = () => {
+        getContext = async () => {
             return {} as Context;
         }
     }: {
         kafka: Kafka;
         topic: string;
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
-        getContext: () => Context | Promise<Context>;
+        getContext: () => Promise<Context>;
     }) {
         this.consumer = kafka.consumer({
             groupId: `${topic}-${uuid.v4()}`,
