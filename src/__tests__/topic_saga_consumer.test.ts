@@ -21,7 +21,7 @@ describe(TopicSagaConsumer.name, function() {
 
                 const topicConsumer = new TopicSagaConsumer({
                     kafka,
-                    getContext: () => ({
+                    getContext: async () => ({
                         spy
                     }),
                     topic,
@@ -32,7 +32,7 @@ describe(TopicSagaConsumer.name, function() {
 
                 await topicConsumer.run();
 
-                await Bluebird.delay(300);
+                await Bluebird.delay(1000);
 
                 await producer.send({
                     acks: -1,
@@ -48,7 +48,7 @@ describe(TopicSagaConsumer.name, function() {
                     ]
                 });
 
-                await Bluebird.delay(300);
+                await Bluebird.delay(1000);
 
                 expect(spy.mock.calls).toMatchInlineSnapshot(`
                     Array [
