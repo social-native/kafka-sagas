@@ -34,7 +34,7 @@ export class TopicSagaConsumer<
         getContext: () => Promise<Context>;
     }) {
         this.consumer = kafka.consumer({
-            groupId: `${topic}-${uuid.v4()}`,
+            groupId: topic,
             allowAutoTopicCreation: true
         });
 
@@ -54,7 +54,11 @@ export class TopicSagaConsumer<
      * so that they can log as they see fit.
      */
     public async run() {
-        await this.consumer.subscribe({topic: this.topic});
+        await this.consumer.subscribe({
+            topic: this.topic,
+            fromBeginning: true
+        });
+
         await this.producerMessageBus.connect();
 
         const runner = new SagaRunner(this.consumerMessageBus, this.producerMessageBus);
