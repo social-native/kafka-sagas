@@ -22,9 +22,10 @@ export class ConsumerMessageBus {
             return;
         }
 
+        await this.createTopicIfNecessary(topic);
+
         const consumer = this.kafka.consumer({
             groupId: `${this.rootTopic}-${uuid.v4()}`,
-            allowAutoTopicCreation: true,
             ...this.consumerConfig
         });
 
@@ -82,6 +83,30 @@ export class ConsumerMessageBus {
         const topicObservers = topicObserversForTransaction.get(topic) || [];
 
         topicObserversForTransaction.set(topic, [...topicObservers, observer]);
+    }
+
+    private async createTopicIfNecessary(topic: string) {
+        const admin = this.kafka.admin();
+        await admin.connect();
+
+        /**
+         * This comes back as `true` or `false`
+         * depending on if a topic was created.
+         *
+         * Either way, by having done this,
+         * we ensure our topic exists.
+         *
+         * If, in the future, this managed to throw,
+         * it would be up to the saga to catch and rollback.
+         *
+         * So, we'll let this bubble up.
+         */
+        await admin.createTopics({
+            topics: [{topic}],
+            waitForLeaders: true
+        });
+
+        await admin.disconnect();
     }
 
     private broadcastAction(topic: string, action: IAction) {

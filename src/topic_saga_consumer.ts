@@ -70,16 +70,22 @@ export class TopicSagaConsumer<
                     this.topic,
                     message
                 );
-                const externalContext = await this.getContext();
 
-                return runner.runSaga<InitialActionPayload, SagaContext<Context>>(
-                    initialAction,
-                    {
-                        ...externalContext,
-                        effects: new EffectBuilder(initialAction.transaction_id)
-                    },
-                    this.saga
-                );
+                try {
+                    const externalContext = await this.getContext();
+
+                    await runner.runSaga<InitialActionPayload, SagaContext<Context>>(
+                        initialAction,
+                        {
+                            ...externalContext,
+                            effects: new EffectBuilder(initialAction.transaction_id)
+                        },
+                        this.saga
+                    );
+                } catch (error) {
+                    this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
+                    throw error;
+                }
             }
         });
     }
