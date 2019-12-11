@@ -2,6 +2,7 @@ import {SagaRunner} from 'saga_runner';
 import {withTopicCleanup} from '../../kafka_utils';
 import {runnerUtilityFactory} from '../runner_utility_factory';
 import {DEFAULT_TEST_TIMEOUT} from '../../constants';
+import Bluebird from 'bluebird';
 
 describe(SagaRunner.name, function() {
     describe('race', function() {
@@ -21,25 +22,27 @@ describe(SagaRunner.name, function() {
                     await runner.runEffect(fastChannel);
                     await runner.runEffect(slowChannel);
 
-                    setTimeout(async () => {
+                    setImmediate(async () => {
                         await runner.runEffect(
                             effectBuilder.put(fast, {
                                 bart_simpson: 'first'
                             })
                         );
-                    }, 2000);
 
-                    setTimeout(async () => {
+                        await Bluebird.delay(2000);
+
                         await runner.runEffect(
                             effectBuilder.put(slow, {
                                 bart_simpson: 'second'
                             })
                         );
-                    }, 5000);
+                    });
 
                     const payload = await runner.runEffect(
                         effectBuilder.race([effectBuilder.take(fast), effectBuilder.take(slow)])
                     );
+
+                    await closeBuses();
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
@@ -50,11 +53,9 @@ describe(SagaRunner.name, function() {
                           "transaction_id": "static-transaction-id",
                         }
                     `);
-
-                    await closeBuses();
                 });
             },
-            DEFAULT_TEST_TIMEOUT * 2
+            DEFAULT_TEST_TIMEOUT
         );
 
         it(
@@ -73,21 +74,21 @@ describe(SagaRunner.name, function() {
                     await runner.runEffect(fastChannel);
                     await runner.runEffect(slowChannel);
 
-                    setTimeout(async () => {
+                    setImmediate(async () => {
                         await runner.runEffect(
                             effectBuilder.put(fast, {
                                 bart_simpson: 'first'
                             })
                         );
-                    }, 2000);
 
-                    setTimeout(async () => {
+                        await Bluebird.delay(2000);
+
                         await runner.runEffect(
                             effectBuilder.put(slow, {
                                 bart_simpson: 'second'
                             })
                         );
-                    }, 5000);
+                    });
 
                     const payload = await runner.runEffect(
                         effectBuilder.race({
@@ -95,6 +96,8 @@ describe(SagaRunner.name, function() {
                             slow: effectBuilder.take(slow)
                         })
                     );
+
+                    await closeBuses();
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
@@ -108,8 +111,6 @@ describe(SagaRunner.name, function() {
                           "slow": null,
                         }
                     `);
-
-                    await closeBuses();
                 });
             },
             DEFAULT_TEST_TIMEOUT
