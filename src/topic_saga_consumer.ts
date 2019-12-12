@@ -5,7 +5,9 @@ import {ConsumerMessageBus} from './consumer_message_bus';
 import {buildActionFromPayload} from './build_action_from_payload';
 import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
-import {SagaContext, Saga} from './types';
+import {SagaContext, Saga, ILoggerConfig} from './types';
+import {getLoggerFromConfig} from './logger';
+import {Logger} from 'pino';
 
 export class TopicSagaConsumer<
     InitialActionPayload,
@@ -15,6 +17,7 @@ export class TopicSagaConsumer<
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
     private getContext: () => Promise<Context>;
+    private logger: Logger;
 
     private consumerMessageBus: ConsumerMessageBus;
     private producerMessageBus: ProducerMessageBus;
@@ -25,12 +28,14 @@ export class TopicSagaConsumer<
         saga,
         getContext = async () => {
             return {} as Context;
-        }
+        },
+        loggerConfig
     }: {
         kafka: Kafka;
         topic: string;
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
-        getContext: () => Promise<Context>;
+        getContext?: () => Promise<Context>;
+        loggerConfig?: ILoggerConfig;
     }) {
         this.consumer = kafka.consumer({
             groupId: topic,
@@ -40,6 +45,10 @@ export class TopicSagaConsumer<
         this.saga = saga;
         this.topic = topic;
         this.getContext = getContext;
+
+        this.logger = getLoggerFromConfig(loggerConfig).child({
+            package: 'snpkg-snapi-kafka-sagas'
+        });
 
         this.consumerMessageBus = new ConsumerMessageBus(kafka, topic);
         this.producerMessageBus = new ProducerMessageBus(kafka);
@@ -84,7 +93,12 @@ export class TopicSagaConsumer<
                     );
                 } catch (error) {
                     this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
-                    throw error;
+                    this.logger.error(
+                        error,
+                        error.message
+                            ? `Error while running ${this.topic} saga: ${error.message}`
+                            : `Error while running ${this.topic} saga`
+                    );
                 }
             }
         });
