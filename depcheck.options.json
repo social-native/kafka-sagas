@@ -19,7 +19,8 @@
         "@social-native/snpkg-dependency-check",
         "@social-native/snpkg-generate-config-ci",
         "@social-native/snpkg-package-version-validation",
-        "dotenv-cli"
+        "dotenv-cli",
+        "@types/pino"
     ],
     "specials": []
 }

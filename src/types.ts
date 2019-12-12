@@ -1,3 +1,5 @@
+import pino from 'pino';
+
 import {EffectBuilder} from './effect_builder';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 import {SagaRunner} from './saga_runner';
@@ -159,6 +161,11 @@ export type PromiseResolver<ResolvedValue> = (
 ) => void;
 
 export type ActionObserver<Action extends IAction> = (action: Action) => void;
+
+export interface ILoggerConfig {
+    logOptions?: pino.LoggerOptions;
+    logger?: ReturnType<typeof pino>;
+}
 
 /**
  * Actions

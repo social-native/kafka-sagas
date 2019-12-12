@@ -1,6 +1,6 @@
 {
     "name": "@social-native/snpkg-snapi-kafka-sagas",
-    "version": "1.0.1",
+    "version": "2.0.0",
     "description": "",
     "main": "dist/index.cjs.js",
     "module": "dist/index.es.js",
@@ -35,12 +35,14 @@
     "dependencies": {
         "bluebird": "^3.7.1",
         "kafkajs": "^1.11.0",
+        "pino": "^5.14.0",
         "uuid": "^3.3.3"
     },
     "peerDependencies": {
         "kafkajs": "^1.11.0"
     },
     "devDependencies": {
+        "@types/pino": "^5.14.0",
         "@social-native/snpkg-dependency-check": "^0.1.0",
         "@social-native/snpkg-package-version-validation": "^3.1.0",
         "@types/bluebird": "^3.5.29",
