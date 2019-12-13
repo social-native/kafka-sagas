@@ -1,5 +1,7 @@
 import {Kafka, Consumer} from 'kafkajs';
 import Bluebird from 'bluebird';
+import pino from 'pino';
+
 import {EffectBuilder} from './effect_builder';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {buildActionFromPayload} from './build_action_from_payload';
@@ -7,8 +9,7 @@ import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig} from './types';
 import {getLoggerFromConfig} from './logger';
-import pino from 'pino';
-import {parseHeaders} from 'parse_headers';
+import {parseHeaders} from './parse_headers';
 
 export class TopicSagaConsumer<
     InitialActionPayload,
