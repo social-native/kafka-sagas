@@ -146,6 +146,7 @@ export type Saga<
 
 export interface IBaseSagaContext {
     effects: EffectBuilder;
+    headers: Record<string, any>;
 }
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;

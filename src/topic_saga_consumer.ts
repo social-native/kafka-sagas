@@ -8,6 +8,7 @@ import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig} from './types';
 import {getLoggerFromConfig} from './logger';
 import {Logger} from 'pino';
+import {parseHeaders} from 'parse_headers';
 
 export class TopicSagaConsumer<
     InitialActionPayload,
@@ -86,6 +87,7 @@ export class TopicSagaConsumer<
                     await runner.runSaga<InitialActionPayload, SagaContext<Context>>(
                         initialAction,
                         {
+                            headers: parseHeaders(message.headers),
                             ...externalContext,
                             effects: new EffectBuilder(initialAction.transaction_id)
                         },
