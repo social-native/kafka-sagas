@@ -130,17 +130,17 @@ describe(SagaRunner.name, function() {
                         function*({payload: {campaignId}}, {effects}) {
                             const {actionChannel, put, race, take} = effects;
 
-                            const copySuccesschannel: ActionChannel<{
-                                new_campaign_id: number;
-                            }> = yield actionChannel(topics.COPY_CAMPAIGN_COMPLETE);
+                            const copySuccesschannel: ActionChannel<ICloneCampaignPayload> = yield actionChannel(
+                                topics.COPY_CAMPAIGN_COMPLETE
+                            );
 
                             const copyFailureChannel: ActionChannel<{
                                 cause: Record<string, any>;
                             }> = yield actionChannel(topics.COPY_CAMPAIGN_FAILURE);
 
-                            const cloneCompleteChannel: ActionChannel<{
-                                new_campaign_id: number;
-                            }> = yield actionChannel(topics.CLONE_CAMPAIGN_COMPLETE);
+                            const cloneCompleteChannel: ActionChannel<ICloneCampaignPayload> = yield actionChannel(
+                                topics.CLONE_CAMPAIGN_COMPLETE
+                            );
 
                             const cloneFailureChannel: ActionChannel<{
                                 cause: Record<string, any>;
@@ -202,4 +202,8 @@ interface ICopyResultPayload {
         field: string;
         message: string;
     }>;
+}
+
+interface ICloneCampaignPayload {
+    new_campaign_id: number;
 }

@@ -1,5 +1,6 @@
 import {Producer, Kafka, CompressionTypes, ProducerConfig} from 'kafkajs';
 import {IAction} from './types';
+import {createActionMessage} from 'create_action_message';
 
 export class ProducerMessageBus {
     private producer: Producer;
@@ -35,12 +36,11 @@ export class ProducerMessageBus {
             compression: CompressionTypes.GZIP,
             topic: action.topic,
             messages: [
-                {
-                    value: JSON.stringify({
-                        transaction_id: action.transaction_id,
-                        payload: action.payload
-                    })
-                }
+                createActionMessage({
+                    action,
+                    userId: action.userId,
+                    roles: action.userRoles
+                })
             ]
         });
     }

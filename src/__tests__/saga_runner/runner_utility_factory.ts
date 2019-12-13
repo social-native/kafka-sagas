@@ -17,15 +17,20 @@ export async function runnerUtilityFactory() {
     await producerBus.connect();
 
     const runner = new SagaRunner(consumerBus, producerBus);
+    const effectBuilder = new EffectBuilder(transactionId);
 
     return {
         transactionId,
-        effectBuilder: new EffectBuilder(transactionId),
+        effectBuilder,
         spy: {
             consumer: (methodName: keyof typeof consumerBus) => jest.spyOn(consumerBus, methodName),
             producer: (methodName: keyof typeof producerBus) => jest.spyOn(producerBus, methodName)
         },
         runner,
+        context: {
+            effects: effectBuilder,
+            headers: {}
+        },
         async closeBuses() {
             consumerBus.stopTransaction(transactionId);
             await consumerBus.disconnectConsumers();

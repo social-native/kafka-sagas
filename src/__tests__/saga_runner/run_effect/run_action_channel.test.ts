@@ -40,13 +40,13 @@ describe(SagaRunner.name, function() {
                     async function() {
                         await withTopicCleanup(topics)(async () => {
                             const runnerUtils = await runnerUtilityFactory();
-                            const {runner, effectBuilder, spy} = runnerUtils;
+                            const {runner, effectBuilder, spy, context} = runnerUtils;
                             const observerRegisteredSpy = spy.consumer('registerTopicObserver');
                             const streamActionsSpy = spy.consumer('streamActionsFromTopic');
 
                             const channel = effectBuilder.actionChannel(pattern);
 
-                            await runner.runEffect(channel);
+                            await runner.runEffect(channel, context);
 
                             expect(observerRegisteredSpy.mock.calls).toMatchSnapshot();
                             expect(streamActionsSpy.mock.calls).toMatchSnapshot();
@@ -75,13 +75,13 @@ describe(SagaRunner.name, function() {
                     async function() {
                         await withTopicCleanup(topics)(async () => {
                             const runnerUtils = await runnerUtilityFactory();
-                            const {runner, effectBuilder, spy} = runnerUtils;
+                            const {runner, effectBuilder, spy, context} = runnerUtils;
                             const observerRegisteredSpy = spy.consumer('registerTopicObserver');
                             const streamActionsSpy = spy.consumer('streamActionsFromTopic');
                             const buffer = new ActionChannelBuffer();
                             const channel = effectBuilder.actionChannel(pattern, buffer);
 
-                            await runner.runEffect(channel);
+                            await runner.runEffect(channel, context);
 
                             expect(observerRegisteredSpy.mock.calls).toMatchSnapshot();
                             expect(streamActionsSpy.mock.calls).toMatchSnapshot();
@@ -113,7 +113,7 @@ describe(SagaRunner.name, function() {
                 async function() {
                     await withTopicCleanup(['test-topic-1'])(async ([topic]) => {
                         const runnerUtils = await runnerUtilityFactory();
-                        const {runner, effectBuilder, spy} = runnerUtils;
+                        const {runner, effectBuilder, spy, context} = runnerUtils;
                         const observerRegisteredSpy = spy.consumer('registerTopicObserver');
                         const streamActionsSpy = spy.consumer('streamActionsFromTopic');
 
@@ -124,7 +124,7 @@ describe(SagaRunner.name, function() {
                             }
                         });
 
-                        await runner.runEffect(channel);
+                        await runner.runEffect(channel, context);
 
                         expect(observerRegisteredSpy.mock.calls).toMatchSnapshot();
                         expect(streamActionsSpy.mock.calls).toMatchSnapshot();

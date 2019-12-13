@@ -10,20 +10,31 @@ export function createActionMessage<Action extends IAction>({
     action,
     headers = {}
 }: {
-    userId: string | number;
-    roles: [Role] & Role[];
     action: Action;
+    userId?: string | number;
+    roles?: [Role] & Role[];
     headers?: IHeaders;
 }): Message {
-    return {
+    const message = {
         value: JSON.stringify({
             transaction_id: action.transaction_id,
             payload: action.payload
         }),
-        headers: {
-            ...headers,
-            [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID]: Buffer.from(`${userId}`),
-            [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES]: Buffer.from(roles.join(','))
-        }
+        headers
     };
+
+    if (userId && roles) {
+        if (!message.headers) {
+            message.headers = {};
+        }
+
+        message.headers[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID] = Buffer.from(
+            `${userId}`
+        );
+        message.headers[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES] = Buffer.from(
+            roles.join(',')
+        );
+    }
+
+    return message;
 }

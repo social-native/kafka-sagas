@@ -10,15 +10,22 @@ describe(SagaRunner.name, function() {
             'runs all of an array of effects',
             async function() {
                 await withTopicCleanup(['test-all-1'])(async ([topic]) => {
-                    const {effectBuilder, runner, closeBuses} = await runnerUtilityFactory();
+                    const {
+                        effectBuilder,
+                        runner,
+                        closeBuses,
+                        context
+                    } = await runnerUtilityFactory();
+
                     const channel = effectBuilder.actionChannel<{
                         bart_simpson: string;
                     }>(topic);
-                    await runner.runEffect(channel);
+                    await runner.runEffect(channel, context);
                     await runner.runEffect(
                         effectBuilder.put(topic, {
                             bart_simpson: 'first'
-                        })
+                        }),
+                        context
                     );
 
                     await Bluebird.delay(2000);
@@ -26,14 +33,16 @@ describe(SagaRunner.name, function() {
                     await runner.runEffect(
                         effectBuilder.put(topic, {
                             bart_simpson: 'second'
-                        })
+                        }),
+                        context
                     );
 
                     const actions = await runner.runEffect(
                         effectBuilder.all([
                             effectBuilder.take(channel),
                             effectBuilder.take(channel)
-                        ])
+                        ]),
+                        context
                     );
 
                     /** Order doesn't matter in this case */
@@ -49,28 +58,36 @@ describe(SagaRunner.name, function() {
             'runs all of a record of effects',
             async function() {
                 await withTopicCleanup(['test-all-1'])(async ([topic]) => {
-                    const {effectBuilder, runner, closeBuses} = await runnerUtilityFactory();
+                    const {
+                        effectBuilder,
+                        runner,
+                        closeBuses,
+                        context
+                    } = await runnerUtilityFactory();
                     const channel = effectBuilder.actionChannel<{
                         bart_simpson: string;
                     }>(topic);
-                    await runner.runEffect(channel);
+                    await runner.runEffect(channel, context);
                     await runner.runEffect(
                         effectBuilder.put(topic, {
                             bart_simpson: 'first'
-                        })
+                        }),
+                        context
                     );
 
                     await runner.runEffect(
                         effectBuilder.put(topic, {
                             bart_simpson: 'second'
-                        })
+                        }),
+                        context
                     );
 
                     const payload = await runner.runEffect(
                         effectBuilder.all({
                             one: effectBuilder.take(channel),
                             two: effectBuilder.take(channel)
-                        })
+                        }),
+                        context
                     );
 
                     expect(payload).toMatchInlineSnapshot(`

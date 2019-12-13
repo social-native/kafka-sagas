@@ -97,7 +97,13 @@ export class TopicSagaConsumer<
                 } catch (error) {
                     this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
                     this.logger.error(
-                        error,
+                        {
+                            transaction_id: initialAction.transaction_id,
+                            topic: initialAction.topic,
+                            user_id: initialAction.userId,
+                            user_roles: initialAction.userRoles,
+                            error
+                        },
                         error.message
                             ? `Error while running ${this.topic} saga: ${error.message}`
                             : `Error while running ${this.topic} saga`
