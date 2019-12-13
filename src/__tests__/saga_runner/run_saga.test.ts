@@ -9,6 +9,7 @@ import uuid from 'uuid';
 import Bluebird from 'bluebird';
 import {CompressionTypes} from 'kafkajs';
 import {ActionChannel, IAction} from 'types';
+import {parseHeaders} from 'parse_headers';
 
 const topics = {
     CLONE_CAMPAIGN_START: 'clone-campaign-start',
@@ -123,7 +124,8 @@ describe(SagaRunner.name, function() {
                             payload: {campaignId: 2082}
                         },
                         {
-                            effects: effectBuilder
+                            effects: effectBuilder,
+                            headers: parseHeaders({})
                         },
                         function*({payload: {campaignId}}, {effects}) {
                             const {actionChannel, put, race, take} = effects;

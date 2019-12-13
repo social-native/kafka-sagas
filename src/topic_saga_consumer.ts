@@ -7,7 +7,7 @@ import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig} from './types';
 import {getLoggerFromConfig} from './logger';
-import {Logger} from 'pino';
+import pino from 'pino';
 import {parseHeaders} from 'parse_headers';
 
 export class TopicSagaConsumer<
@@ -18,7 +18,7 @@ export class TopicSagaConsumer<
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
     private getContext: () => Promise<Context>;
-    private logger: Logger;
+    private logger: ReturnType<typeof pino>;
 
     private consumerMessageBus: ConsumerMessageBus;
     private producerMessageBus: ProducerMessageBus;
