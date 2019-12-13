@@ -18,14 +18,12 @@ export function createActionMessage<Action extends IAction>({
     return {
         value: JSON.stringify({
             transaction_id: action.transaction_id,
-            payload: {
-                hello: 'friend'
-            }
+            payload: action.payload
         }),
         headers: {
             ...headers,
-            user_id: Buffer.from(`${userId}`),
-            roles: Buffer.from(JSON.stringify(roles))
+            [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID]: Buffer.from(`${userId}`),
+            [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES]: Buffer.from(roles.join(','))
         }
     };
 }

@@ -51,7 +51,7 @@ describe(createActionMessage.name, function() {
                   "type": "Buffer",
                 },
               },
-              "value": "{\\"transaction_id\\":\\"test-transaction-id\\",\\"payload\\":{\\"hello\\":\\"friend\\"}}",
+              "value": "{\\"transaction_id\\":\\"test-transaction-id\\",\\"payload\\":{\\"persimmon\\":\\"yum\\"}}",
             }
         `);
     });
