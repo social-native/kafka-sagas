@@ -9,6 +9,7 @@ import uuid from 'uuid';
 import Bluebird from 'bluebird';
 import {CompressionTypes} from 'kafkajs';
 import {ActionChannel, IAction} from 'types';
+import {parseHeaders} from 'parse_headers';
 
 const topics = {
     CLONE_CAMPAIGN_START: 'clone-campaign-start',
@@ -123,22 +124,23 @@ describe(SagaRunner.name, function() {
                             payload: {campaignId: 2082}
                         },
                         {
-                            effects: effectBuilder
+                            effects: effectBuilder,
+                            headers: parseHeaders({})
                         },
                         function*({payload: {campaignId}}, {effects}) {
                             const {actionChannel, put, race, take} = effects;
 
-                            const copySuccesschannel: ActionChannel<{
-                                new_campaign_id: number;
-                            }> = yield actionChannel(topics.COPY_CAMPAIGN_COMPLETE);
+                            const copySuccesschannel: ActionChannel<ICloneCampaignPayload> = yield actionChannel(
+                                topics.COPY_CAMPAIGN_COMPLETE
+                            );
 
                             const copyFailureChannel: ActionChannel<{
                                 cause: Record<string, any>;
                             }> = yield actionChannel(topics.COPY_CAMPAIGN_FAILURE);
 
-                            const cloneCompleteChannel: ActionChannel<{
-                                new_campaign_id: number;
-                            }> = yield actionChannel(topics.CLONE_CAMPAIGN_COMPLETE);
+                            const cloneCompleteChannel: ActionChannel<ICloneCampaignPayload> = yield actionChannel(
+                                topics.CLONE_CAMPAIGN_COMPLETE
+                            );
 
                             const cloneFailureChannel: ActionChannel<{
                                 cause: Record<string, any>;
@@ -200,4 +202,8 @@ interface ICopyResultPayload {
         field: string;
         message: string;
     }>;
+}
+
+interface ICloneCampaignPayload {
+    new_campaign_id: number;
 }

@@ -15,7 +15,11 @@ describe(SagaRunner.name, function() {
 
             const util = await runnerUtilityFactory();
 
-            await util.runner.runEffect(callEffectDescription);
+            await util.runner.runEffect(callEffectDescription, {
+                effects: effectBuilder,
+                headers: {}
+            });
+
             await util.closeBuses();
 
             expect(spy.mock.calls).toMatchInlineSnapshot(`

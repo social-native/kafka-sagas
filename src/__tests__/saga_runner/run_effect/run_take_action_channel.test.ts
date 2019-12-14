@@ -13,11 +13,12 @@ describe(SagaRunner.name, function() {
                         effectBuilder,
                         runner,
                         transactionId,
-                        closeBuses
+                        closeBuses,
+                        context
                     } = await runnerUtilityFactory();
 
                     const channel = effectBuilder.actionChannel<{bart: string}>(topic);
-                    await runner.runEffect(channel);
+                    await runner.runEffect(channel, context);
 
                     const takeActionChannel = effectBuilder.take(channel);
 
@@ -30,7 +31,7 @@ describe(SagaRunner.name, function() {
                         }
                     ]);
 
-                    const payload = await runner.runEffect(takeActionChannel);
+                    const payload = await runner.runEffect(takeActionChannel, context);
 
                     await closeBuses();
 

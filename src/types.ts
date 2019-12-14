@@ -1,4 +1,5 @@
 import pino from 'pino';
+import {enums} from '@social-native/snpkg-snapi-authorization';
 
 import {EffectBuilder} from './effect_builder';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
@@ -146,6 +147,7 @@ export type Saga<
 
 export interface IBaseSagaContext {
     effects: EffectBuilder;
+    headers: Record<string, any>;
 }
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;
@@ -167,6 +169,8 @@ export interface ILoggerConfig {
     logger?: ReturnType<typeof pino>;
 }
 
+type UserRole = keyof typeof enums.ROLES;
+
 /**
  * Actions
  */
@@ -175,6 +179,8 @@ export interface IAction<Payload = DefaultPayload> {
     topic: string;
     transaction_id: string;
     payload: Payload;
+    userId?: string | number;
+    userRoles?: [UserRole] & UserRole[];
 }
 
 export type DefaultPayload = Record<string, any> | undefined;

@@ -6,4 +6,5 @@ export {SagaRunner} from './saga_runner';
 export {EphemeralBuffer, ActionChannelBuffer} from './buffers';
 export {buildActionFromPayload} from './build_action_from_payload';
 export {EffectBuilder} from './effect_builder';
+export {createActionMessage} from './create_action_message';
 export * from './types';

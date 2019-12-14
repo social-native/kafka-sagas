@@ -10,7 +10,12 @@ describe(SagaRunner.name, function() {
             'races an array of effects',
             async function() {
                 await withTopicCleanup(['race-fast', 'race-slow'])(async ([fast, slow]) => {
-                    const {effectBuilder, runner, closeBuses} = await runnerUtilityFactory();
+                    const {
+                        effectBuilder,
+                        runner,
+                        closeBuses,
+                        context
+                    } = await runnerUtilityFactory();
                     const fastChannel = effectBuilder.actionChannel<{
                         bart_simpson: string;
                     }>(fast);
@@ -19,14 +24,15 @@ describe(SagaRunner.name, function() {
                         bart_simpson: string;
                     }>(slow);
 
-                    await runner.runEffect(fastChannel);
-                    await runner.runEffect(slowChannel);
+                    await runner.runEffect(fastChannel, context);
+                    await runner.runEffect(slowChannel, context);
 
                     setImmediate(async () => {
                         await runner.runEffect(
                             effectBuilder.put(fast, {
                                 bart_simpson: 'first'
-                            })
+                            }),
+                            context
                         );
 
                         await Bluebird.delay(2000);
@@ -34,12 +40,14 @@ describe(SagaRunner.name, function() {
                         await runner.runEffect(
                             effectBuilder.put(slow, {
                                 bart_simpson: 'second'
-                            })
+                            }),
+                            context
                         );
                     });
 
                     const payload = await runner.runEffect(
-                        effectBuilder.race([effectBuilder.take(fast), effectBuilder.take(slow)])
+                        effectBuilder.race([effectBuilder.take(fast), effectBuilder.take(slow)]),
+                        context
                     );
 
                     await closeBuses();
@@ -62,7 +70,12 @@ describe(SagaRunner.name, function() {
             'runs all of a record of effects',
             async function() {
                 await withTopicCleanup(['race-fast', 'race-slow'])(async ([fast, slow]) => {
-                    const {effectBuilder, runner, closeBuses} = await runnerUtilityFactory();
+                    const {
+                        effectBuilder,
+                        runner,
+                        closeBuses,
+                        context
+                    } = await runnerUtilityFactory();
                     const fastChannel = effectBuilder.actionChannel<{
                         bart_simpson: string;
                     }>(fast);
@@ -71,14 +84,15 @@ describe(SagaRunner.name, function() {
                         bart_simpson: string;
                     }>(slow);
 
-                    await runner.runEffect(fastChannel);
-                    await runner.runEffect(slowChannel);
+                    await runner.runEffect(fastChannel, context);
+                    await runner.runEffect(slowChannel, context);
 
                     setImmediate(async () => {
                         await runner.runEffect(
                             effectBuilder.put(fast, {
                                 bart_simpson: 'first'
-                            })
+                            }),
+                            context
                         );
 
                         await Bluebird.delay(2000);
@@ -86,7 +100,8 @@ describe(SagaRunner.name, function() {
                         await runner.runEffect(
                             effectBuilder.put(slow, {
                                 bart_simpson: 'second'
-                            })
+                            }),
+                            context
                         );
                     });
 
@@ -94,7 +109,8 @@ describe(SagaRunner.name, function() {
                         effectBuilder.race({
                             fast: effectBuilder.take(fast),
                             slow: effectBuilder.take(slow)
-                        })
+                        }),
+                        context
                     );
 
                     await closeBuses();

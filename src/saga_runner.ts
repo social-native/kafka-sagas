@@ -1,4 +1,6 @@
 import Bluebird from 'bluebird';
+import {enums} from '@social-native/snpkg-snapi-authorization';
+
 import {
     IAction,
     IBaseSagaContext,
@@ -18,35 +20,42 @@ import {
     isEffectCombinatorDescription
 } from './type_guard';
 
+const {
+    WORKER_USER_IDENTITY_HEADER: {WORKER_USER_ID, WORKER_USER_ROLES}
+} = enums;
+
 export class SagaRunner {
     constructor(
         private consumerMessageBus: ConsumerMessageBus,
         private producerMessageBus: ProducerMessageBus
     ) {}
 
-    public runSaga = async <
-        InitialActionPayload,
-        Context extends IBaseSagaContext
-    >(
+    public runSaga = async <InitialActionPayload, Context extends IBaseSagaContext>(
         initialAction: IAction<InitialActionPayload>,
         context: Context,
         saga: Saga<InitialActionPayload, Context>
     ) => {
         this.consumerMessageBus.startTransaction(initialAction.transaction_id);
-        const result = await this.runGeneratorFsm(saga(initialAction, context));
+        const result = await this.runGeneratorFsm(saga(initialAction, context), context);
         this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
         return result;
     };
 
     // tslint:disable-next-line: cyclomatic-complexity
-    public runEffect = async <EffectDescription extends IEffectDescription>(
-        effectDescription: EffectDescription
+    public runEffect = async <
+        EffectDescription extends IEffectDescription,
+        Context extends IBaseSagaContext
+    >(
+        effectDescription: EffectDescription,
+        context: Context
     ) => {
         if (isEffectCombinatorDescription(effectDescription)) {
             const {effects, combinator} = effectDescription;
 
             if (Array.isArray(effects)) {
-                const withRunningEffects: Array<Promise<any>> = effects.map(this.runEffect);
+                const withRunningEffects: Array<Promise<any>> = effects.map(effect =>
+                    this.runEffect(effect, context)
+                );
 
                 return await (combinator as ArrayCombinator<IAction>)(withRunningEffects);
             } else if (typeof effects === 'object') {
@@ -55,7 +64,7 @@ export class SagaRunner {
                 ).reduce((obj, key) => {
                     return {
                         ...obj,
-                        [key]: this.runEffect(effects[key])
+                        [key]: this.runEffect(effects[key], context)
                     };
                 }, {} as Record<string, Promise<any>>);
 
@@ -102,11 +111,22 @@ export class SagaRunner {
         }
 
         if (isPutEffectDescription(effectDescription)) {
-            await this.producerMessageBus.putAction({
+            const action: IAction<typeof effectDescription.payload> = {
                 topic: effectDescription.pattern,
                 transaction_id: effectDescription.transactionId,
                 payload: effectDescription.payload
-            });
+            };
+
+            if (
+                context.headers &&
+                context.headers[WORKER_USER_ID] &&
+                context.headers[WORKER_USER_ROLES]
+            ) {
+                action.userId = context.headers[WORKER_USER_ID];
+                action.userRoles = context.headers[WORKER_USER_ROLES].split(',');
+            }
+
+            await this.producerMessageBus.putAction(action);
 
             return;
         }
@@ -116,14 +136,18 @@ export class SagaRunner {
         }
     };
 
-    protected async runGeneratorFsm(machine: Generator, lastValue: any = null): Promise<any> {
+    protected async runGeneratorFsm<Context extends IBaseSagaContext>(
+        machine: Generator,
+        context: Context,
+        lastValue: any = null
+    ): Promise<any> {
         const {done, value: effectDescription}: IteratorResult<unknown> = machine.next(lastValue);
 
         if (done) {
             return lastValue;
         }
 
-        const result = await this.runEffect(effectDescription);
-        return this.runGeneratorFsm(machine, result);
+        const result = await this.runEffect(effectDescription, context);
+        return this.runGeneratorFsm(machine, context, result);
     }
 }

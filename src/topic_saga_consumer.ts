@@ -1,5 +1,7 @@
 import {Kafka, Consumer} from 'kafkajs';
 import Bluebird from 'bluebird';
+import pino from 'pino';
+
 import {EffectBuilder} from './effect_builder';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {buildActionFromPayload} from './build_action_from_payload';
@@ -7,7 +9,7 @@ import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig} from './types';
 import {getLoggerFromConfig} from './logger';
-import {Logger} from 'pino';
+import {parseHeaders} from './parse_headers';
 
 export class TopicSagaConsumer<
     InitialActionPayload,
@@ -17,7 +19,7 @@ export class TopicSagaConsumer<
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
     private getContext: () => Promise<Context>;
-    private logger: Logger;
+    private logger: ReturnType<typeof pino>;
 
     private consumerMessageBus: ConsumerMessageBus;
     private producerMessageBus: ProducerMessageBus;
@@ -86,6 +88,7 @@ export class TopicSagaConsumer<
                     await runner.runSaga<InitialActionPayload, SagaContext<Context>>(
                         initialAction,
                         {
+                            headers: parseHeaders(message.headers),
                             ...externalContext,
                             effects: new EffectBuilder(initialAction.transaction_id)
                         },
@@ -94,7 +97,13 @@ export class TopicSagaConsumer<
                 } catch (error) {
                     this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
                     this.logger.error(
-                        error,
+                        {
+                            transaction_id: initialAction.transaction_id,
+                            topic: initialAction.topic,
+                            user_id: initialAction.userId,
+                            user_roles: initialAction.userRoles,
+                            error
+                        },
                         error.message
                             ? `Error while running ${this.topic} saga: ${error.message}`
                             : `Error while running ${this.topic} saga`

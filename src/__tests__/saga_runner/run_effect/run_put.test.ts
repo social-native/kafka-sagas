@@ -9,18 +9,24 @@ describe(SagaRunner.name, function() {
             'puts a payload onto the stream',
             async function() {
                 await withTopicCleanup(['test-put'])(async ([topic]) => {
-                    const {effectBuilder, runner, closeBuses} = await runnerUtilityFactory();
+                    const {
+                        effectBuilder,
+                        runner,
+                        closeBuses,
+                        context
+                    } = await runnerUtilityFactory();
                     const channel = effectBuilder.actionChannel<{
                         bart_simpson: string;
                     }>(topic);
-                    await runner.runEffect(channel);
+                    await runner.runEffect(channel, context);
                     await runner.runEffect(
                         effectBuilder.put(topic, {
                             bart_simpson: 'good'
-                        })
+                        }),
+                        context
                     );
 
-                    const payload = await runner.runEffect(effectBuilder.take(channel));
+                    const payload = await runner.runEffect(effectBuilder.take(channel), context);
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
