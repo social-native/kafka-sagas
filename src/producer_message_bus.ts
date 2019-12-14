@@ -1,6 +1,6 @@
 import {Producer, Kafka, CompressionTypes, ProducerConfig} from 'kafkajs';
 import {IAction} from './types';
-import {createActionMessage} from 'create_action_message';
+import {createActionMessage} from './create_action_message';
 
 export class ProducerMessageBus {
     private producer: Producer;

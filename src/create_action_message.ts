@@ -1,6 +1,6 @@
 import {enums} from '@social-native/snpkg-snapi-authorization';
 import {IHeaders, Message} from 'kafkajs';
-import {IAction} from 'types';
+import {IAction} from './types';
 
 type Role = keyof typeof enums.ROLES;
 
