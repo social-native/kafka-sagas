@@ -1,5 +1,5 @@
-import {SagaRunner} from 'saga_runner';
-import {EffectBuilder} from 'effect_builder';
+import {SagaRunner} from '../../../saga_runner';
+import {EffectBuilder} from '../../../effect_builder';
 import {runnerUtilityFactory} from '../runner_utility_factory';
 
 describe(SagaRunner.name, function() {

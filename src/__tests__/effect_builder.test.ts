@@ -1,5 +1,5 @@
-import {EffectBuilder} from 'effect_builder';
-import {EphemeralBuffer, ActionChannelBuffer} from 'buffers';
+import {EffectBuilder} from '../effect_builder';
+import {EphemeralBuffer, ActionChannelBuffer} from '../buffers';
 
 // tslint:disable-next-line: no-empty
 describe(EffectBuilder.name, function() {

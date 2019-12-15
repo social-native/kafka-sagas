@@ -2,7 +2,7 @@ import Bluebird from 'bluebird';
 import {ConsumerMessageBus} from '../../src/consumer_message_bus';
 import {kafka} from './test_clients';
 import {seedTopic, withTopicCleanup, deleteTopic} from './kafka_utils';
-import {IAction} from 'types';
+import {IAction} from '../types';
 import uuid from 'uuid';
 
 describe(ConsumerMessageBus.name, function() {

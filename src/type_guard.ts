@@ -8,12 +8,36 @@ import {
     TakePattern,
     ActionChannelInput,
     ICombinatatorEffectDescription,
-    IPredicateRecord
+    IPredicateRecord,
+    ISnapiHeaders
 } from './types';
 import {EffectDescriptionKind} from './enums';
+import {enums} from '@social-native/snpkg-snapi-authorization';
 
-export function isTransactionAction<Payload>(messageValue: IAction | any): messageValue is IAction<Payload> {
+export function isTransactionMessage<Payload>(
+    messageValue: IAction | any
+): messageValue is Omit<IAction<Payload>, 'topic' | 'userId' | 'userRoles'> {
     return messageValue && messageValue.transaction_id;
+}
+
+export function isSnapiHeaders(
+    messageHeaders: Record<string, string | undefined>
+): messageHeaders is ISnapiHeaders {
+    return (
+        messageHeaders &&
+        messageHeaders[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID] !== undefined &&
+        messageHeaders[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES] !== undefined
+    );
+}
+
+export function isRolesList(roles: string[]): roles is Array<keyof typeof enums.ROLES> {
+    return roles.reduce((allStringsAreRoles: boolean, role) => {
+        if (!allStringsAreRoles) {
+            return false;
+        }
+
+        return Object.values(enums.ROLES).includes(role as enums.ROLES);
+    }, true);
 }
 
 export function isTakeEffectDescription(
@@ -91,6 +115,7 @@ export function takeInputIsActionChannelEffectDescription<Action extends IAction
     return (
         typeof input !== 'string' &&
         !Array.isArray(input) &&
-        (input as IActionChannelEffectDescription<Action>).kind === EffectDescriptionKind.ACTION_CHANNEL
+        (input as IActionChannelEffectDescription<Action>).kind ===
+            EffectDescriptionKind.ACTION_CHANNEL
     );
 }

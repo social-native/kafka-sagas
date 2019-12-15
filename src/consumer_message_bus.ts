@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import {Consumer, Kafka, ConsumerConfig} from 'kafkajs';
 
 import {IAction, ActionObserver} from './types';
-import {buildActionFromPayload} from './build_action_from_payload';
+import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 
 export class ConsumerMessageBus {
     private consumers: Map<string, Consumer> = new Map();
@@ -37,7 +37,7 @@ export class ConsumerMessageBus {
             autoCommit: true,
             autoCommitThreshold: 1,
             eachMessage: async ({message}) => {
-                const action = buildActionFromPayload<any>(topic, message);
+                const action = transformKafkaMessageToAction<any>(topic, message);
 
                 // if this is a transactionId we actually care about, broadcast
                 if (this.observersByTransaction.has(action.transaction_id)) {

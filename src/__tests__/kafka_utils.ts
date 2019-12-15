@@ -1,5 +1,7 @@
 import {kafka} from './test_clients';
-import {KafkaMessage} from 'kafkajs';
+import {KafkaMessage, IHeaders} from 'kafkajs';
+import {IAction} from '../types';
+import {enums} from '@social-native/snpkg-snapi-authorization';
 
 export async function createTopic(topic: string) {
     const admin = kafka.admin();
@@ -57,11 +59,18 @@ export function withTopicCleanup(topics: string[], seeding: boolean = true) {
     };
 }
 
-export function createKafkaMessageFromAction<Payload>(action: {
-    transaction_id?: string;
-    payload?: Payload;
-}): KafkaMessage {
+export function createKafkaMessageFromAction<Payload>(action: IAction<Payload>): KafkaMessage {
+    const headers: IHeaders = {};
+
+    if (action.userId && action.userRoles) {
+        headers[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID] = Buffer.from(`${action.userId}`);
+        headers[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES] = Buffer.from(
+            action.userRoles.join(',')
+        );
+    }
+
     return {
+        headers,
         key: Buffer.from(''),
         value: Buffer.from(JSON.stringify(action)),
         timestamp: new Date().valueOf().toString(),

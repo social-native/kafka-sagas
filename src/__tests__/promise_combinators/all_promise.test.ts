@@ -1,4 +1,4 @@
-import {allPromise} from 'promise_combinators/all_promise';
+import {allPromise} from '../../promise_combinators/all_promise';
 import Bluebird from 'bluebird';
 
 describe('allPromise', function() {

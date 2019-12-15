@@ -1,10 +1,10 @@
-import {Kafka, Consumer} from 'kafkajs';
+import {Kafka, Consumer, KafkaMessage} from 'kafkajs';
 import Bluebird from 'bluebird';
 import pino from 'pino';
 
 import {EffectBuilder} from './effect_builder';
 import {ConsumerMessageBus} from './consumer_message_bus';
-import {buildActionFromPayload} from './build_action_from_payload';
+import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig} from './types';
@@ -18,7 +18,7 @@ export class TopicSagaConsumer<
     private consumer: Consumer;
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
-    private getContext: () => Promise<Context>;
+    private getContext: (message?: KafkaMessage) => Promise<Context>;
     private logger: ReturnType<typeof pino>;
 
     private consumerMessageBus: ConsumerMessageBus;
@@ -36,7 +36,7 @@ export class TopicSagaConsumer<
         kafka: Kafka;
         topic: string;
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
-        getContext?: () => Promise<Context>;
+        getContext?: (message?: KafkaMessage) => Promise<Context>;
         loggerConfig?: ILoggerConfig;
     }) {
         this.consumer = kafka.consumer({
@@ -77,13 +77,24 @@ export class TopicSagaConsumer<
             autoCommit: true,
             autoCommitThreshold: 1,
             eachMessage: async ({message}) => {
-                const initialAction = buildActionFromPayload<InitialActionPayload>(
+                const initialAction = transformKafkaMessageToAction<InitialActionPayload>(
                     this.topic,
                     message
                 );
 
+                this.logger.info(
+                    {
+                        topic: initialAction.topic,
+                        transaction_id: initialAction.transaction_id,
+                        user_id: initialAction.userId,
+                        user_roles: initialAction.userRoles,
+                        timestamp: Date.now()
+                    },
+                    'Beginning consumption of message'
+                );
+
                 try {
-                    const externalContext = await this.getContext();
+                    const externalContext = await this.getContext(message);
 
                     await runner.runSaga<InitialActionPayload, SagaContext<Context>>(
                         initialAction,
@@ -94,6 +105,17 @@ export class TopicSagaConsumer<
                         },
                         this.saga
                     );
+
+                    this.logger.info(
+                        {
+                            topic: initialAction.topic,
+                            transaction_id: initialAction.transaction_id,
+                            user_id: initialAction.userId,
+                            user_roles: initialAction.userRoles,
+                            timestamp: Date.now()
+                        },
+                        'Successfully consumed message'
+                    );
                 } catch (error) {
                     this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
                     this.logger.error(
@@ -102,6 +124,7 @@ export class TopicSagaConsumer<
                             topic: initialAction.topic,
                             user_id: initialAction.userId,
                             user_roles: initialAction.userRoles,
+                            timestamp: Date.now(),
                             error
                         },
                         error.message

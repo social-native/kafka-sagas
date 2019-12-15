@@ -1,4 +1,4 @@
-import {SagaRunner} from 'saga_runner';
+import {SagaRunner} from '../../../saga_runner';
 import {withTopicCleanup} from '../../kafka_utils';
 import {runnerUtilityFactory} from '../runner_utility_factory';
 import {DEFAULT_TEST_TIMEOUT} from '../../constants';

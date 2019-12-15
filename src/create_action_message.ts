@@ -2,8 +2,6 @@ import {enums} from '@social-native/snpkg-snapi-authorization';
 import {IHeaders, Message} from 'kafkajs';
 import {IAction} from './types';
 
-type Role = keyof typeof enums.ROLES;
-
 export function createActionMessage<Action extends IAction>({
     userId,
     roles,
@@ -12,7 +10,7 @@ export function createActionMessage<Action extends IAction>({
 }: {
     action: Action;
     userId?: string | number;
-    roles?: [Role] & Role[];
+    roles?: Array<keyof typeof enums.ROLES>;
     headers?: IHeaders;
 }): Message {
     const message = {
