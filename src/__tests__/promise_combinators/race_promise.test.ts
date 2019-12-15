@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import {racePromise} from 'promise_combinators/race_promise';
+import {racePromise} from '../../promise_combinators/race_promise';
 
 describe(racePromise.name, function() {
     it('races an object of promises', async function() {

@@ -169,7 +169,11 @@ export interface ILoggerConfig {
     logger?: ReturnType<typeof pino>;
 }
 
-type UserRole = keyof typeof enums.ROLES;
+export interface ISnapiHeaders {
+    [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID]: string;
+    [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES]: string;
+    [index: string]: string | undefined;
+}
 
 /**
  * Actions
@@ -180,7 +184,7 @@ export interface IAction<Payload = DefaultPayload> {
     transaction_id: string;
     payload: Payload;
     userId?: string | number;
-    userRoles?: [UserRole] & UserRole[];
+    userRoles?: Array<keyof typeof enums.ROLES>;
 }
 
 export type DefaultPayload = Record<string, any> | undefined;

@@ -4,7 +4,7 @@ export {ConsumerMessageBus} from './consumer_message_bus';
 export {ProducerMessageBus} from './producer_message_bus';
 export {SagaRunner} from './saga_runner';
 export {EphemeralBuffer, ActionChannelBuffer} from './buffers';
-export {buildActionFromPayload} from './build_action_from_payload';
+export {transformKafkaMessageToAction as buildActionFromPayload} from './transform_kafka_message_to_action';
 export {EffectBuilder} from './effect_builder';
 export {createActionMessage} from './create_action_message';
 export * from './types';

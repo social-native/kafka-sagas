@@ -1,15 +1,15 @@
-import {SagaRunner} from 'saga_runner';
+import {SagaRunner} from '../../saga_runner';
 import {withTopicCleanup} from '../kafka_utils';
 import {DEFAULT_TEST_TIMEOUT} from '../constants';
-import {ConsumerMessageBus} from 'consumer_message_bus';
-import {kafka} from '__tests__/test_clients';
-import {ProducerMessageBus} from 'producer_message_bus';
-import {EffectBuilder} from 'effect_builder';
+import {ConsumerMessageBus} from '../../consumer_message_bus';
+import {kafka} from '../test_clients';
+import {ProducerMessageBus} from '../../producer_message_bus';
+import {EffectBuilder} from '../../effect_builder';
 import uuid from 'uuid';
 import Bluebird from 'bluebird';
 import {CompressionTypes} from 'kafkajs';
-import {ActionChannel, IAction} from 'types';
-import {parseHeaders} from 'parse_headers';
+import {ActionChannel, IAction} from '../../types';
+import {parseHeaders} from '../../parse_headers';
 
 const topics = {
     CLONE_CAMPAIGN_START: 'clone-campaign-start',

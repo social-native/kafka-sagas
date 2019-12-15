@@ -1,4 +1,4 @@
-import {TopicEventEmitter} from 'topic_event_emitter';
+import {TopicEventEmitter} from '../topic_event_emitter';
 import {kafka} from './test_clients';
 import {withTopicCleanup} from './kafka_utils';
 import {DEFAULT_TEST_TIMEOUT} from './constants';

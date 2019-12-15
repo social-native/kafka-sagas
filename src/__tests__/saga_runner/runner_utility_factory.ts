@@ -1,8 +1,8 @@
-import {ConsumerMessageBus} from 'consumer_message_bus';
+import {ConsumerMessageBus} from '../../consumer_message_bus';
 import {kafka} from '../test_clients';
-import {ProducerMessageBus} from 'producer_message_bus';
-import {EffectBuilder} from 'effect_builder';
-import {SagaRunner} from 'saga_runner';
+import {ProducerMessageBus} from '../../producer_message_bus';
+import {EffectBuilder} from '../../effect_builder';
+import {SagaRunner} from '../../saga_runner';
 
 export async function runnerUtilityFactory() {
     const transactionId = 'static-transaction-id';

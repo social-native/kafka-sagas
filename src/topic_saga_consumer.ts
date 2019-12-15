@@ -4,7 +4,7 @@ import pino from 'pino';
 
 import {EffectBuilder} from './effect_builder';
 import {ConsumerMessageBus} from './consumer_message_bus';
-import {buildActionFromPayload} from './build_action_from_payload';
+import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig} from './types';
@@ -77,9 +77,20 @@ export class TopicSagaConsumer<
             autoCommit: true,
             autoCommitThreshold: 1,
             eachMessage: async ({message}) => {
-                const initialAction = buildActionFromPayload<InitialActionPayload>(
+                const initialAction = transformKafkaMessageToAction<InitialActionPayload>(
                     this.topic,
                     message
+                );
+
+                this.logger.info(
+                    {
+                        topic: initialAction.topic,
+                        transaction_id: initialAction.transaction_id,
+                        user_id: initialAction.userId,
+                        user_roles: initialAction.userRoles,
+                        timestamp: Date.now()
+                    },
+                    'Beginning consumption of message'
                 );
 
                 try {
@@ -94,6 +105,17 @@ export class TopicSagaConsumer<
                         },
                         this.saga
                     );
+
+                    this.logger.info(
+                        {
+                            topic: initialAction.topic,
+                            transaction_id: initialAction.transaction_id,
+                            user_id: initialAction.userId,
+                            user_roles: initialAction.userRoles,
+                            timestamp: Date.now()
+                        },
+                        'Successfully consumed message'
+                    );
                 } catch (error) {
                     this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
                     this.logger.error(
@@ -102,6 +124,7 @@ export class TopicSagaConsumer<
                             topic: initialAction.topic,
                             user_id: initialAction.userId,
                             user_roles: initialAction.userRoles,
+                            timestamp: Date.now(),
                             error
                         },
                         error.message

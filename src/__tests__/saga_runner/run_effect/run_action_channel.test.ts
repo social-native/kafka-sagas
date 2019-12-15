@@ -1,8 +1,9 @@
-import {SagaRunner} from 'saga_runner';
-import {seedTopic, withTopicCleanup} from '../../kafka_utils';
 import Bluebird from 'bluebird';
-import {ActionChannelBuffer} from 'buffers';
-import {ActionChannelInput, IAction} from 'types';
+
+import {SagaRunner} from '../../../saga_runner';
+import {seedTopic, withTopicCleanup} from '../../kafka_utils';
+import {ActionChannelBuffer} from '../../../buffers';
+import {ActionChannelInput, IAction} from '../../../types';
 import {runnerUtilityFactory} from '../runner_utility_factory';
 import {DEFAULT_TEST_TIMEOUT} from '../../constants';
 
@@ -119,7 +120,7 @@ describe(SagaRunner.name, function() {
 
                         const channel = effectBuilder.actionChannel<{bart_simpson: string}>({
                             pattern: topic,
-                            predicate: action => {
+                            predicate: (action: IAction<{bart_simpson: string}>) => {
                                 return action.payload.bart_simpson === 'eat_my_jeans';
                             }
                         });

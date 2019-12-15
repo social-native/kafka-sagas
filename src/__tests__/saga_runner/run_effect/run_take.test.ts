@@ -1,8 +1,8 @@
-import {SagaRunner} from 'saga_runner';
+import {SagaRunner} from '../../../saga_runner';
 import {withTopicCleanup, seedTopic} from '../../kafka_utils';
 import {runnerUtilityFactory} from '../runner_utility_factory';
 import {DEFAULT_TEST_TIMEOUT} from '../../constants';
-import {IAction, ActionChannelInput, IActionChannelEffectDescription} from 'types';
+import {IAction, ActionChannelInput, IActionChannelEffectDescription} from '../../../types';
 
 describe(SagaRunner.name, function() {
     describe('take', function() {

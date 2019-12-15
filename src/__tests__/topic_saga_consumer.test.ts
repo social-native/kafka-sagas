@@ -1,4 +1,4 @@
-import {TopicSagaConsumer} from 'topic_saga_consumer';
+import {TopicSagaConsumer} from '../topic_saga_consumer';
 import {kafka} from './test_clients';
 import {withTopicCleanup} from './kafka_utils';
 import {CompressionTypes} from 'kafkajs';
