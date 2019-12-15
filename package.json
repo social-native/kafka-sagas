@@ -36,14 +36,14 @@
         "@social-native/snpkg-snapi-authorization": "^3.1.0",
         "bluebird": "^3.7.1",
         "kafkajs": "^1.11.0",
-        "pino": "^5.14.0",
+        "pino": "^5.15.0",
         "uuid": "^3.3.3"
     },
     "peerDependencies": {
         "kafkajs": "^1.11.0"
     },
     "devDependencies": {
-        "@types/pino": "^5.14.0",
+        "@types/pino": "^5.15.0",
         "@social-native/snpkg-dependency-check": "^0.1.0",
         "@social-native/snpkg-package-version-validation": "^3.1.0",
         "@types/bluebird": "^3.5.29",
