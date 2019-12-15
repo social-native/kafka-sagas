@@ -18,7 +18,7 @@ export class TopicSagaConsumer<
     private consumer: Consumer;
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
-    private getContext: (message?: KafkaMessage) => Promise<Context>;
+    private getContext: (message: KafkaMessage) => Promise<Context>;
     private logger: ReturnType<typeof pino>;
 
     private consumerMessageBus: ConsumerMessageBus;
@@ -36,7 +36,7 @@ export class TopicSagaConsumer<
         kafka: Kafka;
         topic: string;
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
-        getContext?: (message?: KafkaMessage) => Promise<Context>;
+        getContext?: (message: KafkaMessage) => Promise<Context>;
         loggerConfig?: ILoggerConfig;
     }) {
         this.consumer = kafka.consumer({
