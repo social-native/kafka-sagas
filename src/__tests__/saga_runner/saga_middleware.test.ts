@@ -18,13 +18,13 @@ describe('Saga middleware', function() {
                 next => async effect => {
                     calls.push('first');
                     const result = await next(effect);
-                    calls.push('second');
+                    calls.push('fourth');
                     return result;
                 },
                 next => async effect => {
-                    calls.push('third');
+                    calls.push('second');
                     const result = await next(effect);
-                    calls.push('fourth');
+                    calls.push('third');
                     return result;
                 }
             ]);
