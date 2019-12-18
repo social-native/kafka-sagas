@@ -7,7 +7,9 @@ import {
     IEffectDescription,
     ArrayCombinator,
     RecordCombinator,
-    Saga
+    Saga,
+    Middleware,
+    Next
 } from './types';
 import {ConsumerMessageBus} from './consumer_message_bus';
 import {ProducerMessageBus} from './producer_message_bus';
@@ -27,18 +29,18 @@ const {
 export class SagaRunner {
     constructor(
         private consumerMessageBus: ConsumerMessageBus,
-        private producerMessageBus: ProducerMessageBus
+        private producerMessageBus: ProducerMessageBus,
+        private middlewares: Middleware[] = []
     ) {}
 
     public runSaga = async <InitialActionPayload, Context extends IBaseSagaContext>(
         initialAction: IAction<InitialActionPayload>,
         context: Context,
         saga: Saga<InitialActionPayload, Context>
-    ) => {
+    ): Promise<void> => {
         this.consumerMessageBus.startTransaction(initialAction.transaction_id);
-        const result = await this.runGeneratorFsm(saga(initialAction, context), context);
+        await this.runGeneratorFsm(saga(initialAction, context), context);
         this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
-        return result;
     };
 
     // tslint:disable-next-line: cyclomatic-complexity
@@ -140,14 +142,34 @@ export class SagaRunner {
         machine: Generator,
         context: Context,
         lastValue: any = null
-    ): Promise<any> {
-        const {done, value: effectDescription}: IteratorResult<unknown> = machine.next(lastValue);
+    ): Promise<void> {
+        const {done, value: effectDescription} = machine.next(lastValue) as IteratorResult<
+            IEffectDescription
+        >;
 
         if (done) {
             return lastValue;
         }
 
-        const result = await this.runEffect(effectDescription, context);
-        return this.runGeneratorFsm(machine, context, result);
+        if (!this.middlewares.length) {
+            const result = await this.runEffect(effectDescription, context);
+
+            return this.runGeneratorFsm(machine, context, result);
+        } else {
+            const initialNext: Next = async effect => {
+                return await this.runEffect(effect, context);
+            };
+
+            const compiledNexts = this.middlewares.reduceRight(
+                (previousNext, middleware: Middleware) => {
+                    return middleware(previousNext);
+                },
+                initialNext
+            );
+
+            const result = await compiledNexts(effectDescription);
+
+            return this.runGeneratorFsm(machine, context, result);
+        }
     }
 }

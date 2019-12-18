@@ -7,7 +7,7 @@ import {ConsumerMessageBus} from './consumer_message_bus';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
-import {SagaContext, Saga, ILoggerConfig} from './types';
+import {SagaContext, Saga, ILoggerConfig, Middleware} from './types';
 import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
 
@@ -20,6 +20,7 @@ export class TopicSagaConsumer<
     private topic: string;
     private getContext: (message: KafkaMessage) => Promise<Context>;
     private logger: ReturnType<typeof pino>;
+    private middlewares: Middleware[];
 
     private consumerMessageBus: ConsumerMessageBus;
     private producerMessageBus: ProducerMessageBus;
@@ -31,13 +32,15 @@ export class TopicSagaConsumer<
         getContext = async () => {
             return {} as Context;
         },
-        loggerConfig
+        loggerConfig,
+        middlewares = []
     }: {
         kafka: Kafka;
         topic: string;
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
         getContext?: (message: KafkaMessage) => Promise<Context>;
         loggerConfig?: ILoggerConfig;
+        middlewares?: Middleware[];
     }) {
         this.consumer = kafka.consumer({
             groupId: topic,
@@ -47,6 +50,7 @@ export class TopicSagaConsumer<
         this.saga = saga;
         this.topic = topic;
         this.getContext = getContext;
+        this.middlewares = middlewares;
 
         this.logger = getLoggerFromConfig(loggerConfig).child({
             package: 'snpkg-snapi-kafka-sagas'
@@ -71,7 +75,11 @@ export class TopicSagaConsumer<
 
         await this.producerMessageBus.connect();
 
-        const runner = new SagaRunner(this.consumerMessageBus, this.producerMessageBus);
+        const runner = new SagaRunner(
+            this.consumerMessageBus,
+            this.producerMessageBus,
+            this.middlewares
+        );
 
         await this.consumer.run({
             autoCommit: true,
