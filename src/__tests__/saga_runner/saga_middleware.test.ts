@@ -17,11 +17,15 @@ describe('Saga middleware', function() {
             const sagaRunner = new SagaRunner(consumerBus, producerbus, [
                 next => async effect => {
                     calls.push('first');
-                    return await next(effect);
+                    const result = await next(effect);
+                    calls.push('second');
+                    return result;
                 },
                 next => async effect => {
-                    calls.push('second');
-                    return await next(effect);
+                    calls.push('third');
+                    const result = await next(effect);
+                    calls.push('fourth');
+                    return result;
                 }
             ]);
 
@@ -43,7 +47,7 @@ describe('Saga middleware', function() {
             await consumerBus.disconnectConsumers();
             await producerbus.disconnect();
 
-            expect(calls).toEqual(['first', 'second']);
+            expect(calls).toEqual(['first', 'second', 'third', 'fourth']);
         });
     });
 
