@@ -152,6 +152,14 @@ export interface IBaseSagaContext {
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;
 
+export type Next = <EffectDescription extends IEffectDescription>(
+    effectDescription: EffectDescription
+) => Promise<any>;
+
+export type Middleware = <EffectDescription extends IEffectDescription>(
+    next: Next
+) => (effectDescription: EffectDescription) => Promise<void>;
+
 /**
  * Utilities
  */
