@@ -32,9 +32,9 @@ export class ProducerMessageBus {
         await this.createTopicIfNecessary(action.topic);
 
         await this.producer.send({
-            topic: action.topic,
+            acks: -1,
             compression: CompressionTypes.GZIP,
-            acks: 1,
+            topic: action.topic,
             messages: [
                 createActionMessage({
                     action,
