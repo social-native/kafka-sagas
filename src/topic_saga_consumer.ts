@@ -66,7 +66,7 @@ export class TopicSagaConsumer<
             topicAdministrator
         );
 
-        this.producerMessageBus = new ProducerMessageBus(kafka);
+        this.producerMessageBus = new ProducerMessageBus(kafka, undefined, topicAdministrator);
 
         this.run = this.run.bind(this);
         this.disconnect = this.disconnect.bind(this);
