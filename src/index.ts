@@ -1,5 +1,6 @@
 export {TopicSagaConsumer} from './topic_saga_consumer';
 export {TopicEventEmitter} from './topic_event_emitter';
+export {TopicAdministrator} from './topic_administrator';
 export {ConsumerMessageBus} from './consumer_message_bus';
 export {ProducerMessageBus} from './producer_message_bus';
 export {SagaRunner} from './saga_runner';

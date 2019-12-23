@@ -3,8 +3,10 @@ import {Consumer, Kafka, ConsumerConfig} from 'kafkajs';
 
 import {IAction, ActionObserver} from './types';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
+import {TopicAdministrator} from './topic_administrator';
 
 export class ConsumerMessageBus {
+    private topicAdministrator: TopicAdministrator;
     private consumers: Map<string, Consumer> = new Map();
     private observersByTransaction: Map<
         string,
@@ -14,15 +16,19 @@ export class ConsumerMessageBus {
     constructor(
         private kafka: Kafka,
         private rootTopic: string,
-        private consumerConfig: Omit<ConsumerConfig, 'groupId' | 'allowAutoTopicCreation'> = {}
-    ) {}
+        private consumerConfig: Omit<ConsumerConfig, 'groupId' | 'allowAutoTopicCreation'> = {},
+        topicAdministrator?: TopicAdministrator
+    ) {
+        this.topicAdministrator =
+            topicAdministrator || new TopicAdministrator(kafka, {replicationFactor: 1});
+    }
 
     public async streamActionsFromTopic(topic: string) {
         if (this.consumers.has(topic)) {
             return;
         }
 
-        await this.createTopicIfNecessary(topic);
+        await this.topicAdministrator.createTopic(topic);
 
         const consumer = this.kafka.consumer({
             groupId: `${this.rootTopic}-${uuid.v4()}`,
@@ -83,30 +89,6 @@ export class ConsumerMessageBus {
         const topicObservers = topicObserversForTransaction.get(topic) || [];
 
         topicObserversForTransaction.set(topic, [...topicObservers, observer]);
-    }
-
-    private async createTopicIfNecessary(topic: string) {
-        const admin = this.kafka.admin();
-        await admin.connect();
-
-        /**
-         * This comes back as `true` or `false`
-         * depending on if a topic was created.
-         *
-         * Either way, by having done this,
-         * we ensure our topic exists.
-         *
-         * If, in the future, this managed to throw,
-         * it would be up to the saga to catch and rollback.
-         *
-         * So, we'll let this bubble up.
-         */
-        await admin.createTopics({
-            topics: [{topic}],
-            waitForLeaders: true
-        });
-
-        await admin.disconnect();
     }
 
     private broadcastAction(topic: string, action: IAction) {

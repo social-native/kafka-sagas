@@ -10,6 +10,7 @@ import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig, Middleware} from './types';
 import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
+import {TopicAdministrator} from './topic_administrator';
 
 export class TopicSagaConsumer<
     InitialActionPayload,
@@ -33,10 +34,12 @@ export class TopicSagaConsumer<
             return {} as Context;
         },
         loggerConfig,
-        middlewares = []
+        middlewares = [],
+        topicAdministrator
     }: {
         kafka: Kafka;
         topic: string;
+        topicAdministrator?: TopicAdministrator;
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
         getContext?: (message: KafkaMessage) => Promise<Context>;
         loggerConfig?: ILoggerConfig;
@@ -56,7 +59,13 @@ export class TopicSagaConsumer<
             package: 'snpkg-snapi-kafka-sagas'
         });
 
-        this.consumerMessageBus = new ConsumerMessageBus(kafka, topic);
+        this.consumerMessageBus = new ConsumerMessageBus(
+            kafka,
+            topic,
+            undefined,
+            topicAdministrator
+        );
+
         this.producerMessageBus = new ProducerMessageBus(kafka);
 
         this.run = this.run.bind(this);

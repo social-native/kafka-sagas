@@ -1,17 +1,20 @@
 import {Producer, Kafka, CompressionTypes, ProducerConfig} from 'kafkajs';
 import {IAction} from './types';
 import {createActionMessage} from './create_action_message';
+import {TopicAdministrator} from './topic_administrator';
 
 export class ProducerMessageBus {
     private producer: Producer;
+    private topicAdministrator: TopicAdministrator;
     private isConnected: boolean = false;
 
     constructor(
-        private kafka: Kafka,
+        kafka: Kafka,
         producerConfig: Omit<
             ProducerConfig,
             'allowAutoTopicCreation' | 'maxInflightRequests' | 'idempotent'
-        > = {}
+        > = {},
+        topicAdministrator?: TopicAdministrator
     ) {
         this.producer = kafka.producer({
             maxInFlightRequests: 1,
@@ -22,6 +25,11 @@ export class ProducerMessageBus {
         this.connect = this.connect.bind(this);
         this.putAction = this.putAction.bind(this);
         this.disconnect = this.disconnect.bind(this);
+        this.topicAdministrator =
+            topicAdministrator ||
+            new TopicAdministrator(kafka, {
+                replicationFactor: 1
+            });
     }
 
     public async putAction<Action extends IAction>(action: Action) {
@@ -29,7 +37,7 @@ export class ProducerMessageBus {
             throw new Error('You must .connect before producing actions');
         }
 
-        await this.createTopicIfNecessary(action.topic);
+        await this.topicAdministrator.createTopic(action.topic);
 
         await this.producer.send({
             acks: -1,
@@ -60,26 +68,5 @@ export class ProducerMessageBus {
         }
 
         await this.producer.disconnect();
-    }
-
-    private async createTopicIfNecessary(topic: string) {
-        const admin = this.kafka.admin();
-        await admin.connect();
-        /**
-         * This comes back as `true` or `false`
-         * depending on if a topic was created.
-         *
-         * Either way, by having done this,
-         * we ensure our topic exists.
-         *
-         * If, in the future, this managed to throw,
-         * it would be up to the saga to catch and rollback.
-         *
-         * So, we'll let this bubble up.
-         */
-        await admin.createTopics({
-            topics: [{topic}]
-        });
-        await admin.disconnect();
     }
 }
