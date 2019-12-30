@@ -70,4 +70,63 @@ describe(TopicSagaConsumer.name, function() {
         },
         DEFAULT_TEST_TIMEOUT
     );
+
+    it(
+        'bubbles errors into the saga',
+        async function() {
+            await withTopicCleanup(
+                ['saga-failure'],
+                false
+            )(async ([topic]) => {
+                const producer = kafka.producer({idempotent: true});
+                await producer.connect();
+                const spy = jest.fn();
+
+                const topicConsumer = new TopicSagaConsumer({
+                    kafka,
+                    topic,
+                    *saga(_, {effects: {callFn}}) {
+                        try {
+                            yield callFn(async () => {
+                                throw new Error('I failed.');
+                            }, []);
+                        } catch (error) {
+                            spy(error);
+                        }
+                    }
+                });
+
+                await topicConsumer.run();
+
+                await Bluebird.delay(1000);
+
+                await producer.send({
+                    acks: -1,
+                    compression: CompressionTypes.GZIP,
+                    topic,
+                    messages: [
+                        {
+                            value: JSON.stringify({
+                                transaction_id: 'test-trx-id-bark',
+                                payload: {dogs_go: 'awoo'}
+                            })
+                        }
+                    ]
+                });
+
+                await Bluebird.delay(1000);
+                await topicConsumer.disconnect();
+                await producer.disconnect();
+
+                expect(spy.mock.calls).toMatchInlineSnapshot(`
+                    Array [
+                      Array [
+                        [Error: I failed.],
+                      ],
+                    ]
+                `);
+            });
+        },
+        DEFAULT_TEST_TIMEOUT * 3
+    );
 });
