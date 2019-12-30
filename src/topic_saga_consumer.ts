@@ -47,7 +47,8 @@ export class TopicSagaConsumer<
     }) {
         this.consumer = kafka.consumer({
             groupId: topic,
-            allowAutoTopicCreation: true
+            allowAutoTopicCreation: true,
+            retry: {retries: 0}
         });
 
         this.saga = saga;

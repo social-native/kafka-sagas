@@ -152,12 +152,19 @@ export class SagaRunner {
         }
 
         if (!this.middlewares.length) {
-            const result = await this.runEffect(effectDescription, context);
-
-            return this.runGeneratorFsm(machine, context, result);
+            try {
+                const result = await this.runEffect(effectDescription, context);
+                return this.runGeneratorFsm(machine, context, result);
+            } catch (error) {
+                machine.throw(error);
+            }
         } else {
             const initialNext: Next = async effect => {
-                return await this.runEffect(effect, context);
+                try {
+                    return await this.runEffect(effect, context);
+                } catch (error) {
+                    machine.throw(error);
+                }
             };
 
             const compiledNexts = this.middlewares.reduceRight(
