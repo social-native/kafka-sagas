@@ -30,16 +30,6 @@ export function isSnapiHeaders(
     );
 }
 
-export function isRolesList(roles: string[]): roles is Array<keyof typeof enums.ROLES> {
-    return roles.reduce((allStringsAreRoles: boolean, role) => {
-        if (!allStringsAreRoles) {
-            return false;
-        }
-
-        return Object.values(enums.ROLES).includes(role as enums.ROLES);
-    }, true);
-}
-
 export function isTakeEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is ITakeEffectDescription {

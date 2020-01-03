@@ -192,7 +192,7 @@ export interface IAction<Payload = DefaultPayload> {
     transaction_id: string;
     payload: Payload;
     userId?: string | number;
-    userRoles?: Array<keyof typeof enums.ROLES>;
+    userRoles?: string[];
 }
 
 export type DefaultPayload = Record<string, any> | undefined;
