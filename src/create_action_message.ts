@@ -10,7 +10,7 @@ export function createActionMessage<Action extends IAction>({
 }: {
     action: Action;
     userId?: string | number;
-    roles?: Array<keyof typeof enums.ROLES>;
+    roles?: string[];
     headers?: IHeaders;
 }): Message {
     const message = {
