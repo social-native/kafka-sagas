@@ -1,6 +1,6 @@
 import {Kafka, Consumer} from 'kafkajs';
 import uuid from 'uuid';
-import EventEmitter from 'events';
+import {EventEmitter} from 'events';
 
 export class TopicEventEmitter {
     public emitter: EventEmitter = new EventEmitter();
