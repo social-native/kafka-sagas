@@ -156,14 +156,28 @@ export class SagaRunner {
                 const result = await this.runEffect(effectDescription, context);
                 return this.runGeneratorFsm(machine, context, result);
             } catch (error) {
-                machine.throw(error);
+                const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
+
+                if (continuation.done) {
+                    return;
+                }
+
+                const result = await this.runEffect(continuation.value, context);
+
+                return this.runGeneratorFsm(machine, context, result);
             }
         } else {
             const initialNext: Next = async effect => {
                 try {
                     return await this.runEffect(effect, context);
                 } catch (error) {
-                    machine.throw(error);
+                    const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
+
+                    if (continuation.done) {
+                        return;
+                    }
+
+                    return await this.runEffect(continuation.value, context);
                 }
             };
 
