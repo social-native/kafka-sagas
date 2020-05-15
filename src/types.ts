@@ -36,6 +36,11 @@ export type ActionChannelEffect<Payload> = (
     actionBuffer?: ActionChannelBuffer<IAction<Payload>>
 ) => IActionChannelEffectDescription<IAction<Payload>>;
 
+export type DelayEffect<Payload extends {} | undefined = undefined> = (
+    delayInMilliseconds: number,
+    payload?: Payload
+) => IDelayEffectDescription<Payload>;
+
 export type RaceCombinatorEffect<Payload> = (
     effects: ICombinatatorEffectDescription<IAction<Payload>>['effects']
 ) => ICombinatatorEffectDescription<IAction<Payload>>;
@@ -110,6 +115,12 @@ export interface IActionChannelEffectDescription<Action extends IAction = IActio
     buffer: ActionChannelBuffer<Action>;
     topics: string[];
     observer: ActionObserver<Action>;
+}
+
+export interface IDelayEffectDescription<Payload> extends IEffectDescription {
+    kind: EffectDescriptionKind.DELAY;
+    delayInMilliseconds: number;
+    payload?: Payload;
 }
 
 export type ArrayCombinator<Action extends IAction> = <Combined extends Array<Promise<Action>>>(
