@@ -19,7 +19,8 @@ import {
     isPutEffectDescription,
     isCallEffectDescription,
     isTakeActionChannelEffectDescription,
-    isEffectCombinatorDescription
+    isEffectCombinatorDescription,
+    isDelayEffectDescription
 } from './type_guard';
 
 const {
@@ -96,6 +97,12 @@ export class SagaRunner {
         // then just take from the buffer
         if (isTakeActionChannelEffectDescription(effectDescription)) {
             return await effectDescription.buffer.take();
+        }
+
+        if (isDelayEffectDescription(effectDescription)) {
+            const {delayInMilliseconds, payload} = effectDescription;
+            await Bluebird.delay(delayInMilliseconds);
+            return payload;
         }
 
         if (isTakeEffectDescription(effectDescription)) {

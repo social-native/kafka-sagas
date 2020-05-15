@@ -9,7 +9,8 @@ import {
     ActionChannelInput,
     ICombinatatorEffectDescription,
     IPredicateRecord,
-    ISnapiHeaders
+    ISnapiHeaders,
+    IDelayEffectDescription
 } from './types';
 import {EffectDescriptionKind} from './enums';
 import {enums} from '@social-native/snpkg-snapi-authorization';
@@ -67,6 +68,12 @@ export function isTakeActionChannelEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is IActionChannelEffectDescription<any> {
     return effectDescription.kind === EffectDescriptionKind.TAKE_ACTION_CHANNEL;
+}
+
+export function isDelayEffectDescription<Payload>(
+    effectDescription: IEffectDescription
+): effectDescription is IDelayEffectDescription<Payload> {
+    return effectDescription.kind === EffectDescriptionKind.DELAY;
 }
 
 export function actionPatternIsPredicateRecord<Action extends IAction>(

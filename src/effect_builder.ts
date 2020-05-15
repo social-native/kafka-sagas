@@ -10,7 +10,8 @@ import {
     ITakeEffectDescription,
     ITakeActionChannelEffectDescription,
     TakePattern,
-    IActionChannelEffectDescription
+    IActionChannelEffectDescription,
+    DelayEffect
 } from './types';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 
@@ -152,6 +153,17 @@ export class EffectBuilder {
             effects
         };
     }
+
+    public delay = <Payload>(
+        ...[delayInMilliseconds, payload]: Parameters<DelayEffect<Payload>>
+    ): ReturnType<DelayEffect<Payload>> => {
+        return {
+            transactionId: this.transactionId,
+            kind: EffectDescriptionKind.DELAY,
+            delayInMilliseconds,
+            payload
+        };
+    };
 
     // tslint:disable-next-line: cyclomatic-complexity
     private generateTopics<Action extends IAction>(
