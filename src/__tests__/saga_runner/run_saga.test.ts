@@ -8,7 +8,7 @@ import {EffectBuilder} from '../../effect_builder';
 import uuid from 'uuid';
 import Bluebird from 'bluebird';
 import {CompressionTypes} from 'kafkajs';
-import {ActionChannel, IAction} from '../../types';
+import {ActionChannel, IAction, SagaContext} from '../../types';
 import {parseHeaders} from '../../parse_headers';
 
 const topics = {
@@ -110,7 +110,10 @@ describe(SagaRunner.name, function() {
                     const producerBus = new ProducerMessageBus(kafka);
                     await producerBus.connect();
 
-                    const runner = new SagaRunner(consumerBus, producerBus);
+                    const runner = new SagaRunner<{campaignId: number}, SagaContext>(
+                        consumerBus,
+                        producerBus
+                    );
 
                     const effectBuilder = new EffectBuilder(transactionId);
 
