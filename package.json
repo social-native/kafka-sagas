@@ -1,6 +1,6 @@
 {
     "name": "@social-native/snpkg-snapi-kafka-sagas",
-    "version": "4.4.0",
+    "version": "5.0.0",
     "description": "",
     "main": "dist/index.cjs.js",
     "module": "dist/index.es.js",
