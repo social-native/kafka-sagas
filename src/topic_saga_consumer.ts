@@ -7,7 +7,7 @@ import {ConsumerMessageBus} from './consumer_message_bus';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {ProducerMessageBus} from './producer_message_bus';
 import {SagaRunner} from './saga_runner';
-import {SagaContext, Saga, ILoggerConfig, Middleware} from './types';
+import {SagaContext, Saga, ILoggerConfig, Middleware, IEffectDescription} from './types';
 import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
 import {TopicAdministrator} from './topic_administrator';
@@ -21,7 +21,7 @@ export class TopicSagaConsumer<
     private topic: string;
     private getContext: (message: KafkaMessage) => Promise<Context>;
     private logger: ReturnType<typeof pino>;
-    private middlewares: Middleware[];
+    private middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
 
     private consumerMessageBus: ConsumerMessageBus;
     private producerMessageBus: ProducerMessageBus;
@@ -43,7 +43,7 @@ export class TopicSagaConsumer<
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
         getContext?: (message: KafkaMessage) => Promise<Context>;
         loggerConfig?: ILoggerConfig;
-        middlewares?: Middleware[];
+        middlewares?: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
     }) {
         this.consumer = kafka.consumer({
             groupId: topic,
@@ -85,7 +85,7 @@ export class TopicSagaConsumer<
 
         await this.producerMessageBus.connect();
 
-        const runner = new SagaRunner(
+        const runner = new SagaRunner<InitialActionPayload, SagaContext<Context>>(
             this.consumerMessageBus,
             this.producerMessageBus,
             this.middlewares
@@ -114,7 +114,7 @@ export class TopicSagaConsumer<
                 try {
                     const externalContext = await this.getContext(message);
 
-                    await runner.runSaga<InitialActionPayload, SagaContext<Context>>(
+                    await runner.runSaga(
                         initialAction,
                         {
                             headers: parseHeaders(message.headers),

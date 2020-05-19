@@ -27,14 +27,14 @@ const {
     WORKER_USER_IDENTITY_HEADER: {WORKER_USER_ID, WORKER_USER_ROLES}
 } = enums;
 
-export class SagaRunner {
+export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
     constructor(
         private consumerMessageBus: ConsumerMessageBus,
         private producerMessageBus: ProducerMessageBus,
-        private middlewares: Middleware[] = []
+        private middlewares: Array<Middleware<IEffectDescription, Context>> = []
     ) {}
 
-    public runSaga = async <InitialActionPayload, Context extends IBaseSagaContext>(
+    public runSaga = async (
         initialAction: IAction<InitialActionPayload>,
         context: Context,
         saga: Saga<InitialActionPayload, Context>
@@ -45,10 +45,7 @@ export class SagaRunner {
     };
 
     // tslint:disable-next-line: cyclomatic-complexity
-    public runEffect = async <
-        EffectDescription extends IEffectDescription,
-        Context extends IBaseSagaContext
-    >(
+    public runEffect = async <EffectDescription extends IEffectDescription>(
         effectDescription: EffectDescription,
         context: Context
     ) => {
@@ -145,7 +142,7 @@ export class SagaRunner {
         }
     };
 
-    protected async runGeneratorFsm<Context extends IBaseSagaContext>(
+    protected async runGeneratorFsm(
         machine: Generator,
         context: Context,
         lastValue: any = null
@@ -174,9 +171,9 @@ export class SagaRunner {
                 return this.runGeneratorFsm(machine, context, result);
             }
         } else {
-            const initialNext: Next = async effect => {
+            const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
                 try {
-                    return await this.runEffect(effect, context);
+                    return await this.runEffect(effect, ctx);
                 } catch (error) {
                     const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
 
@@ -184,18 +181,18 @@ export class SagaRunner {
                         return;
                     }
 
-                    return await this.runEffect(continuation.value, context);
+                    return await this.runEffect(continuation.value, ctx);
                 }
             };
 
             const compiledNexts = this.middlewares.reduceRight(
-                (previousNext, middleware: Middleware) => {
+                (previousNext, middleware: Middleware<IEffectDescription, Context>) => {
                     return middleware(previousNext);
                 },
                 initialNext
             );
 
-            const result = await compiledNexts(effectDescription);
+            const result = await compiledNexts(effectDescription, context);
 
             return this.runGeneratorFsm(machine, context, result);
         }

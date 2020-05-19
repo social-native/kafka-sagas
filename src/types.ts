@@ -154,7 +154,11 @@ export type Saga<
 > = (
     initialAction: IAction<InitialActionPayload>,
     context: Context
-) => Generator<IEffectDescription, void, UnPromisify<ReturnType<SagaRunner['runEffect']>>>;
+) => Generator<
+    IEffectDescription,
+    void,
+    UnPromisify<ReturnType<SagaRunner<IEffectDescription, Context>['runEffect']>>
+>;
 
 export interface IBaseSagaContext {
     effects: EffectBuilder;
@@ -163,13 +167,17 @@ export interface IBaseSagaContext {
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;
 
-export type Next = <EffectDescription extends IEffectDescription>(
-    effectDescription: EffectDescription
-) => Promise<any>;
+export type Next<
+    EffectDescription extends IEffectDescription,
+    Context extends SagaContext<Record<string, any>>
+> = (effectDescription: EffectDescription, context: Context) => Promise<any>;
 
-export type Middleware = <EffectDescription extends IEffectDescription>(
-    next: Next
-) => (effectDescription: EffectDescription) => Promise<void>;
+export type Middleware<
+    EffectDescription extends IEffectDescription,
+    Context extends SagaContext<Record<string, any>>
+> = (
+    next: Next<EffectDescription, Context>
+) => (effectDescription: EffectDescription, context: Context) => Promise<void>;
 
 /**
  * Utilities

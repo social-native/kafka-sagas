@@ -15,15 +15,15 @@ describe('Saga middleware', function() {
             await producerbus.connect();
 
             const sagaRunner = new SagaRunner(consumerBus, producerbus, [
-                next => async effect => {
+                next => async (effectDescription, ctx) => {
                     calls.push('first');
-                    const result = await next(effect);
+                    const result = await next(effectDescription, ctx);
                     calls.push('fourth');
                     return result;
                 },
-                next => async effect => {
+                next => async (effectDescription, ctx) => {
                     calls.push('second');
-                    const result = await next(effect);
+                    const result = await next(effectDescription, ctx);
                     calls.push('third');
                     return result;
                 }
@@ -61,19 +61,19 @@ describe('Saga middleware', function() {
                 let redirectedPattern: string | null = null;
 
                 const sagaRunner = new SagaRunner(consumerBus, producerbus, [
-                    next => async effect => {
+                    next => async (effect, ctx) => {
                         if (isPutEffectDescription(effect)) {
                             effect.pattern = 'redirected';
                         }
 
-                        return await next(effect);
+                        return await next(effect, ctx);
                     },
-                    next => async effect => {
+                    next => async (effect, ctx) => {
                         if (isPutEffectDescription(effect)) {
                             redirectedPattern = effect.pattern;
                         }
 
-                        return await next(effect);
+                        return await next(effect, ctx);
                     }
                 ]);
 
