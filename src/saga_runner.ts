@@ -138,7 +138,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
         }
 
         if (isCallEffectDescription(effectDescription)) {
-            return await effectDescription.effect(...effectDescription.args);
+            return await effectDescription.effect(...(effectDescription.args || []));
         }
     };
 
