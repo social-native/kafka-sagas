@@ -105,7 +105,7 @@ export class EffectBuilder {
 
     public callFn<Fn extends (...args: any[]) => any>(
         effect: Fn,
-        args: Parameters<Fn>
+        args?: Parameters<Fn>
     ): ReturnType<CallEffect<Fn>> {
         return {
             transactionId: this.transactionId,

@@ -28,7 +28,7 @@ export type TakeEffect<Payload> = (
 
 export type CallEffect<Fn extends (...args: any[]) => any> = (
     callable: (args: Parameters<Fn>) => ReturnType<Fn>,
-    args: Parameters<Fn>
+    args?: Parameters<Fn>
 ) => ICallEffectDescription<Parameters<Fn>, ReturnType<Fn>>;
 
 export type ActionChannelEffect<Payload> = (
@@ -105,7 +105,7 @@ export interface ITakeActionChannelEffectDescription<Action extends IAction = IA
 export interface ICallEffectDescription<Arguments extends any[], CallResponse>
     extends IEffectDescription {
     effect: (...args: Arguments) => CallResponse;
-    args: Arguments;
+    args?: Arguments;
 }
 
 export interface IActionChannelEffectDescription<Action extends IAction = IAction>
