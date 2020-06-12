@@ -37,9 +37,9 @@ export function isTakeEffectDescription(
     return effectDescription.kind === EffectDescriptionKind.TAKE;
 }
 
-export function isPutEffectDescription(
+export function isPutEffectDescription<Payload = any>(
     effectDescription: IEffectDescription
-): effectDescription is IPutEffectDescription<any> {
+): effectDescription is IPutEffectDescription<Payload> {
     return effectDescription.kind === EffectDescriptionKind.PUT;
 }
 
