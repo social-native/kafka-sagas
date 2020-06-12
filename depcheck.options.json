@@ -21,7 +21,8 @@
         "@social-native/snpkg-package-version-validation",
         "@social-native/snpkg-snapi-authorization",
         "dotenv-cli",
-        "@types/pino"
+        "@types/pino",
+        "typed-emitter"
     ],
     "specials": []
 }
