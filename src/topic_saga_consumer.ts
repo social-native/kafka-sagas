@@ -1,6 +1,7 @@
 import {Kafka, Consumer, KafkaMessage} from 'kafkajs';
 import Bluebird from 'bluebird';
 import pino from 'pino';
+import {EventEmitter} from 'tsee';
 
 import {EffectBuilder} from './effect_builder';
 import {ConsumerMessageBus} from './consumer_message_bus';
@@ -16,6 +17,10 @@ export class TopicSagaConsumer<
     InitialActionPayload,
     Context extends Record<string, any> = Record<string, any>
 > {
+    public eventEmitter = new EventEmitter<{
+        comitted_offsets: (...args: any[]) => void;
+    }>();
+
     private consumer: Consumer;
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
@@ -90,6 +95,10 @@ export class TopicSagaConsumer<
             this.producerMessageBus,
             this.middlewares
         );
+
+        this.consumer.on('consumer.commit_offsets', (...args) => {
+            this.eventEmitter.emit('comitted_offsets', ...args);
+        });
 
         await this.consumer.run({
             autoCommit: true,
