@@ -20,6 +20,7 @@ export class TopicSagaConsumer<
 > {
     public eventEmitter = new EventEmitter() as TypedEmitter<{
         comitted_offsets: (...args: any[]) => void;
+        completed_saga: (...args: any[]) => void;
     }>;
 
     private consumer: Consumer;
@@ -99,6 +100,10 @@ export class TopicSagaConsumer<
 
         this.consumer.on('consumer.commit_offsets', (...args) => {
             this.eventEmitter.emit('comitted_offsets', ...args);
+        });
+
+        this.consumer.on('consumer.end_batch_process', (...args) => {
+            this.eventEmitter.emit('completed_saga', ...args);
         });
 
         await this.consumer.run({
