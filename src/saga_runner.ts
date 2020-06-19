@@ -20,7 +20,8 @@ import {
     isCallEffectDescription,
     isTakeActionChannelEffectDescription,
     isEffectCombinatorDescription,
-    isDelayEffectDescription
+    isDelayEffectDescription,
+    isGenerator
 } from './type_guard';
 
 const {
@@ -38,10 +39,11 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
         initialAction: IAction<InitialActionPayload>,
         context: Context,
         saga: Saga<InitialActionPayload, Context>
-    ): Promise<void> => {
+    ): Promise<any> => {
         this.consumerMessageBus.startTransaction(initialAction.transaction_id);
-        await this.runGeneratorFsm(saga(initialAction, context), context);
+        const result = await this.runGeneratorFsm(saga(initialAction, context), context);
         this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
+        return result;
     };
 
     // tslint:disable-next-line: cyclomatic-complexity
@@ -138,32 +140,39 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
         }
 
         if (isCallEffectDescription(effectDescription)) {
-            return await effectDescription.effect(...(effectDescription.args || []));
+            const result = await effectDescription.effect(...(effectDescription.args || []));
+
+            if (isGenerator(result)) {
+                return this.runGeneratorFsm(result, context);
+            }
+
+            return result;
         }
     };
 
-    protected async runGeneratorFsm(
+    protected async runGeneratorFsm<Returned = any | undefined>(
         machine: Generator,
         context: Context,
         lastValue: any = null
-    ): Promise<void> {
-        const {done, value: effectDescription} = machine.next(lastValue) as IteratorResult<
-            IEffectDescription
+    ): Promise<Returned> {
+        const {done, value} = machine.next(lastValue) as IteratorResult<
+            IEffectDescription,
+            Returned
         >;
 
         if (done) {
-            return lastValue;
+            return value as Returned;
         }
 
         if (!this.middlewares.length) {
             try {
-                const result = await this.runEffect(effectDescription, context);
+                const result = await this.runEffect(value as IEffectDescription, context);
                 return this.runGeneratorFsm(machine, context, result);
             } catch (error) {
                 const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
 
                 if (continuation.done) {
-                    return;
+                    return continuation.value;
                 }
 
                 const result = await this.runEffect(continuation.value, context);
@@ -178,7 +187,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
                     const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
 
                     if (continuation.done) {
-                        return;
+                        return continuation.value;
                     }
 
                     return await this.runEffect(continuation.value, ctx);
@@ -192,7 +201,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
                 initialNext
             );
 
-            const result = await compiledNexts(effectDescription, context);
+            const result = await compiledNexts(value as IEffectDescription, context);
 
             return this.runGeneratorFsm(machine, context, result);
         }

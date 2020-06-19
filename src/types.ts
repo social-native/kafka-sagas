@@ -156,9 +156,15 @@ export type Saga<
     context: Context
 ) => Generator<
     IEffectDescription,
-    void,
+    any,
     UnPromisify<ReturnType<SagaRunner<IEffectDescription, Context>['runEffect']>>
 >;
+
+export type CallableSaga<
+    InitialActionPayload extends DefaultPayload = DefaultPayload,
+    Context extends IBaseSagaContext = IBaseSagaContext,
+    Result = any
+> = (payload: InitialActionPayload, context: Context) => Generator<IEffectDescription, Result, any>;
 
 export interface IBaseSagaContext {
     effects: EffectBuilder;

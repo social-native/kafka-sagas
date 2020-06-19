@@ -116,3 +116,12 @@ export function takeInputIsActionChannelEffectDescription<Action extends IAction
             EffectDescriptionKind.ACTION_CHANNEL
     );
 }
+
+export function isGenerator(possibleGenerator: any): possibleGenerator is Generator {
+    return (
+        !!possibleGenerator &&
+        !!(possibleGenerator as Generator).next &&
+        !!(possibleGenerator as Generator).throw &&
+        !!(possibleGenerator as Generator).return
+    );
+}
