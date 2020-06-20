@@ -175,15 +175,17 @@ export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Ex
 
 export type Next<
     EffectDescription extends IEffectDescription,
-    Context extends SagaContext<Record<string, any>>
-> = (effectDescription: EffectDescription, context: Context) => Promise<any>;
+    Context extends SagaContext<Record<string, any>>,
+    Response = any
+> = (effectDescription: EffectDescription, context: Context) => Promise<Response>;
 
 export type Middleware<
     EffectDescription extends IEffectDescription,
-    Context extends SagaContext<Record<string, any>>
+    Context extends SagaContext<Record<string, any>>,
+    Response = any
 > = (
     next: Next<EffectDescription, Context>
-) => (effectDescription: EffectDescription, context: Context) => Promise<void>;
+) => (effectDescription: EffectDescription, context: Context) => Promise<Response>;
 
 /**
  * Utilities
