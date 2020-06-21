@@ -141,7 +141,7 @@ export interface ICombinatatorEffectDescription<Action extends IAction> extends 
 
 export interface IEffectDescription {
     transactionId: string;
-    kind: keyof typeof EffectDescriptionKind;
+    kind: EffectDescriptionKind;
 }
 
 /**
