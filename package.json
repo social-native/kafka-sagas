@@ -1,6 +1,6 @@
 {
     "name": "@social-native/snpkg-snapi-kafka-sagas",
-    "version": "7.0.0",
+    "version": "7.0.1",
     "description": "",
     "main": "dist/index.cjs.js",
     "module": "dist/index.es.js",
@@ -64,6 +64,6 @@
         "tslint-config-prettier": "^1.18.0",
         "tslint-eslint-rules": "^5.4.0",
         "tslint-immutable": "^5.5.2",
-        "typescript": "^3.7.2"
+        "typescript": "^3.8.3"
     }
 }

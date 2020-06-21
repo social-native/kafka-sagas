@@ -164,44 +164,29 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
             return value as Returned;
         }
 
-        if (!this.middlewares.length) {
-            try {
-                const result = await this.runEffect(value as IEffectDescription, context);
-                return this.runGeneratorFsm(machine, context, result);
-            } catch (error) {
-                const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
-
-                if (continuation.done) {
-                    return continuation.value;
-                }
-
-                const result = await this.runEffect(continuation.value, context);
-
-                return this.runGeneratorFsm(machine, context, result);
-            }
-        } else {
+        try {
             const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
-                try {
-                    return await this.runEffect(effect, ctx);
-                } catch (error) {
-                    const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
-
-                    if (continuation.done) {
-                        return continuation.value;
-                    }
-
-                    return await this.runEffect(continuation.value, ctx);
-                }
+                return this.runEffect(effect, ctx);
             };
 
-            const compiledNexts = this.middlewares.reduceRight(
+            const runEffectWithMiddleware = this.middlewares.reduceRight(
                 (previousNext, middleware: Middleware<IEffectDescription, Context>) => {
                     return middleware(previousNext);
                 },
                 initialNext
             );
 
-            const result = await compiledNexts(value as IEffectDescription, context);
+            const result = await runEffectWithMiddleware(value as IEffectDescription, context);
+
+            return this.runGeneratorFsm(machine, context, result);
+        } catch (error) {
+            const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
+
+            if (continuation.done) {
+                return continuation.value;
+            }
+
+            const result = await this.runEffect(continuation.value, context);
 
             return this.runGeneratorFsm(machine, context, result);
         }
