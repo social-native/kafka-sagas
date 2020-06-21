@@ -180,37 +180,44 @@ workflows:
     test-build-deploy:
         jobs:
             - test:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       tags: # run for every branch
                           only: /^[0-9]+(\.[0-9]+)*$/
 
             - build-verification:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       tags: # run for every branch
                           only: /^[0-9]+(\.[0-9]+)*$/
 
             - type-check:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       tags: # run for every branch
                           only: /^[0-9]+(\.[0-9]+)*$/
 
             - lint-check:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       tags: # run for every branch
                           only: /^[0-9]+(\.[0-9]+)*$/
 
             - beauty-check:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       tags: # run for every branch
                           only: /^[0-9]+(\.[0-9]+)*$/
 
             - dependency-check:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       tags: # run for every branch
                           only: /^[0-9]+(\.[0-9]+)*$/
     snpkg-publish:
         jobs:
             - package-version-validation:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       branches: # run for every branch
                           ignore:
@@ -218,6 +225,7 @@ workflows:
                       tags:
                           ignore: /.*/
             - tag-version-validation:
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       branches:
                           ignore: /.*/
@@ -226,6 +234,7 @@ workflows:
             - build-for-publishing:
                   requires:
                       - tag-version-validation
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       branches:
                           ignore: /.*/
@@ -234,6 +243,7 @@ workflows:
             - publish-github-release-to-npm:
                   requires:
                       - build-for-publishing
+                  context: NPM_PACKAGE_CONTEXT
                   filters:
                       branches:
                           ignore: /.*/

@@ -109,7 +109,7 @@ export class EffectBuilder {
     ): ReturnType<CallEffect<Fn>> {
         return {
             transactionId: this.transactionId,
-            kind: 'CALL',
+            kind: EffectDescriptionKind.CALL,
             effect,
             args
         };
