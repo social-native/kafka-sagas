@@ -36,8 +36,8 @@
         "@social-native/snpkg-snapi-authorization": "^4.0.0",
         "bluebird": "^3.7.1",
         "kafkajs": "^1.12.0",
-        "pino": "^6.2.1",
-        "@types/pino": "^6.0.1",
+        "pino": "^5.15.5",
+        "@types/pino": "^5.15.5",
         "uuid": "^3.3.3",
         "typed-emitter": "^1.2.0"
     },
