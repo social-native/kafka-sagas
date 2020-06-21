@@ -104,6 +104,7 @@ export interface ITakeActionChannelEffectDescription<Action extends IAction = IA
 
 export interface ICallEffectDescription<Arguments extends any[], CallResponse>
     extends IEffectDescription {
+    kind: EffectDescriptionKind.CALL;
     effect: (...args: Arguments) => CallResponse;
     args?: Arguments;
 }
