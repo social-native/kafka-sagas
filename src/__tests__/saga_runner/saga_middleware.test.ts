@@ -99,4 +99,43 @@ describe('Saga middleware', function() {
             }
         );
     });
+
+    it('bubbles errors up from middleware into the saga', async function() {
+        await withTopicCleanup(['middleware-test-error-bubbling'])(async ([topic]) => {
+            const consumerBus = new ConsumerMessageBus(kafka, topic);
+            const producerbus = new ProducerMessageBus(kafka);
+            await producerbus.connect();
+
+            const sagaRunner = new SagaRunner(consumerBus, producerbus, [
+                () => async () => {
+                    throw new Error('Symbolic Error');
+                }
+            ]);
+
+            let error: Error | undefined;
+
+            await sagaRunner.runSaga(
+                {
+                    topic,
+                    transaction_id: 'boop',
+                    payload: {}
+                },
+                {
+                    effects: new EffectBuilder('boop'),
+                    headers: {}
+                },
+                function*(_, {effects}) {
+                    try {
+                        yield effects.put(topic);
+                    } catch (err) {
+                        error = err;
+                    }
+                }
+            );
+
+            await consumerBus.disconnectConsumers();
+            await producerbus.disconnect();
+            expect(error).toMatchInlineSnapshot(`[Error: Symbolic Error]`);
+        });
+    });
 });
