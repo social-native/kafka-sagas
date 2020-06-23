@@ -164,18 +164,18 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
             return value as Returned;
         }
 
+        const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
+            return this.runEffect(effect, ctx);
+        };
+
+        const runEffectWithMiddleware = this.middlewares.reduceRight(
+            (previousNext, middleware: Middleware<IEffectDescription, Context>) => {
+                return middleware(previousNext);
+            },
+            initialNext
+        );
+
         try {
-            const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
-                return this.runEffect(effect, ctx);
-            };
-
-            const runEffectWithMiddleware = this.middlewares.reduceRight(
-                (previousNext, middleware: Middleware<IEffectDescription, Context>) => {
-                    return middleware(previousNext);
-                },
-                initialNext
-            );
-
             const result = await runEffectWithMiddleware(value as IEffectDescription, context);
 
             return this.runGeneratorFsm(machine, context, result);
@@ -186,7 +186,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
                 return continuation.value;
             }
 
-            const result = await this.runEffect(continuation.value, context);
+            const result = await runEffectWithMiddleware(value as IEffectDescription, context);
 
             return this.runGeneratorFsm(machine, context, result);
         }
