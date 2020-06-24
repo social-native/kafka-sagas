@@ -29,11 +29,26 @@ const {
 } = enums;
 
 export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
+    protected runEffectWithMiddleware: <EffectDescription extends IEffectDescription>(
+        effect: EffectDescription,
+        context: Context
+    ) => Promise<any>;
+
     constructor(
         private consumerMessageBus: ConsumerMessageBus,
         private producerMessageBus: ProducerMessageBus,
-        private middlewares: Array<Middleware<IEffectDescription, Context>> = []
-    ) {}
+        middlewares: Array<Middleware<IEffectDescription, Context>> = []
+    ) {
+        const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
+            return this.runEffect(effect, ctx);
+        };
+
+        this.runEffectWithMiddleware = middlewares
+            .reduceRight((previousNext, middleware: Middleware<IEffectDescription, Context>) => {
+                return middleware(previousNext);
+            }, initialNext)
+            .bind(this);
+    }
 
     public runSaga = async (
         initialAction: IAction<InitialActionPayload>,
@@ -153,9 +168,20 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
     protected async runGeneratorFsm<Returned = any | undefined>(
         machine: Generator,
         context: Context,
-        lastValue: any = null
+        {
+            previousGeneratorResponse = null,
+            didThrow = false
+        }: {
+            previousGeneratorResponse: any;
+            didThrow: boolean;
+        } = {previousGeneratorResponse: null, didThrow: false}
     ): Promise<Returned> {
-        const {done, value} = machine.next(lastValue) as IteratorResult<
+        /**
+         * Dereferencing the receiver removes its context, so we need to bind it back to the machine.
+         */
+        const receiver = didThrow ? machine.throw.bind(machine) : machine.next.bind(machine);
+
+        const {done, value} = receiver(previousGeneratorResponse) as IteratorResult<
             IEffectDescription,
             Returned
         >;
@@ -164,31 +190,18 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
             return value as Returned;
         }
 
-        const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
-            return this.runEffect(effect, ctx);
-        };
-
-        const runEffectWithMiddleware = this.middlewares.reduceRight(
-            (previousNext, middleware: Middleware<IEffectDescription, Context>) => {
-                return middleware(previousNext);
-            },
-            initialNext
-        );
-
         try {
-            const result = await runEffectWithMiddleware(value as IEffectDescription, context);
+            const result = await this.runEffectWithMiddleware(value as IEffectDescription, context);
 
-            return this.runGeneratorFsm(machine, context, result);
+            return this.runGeneratorFsm(machine, context, {
+                previousGeneratorResponse: result,
+                didThrow: false
+            });
         } catch (error) {
-            const continuation = machine.throw(error) as IteratorResult<IEffectDescription>;
-
-            if (continuation.done) {
-                return continuation.value;
-            }
-
-            const result = await runEffectWithMiddleware(value as IEffectDescription, context);
-
-            return this.runGeneratorFsm(machine, context, result);
+            return this.runGeneratorFsm(machine, context, {
+                previousGeneratorResponse: error,
+                didThrow: true
+            });
         }
     }
 }
