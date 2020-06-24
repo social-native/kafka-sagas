@@ -177,9 +177,12 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
             didThrow: boolean;
         } = {previousGeneratorResponse: null, didThrow: false}
     ): Promise<Returned> {
-        const machineHandler = didThrow ? machine.throw : machine.next;
+        /**
+         * Dereferencing the receiver removes its context, so we need to bind it back to the machine.
+         */
+        const receiver = didThrow ? machine.throw.bind(machine) : machine.next.bind(machine);
 
-        const {done, value} = machineHandler(previousGeneratorResponse) as IteratorResult<
+        const {done, value} = receiver(previousGeneratorResponse) as IteratorResult<
             IEffectDescription,
             Returned
         >;

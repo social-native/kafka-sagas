@@ -92,5 +92,42 @@ describe(SagaRunner.name, function() {
                 expect(result).toEqual('return-value-from-other-saga');
             });
         });
+
+        it('Bubbles errors from callable sagas', async function() {
+            await withTopicCleanup(['puppies'])(async function([topic]) {
+                const effectBuilder = new EffectBuilder('marge');
+
+                const util = await runnerUtilityFactory();
+
+                const otherSaga: CallableSaga = function*() {
+                    throw new Error('Big Fail');
+                };
+
+                let error: any;
+
+                await util.runner.runSaga(
+                    {
+                        transaction_id: '1',
+                        topic,
+                        payload: 3
+                    },
+                    {
+                        effects: effectBuilder,
+                        headers: {}
+                    },
+                    function*(_, ctx) {
+                        try {
+                            yield ctx.effects.callFn(otherSaga, [{ding: 3}, ctx]);
+                        } catch (err) {
+                            error = err;
+                        }
+                    }
+                );
+
+                await util.closeBuses();
+
+                expect(error).toMatchInlineSnapshot(`[Error: Big Fail]`);
+            });
+        });
     });
 });

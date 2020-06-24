@@ -138,4 +138,44 @@ describe('Saga middleware', function() {
             expect(error).toMatchInlineSnapshot(`[Error: Symbolic Error]`);
         });
     });
+
+    it('runs effects with middleware from error continuation in the saga', async function() {
+        await withTopicCleanup(['middleware-test-error-bubbling'])(async ([topic]) => {
+            const consumerBus = new ConsumerMessageBus(kafka, topic);
+            const producerbus = new ProducerMessageBus(kafka);
+            await producerbus.connect();
+
+            const spyMiddleware = jest
+                .fn()
+                .mockImplementation(
+                    (next: (...args: any[]) => any) => async (effect: any, context: any) =>
+                        next(effect, context)
+                );
+
+            const sagaRunner = new SagaRunner(consumerBus, producerbus, [spyMiddleware]);
+
+            await sagaRunner.runSaga(
+                {
+                    topic,
+                    transaction_id: 'boop',
+                    payload: {}
+                },
+                {
+                    effects: new EffectBuilder('boop'),
+                    headers: {}
+                },
+                function*(_, {effects}) {
+                    try {
+                        throw new Error('Asdf1');
+                    } catch (err) {
+                        yield effects.put(topic);
+                    }
+                }
+            );
+
+            await consumerBus.disconnectConsumers();
+            await producerbus.disconnect();
+            expect(spyMiddleware.mock.calls.length).toEqual(1);
+        });
+    });
 });
