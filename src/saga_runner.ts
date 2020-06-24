@@ -43,12 +43,11 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
             return this.runEffect(effect, ctx);
         };
 
-        this.runEffectWithMiddleware = middlewares.reduceRight(
-            (previousNext, middleware: Middleware<IEffectDescription, Context>) => {
+        this.runEffectWithMiddleware = middlewares
+            .reduceRight((previousNext, middleware: Middleware<IEffectDescription, Context>) => {
                 return middleware(previousNext);
-            },
-            initialNext
-        );
+            }, initialNext)
+            .bind(this);
     }
 
     public runSaga = async (
