@@ -1,47 +1,19 @@
-# snpkg-snapi-background-worker
+# Kafka Sagas 🌼
 
-Rollup for client side packages + Parcel for dev react app with styled components and typescript
+Kafka-sagas is a package that allows you to use eerily similar semantics to [Redux-Sagas](https://redux-saga.js.org/) built on top of [KafkaJS](https://kafka.js.org/). With Kafka-Sagas, Kafka topics are treated as streams that a saga can dispatch actions into, as well as tapped for particular actions to initiate a saga.
 
-To use:
-1. Go to package.json and change `package-name` to repo name
-2. Add any dependencies that are used in the built version to `peerDependencies`
-3. Create your dev playground app in the `dev` folder
-   - Reusable components go in the `app/components` folder. Export all components from the `app/components/index.ts` file
-   - Features go in the `app/features` folder. Export all features from the `app/features/index.ts` file
-   - State (mobx objects) go in the `app/state` folder. Export all state objects from the `app/state/index.ts` file
-   - Context (mobx singletons aka datastores) go in the `app/context` file.
-4. Create your package code in the `src` folder
-5. Edit the `.github/CODEOWNERS` file with the github user names of the codeowners
+### Concepts
 
-Your README should have:
+## Consumer
 
-- table of contents
-- install section
-- about section
-- api section
-- example usage section
+## Saga
 
+## Action
 
-- [snpkg-snapi-background-worker](#snpkg-snapi-background-worker)
-  - [Install](#install)
-  - [About](#about)
-  - [API](#api)
-  - [Example Usage](#example-usage)
+## Effect
 
-## Install
+## Transaction
 
-```
-npm install --save @social-native/<NAME>
-```
+## Communication between sagas
 
-## About
-
-<FILL ME IN>
-
-## API
-
-<FILL ME IN>
-
-## Example Usage
-
-<FILL ME IN>
+![3 sagas communicate](https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png)
