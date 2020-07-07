@@ -22,7 +22,8 @@
         "@social-native/snpkg-snapi-authorization",
         "dotenv-cli",
         "@types/pino",
-        "typed-emitter"
+        "typed-emitter",
+        "typedoc"
     ],
     "specials": []
 }
