@@ -10,6 +10,7 @@
     ],
     "scripts": {
         "build": "npm run clean && rollup -c",
+        "docs:generate": "typedoc --tsconfig tsconfig.json --mode file --exclude \"src/__tests__/**/*.ts\" --excludeNotExported --out docs",
         "clean": "rimraf dist tmp",
         "watch": "rollup -cw",
         "prettier": "./node_modules/.bin/prettier \"src/**/*\" --write",
@@ -64,6 +65,7 @@
         "tslint-config-prettier": "^1.18.0",
         "tslint-eslint-rules": "^5.4.0",
         "tslint-immutable": "^5.5.2",
-        "typescript": "^3.8.3"
+        "typescript": "^3.8.3",
+        "typedoc": "^0.16.11"
     }
 }
