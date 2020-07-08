@@ -66,28 +66,98 @@
 					<h1>Kafka Sagas 🌼</h1>
 				</a>
 				<p>Kafka-sagas is a package that allows you to use eerily similar semantics to <a href="https://redux-saga.js.org/">Redux-Sagas</a> built on top of <a href="https://kafka.js.org/">KafkaJS</a>. With Kafka-Sagas, Kafka topics are treated as streams that a saga can dispatch actions into, as well as tapped for particular actions to initiate a saga.</p>
-				<a href="#concepts" id="concepts" style="color: inherit; text-decoration: none;">
-					<h3>Concepts</h3>
+				<ul>
+					<li><a href="#kafka-sagas-">Kafka Sagas 🌼</a><ul>
+							<li><a href="#whats-a-saga">What&#39;s A Saga?</a></li>
+							<li><a href="#whats-a-consumer">What&#39;s A Consumer?</a></li>
+							<li><a href="#whats-an-action">What&#39;s An Action?</a></li>
+							<li><a href="#whats-an-effect">What&#39;s an Effect?</a></li>
+							<li><a href="#whats-a-transaction">What&#39;s A Transaction?</a><ul>
+									<li><a href="#advanced">Advanced</a></li>
+								</ul>
+							</li>
+							<li><a href="#communication-between-sagas">Communication between sagas</a></li>
+						</ul>
+					</li>
+				</ul>
+				<a href="#what39s-a-saga" id="what39s-a-saga" style="color: inherit; text-decoration: none;">
+					<h3>What&#39;s A Saga?</h3>
 				</a>
-				<a href="#consumer" id="consumer" style="color: inherit; text-decoration: none;">
-					<h2>Consumer</h2>
+				<p>A saga is a generator function that receives a payload from a topic and runs some effects as a response. Effects performed by the saga will all be executed within the same transaction as the initiating action.</p>
+				<p>Example:</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">const</span> topics = {
+    BEGIN: <span class="hljs-string">'BEGIN'</span>,
+    STARTED: <span class="hljs-string">'STARTED'</span>,
+    COMPLETED: <span class="hljs-string">'COMPLETED'</span>,
+    FAILED: <span class="hljs-string">'FAILED'</span>
+};
+
+<span class="hljs-keyword">const</span> saga = <span class="hljs-function"><span class="hljs-keyword">function</span>*&lt;<span class="hljs-title">Payload</span>&gt;(<span class="hljs-params">
+    {
+        topic,
+        transaction_id,
+        payload
+    }: {
+        topic: <span class="hljs-built_in">string</span>;
+        transaction_id: <span class="hljs-built_in">string</span>;
+        payload: Payload;
+    },
+    context
+</span>) </span>{
+    <span class="hljs-keyword">const</span> {effects} = context;
+
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${topic}</span> message received`</span>, {
+        transaction_id
+    });
+
+    <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">yield</span> effects.put(topics.STARTED, payload); <span class="hljs-comment">// This will put send an action to the STARTED topic with our current transaction_id.</span>
+
+        <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">yield</span> effects.callFn(<span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+            <span class="hljs-keyword">const</span> {data} = <span class="hljs-keyword">await</span> axios.post(<span class="hljs-string">'/status'</span>);
+            <span class="hljs-keyword">return</span> data;
+        });
+
+        <span class="hljs-keyword">yield</span> effects.put(topics.COMPLETED, result); <span class="hljs-comment">// This will put send an action to the COMPLETED topic with our current transaction_id.</span>
+
+        <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`<span class="hljs-subst">${topic}</span> message processed`</span>, {
+            transaction_id
+        });
+    } <span class="hljs-keyword">catch</span> (error) {
+        <span class="hljs-keyword">yield</span> effects.put(topics.FAILED, {
+            <span class="hljs-comment">// This will put send an action to the FAILED topic with our current transaction_id.</span>
+            error: {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            }
+        });
+    }
+};</code></pre>
+				<a href="#what39s-a-consumer" id="what39s-a-consumer" style="color: inherit; text-decoration: none;">
+					<h3>What&#39;s A Consumer?</h3>
 				</a>
-				<a href="#saga" id="saga" style="color: inherit; text-decoration: none;">
-					<h2>Saga</h2>
+				<p>A consumer, in this realm, is a <a href="https://www.confluent.io/blog/tutorial-getting-started-with-the-new-apache-kafka-0-9-consumer-client/#:~:text=In%20Kafka%2C%20each%20topic%20is,sharing%20a%20common%20group%20identifier.">Kafka consumer</a>. You may choose to have one or many consumers within a single group. In order to do so, simply create another TopicSagaConsumer with the same topic.</p>
+				<a href="#what39s-an-action" id="what39s-an-action" style="color: inherit; text-decoration: none;">
+					<h3>What&#39;s An Action?</h3>
 				</a>
-				<a href="#action" id="action" style="color: inherit; text-decoration: none;">
-					<h2>Action</h2>
+				<p>An action is an event sent to a saga consumer that includes information about the topic, transactionId, and a payload. Under the hood, actions are just specialized kafka messages.</p>
+				<a href="#what39s-an-effect" id="what39s-an-effect" style="color: inherit; text-decoration: none;">
+					<h3>What&#39;s an Effect?</h3>
 				</a>
-				<a href="#effect" id="effect" style="color: inherit; text-decoration: none;">
-					<h2>Effect</h2>
+				<p>An effect is a side-effect a saga may perform within a transaction. Effects may be either intercepted by or stubbed out by using middleware.</p>
+				<a href="#what39s-a-transaction" id="what39s-a-transaction" style="color: inherit; text-decoration: none;">
+					<h3>What&#39;s A Transaction?</h3>
 				</a>
-				<a href="#transaction" id="transaction" style="color: inherit; text-decoration: none;">
-					<h2>Transaction</h2>
+				<p>A transaction is a string of events that share a transaction_id. By being in the same transaction, we are able to create consumers under-the-hood to other topics while only receiving messages from those topics that are in the current transaction we are working within.</p>
+				<a href="#advanced" id="advanced" style="color: inherit; text-decoration: none;">
+					<h2>Advanced</h2>
 				</a>
 				<a href="#communication-between-sagas" id="communication-between-sagas" style="color: inherit; text-decoration: none;">
-					<h2>Communication between sagas</h2>
+					<h3>Communication between sagas</h3>
 				</a>
-				<p><img src="https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png" alt="3 sagas communicate"></p>
+				<p>The following diagram illustrates how 3 independently deployed sagas can interact and react to each other.
+				<img src="https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png" alt="3 sagas communicate"></p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
