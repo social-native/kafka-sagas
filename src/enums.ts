@@ -1,8 +1,3 @@
-export enum BACKPRESSURE_EVENT {
-    BACKPRESSURE_REACHED = 'BACKPRESSURE_REACHED',
-    BACKPRESSURE_RELIEVED = 'BACKPRESSURE_RELIEVED'
-}
-
 export enum EffectDescriptionKind {
     PUT = 'PUT',
     TAKE = 'TAKE',
