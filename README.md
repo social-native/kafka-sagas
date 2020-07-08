@@ -2,6 +2,8 @@
 
 Kafka-sagas is a package that allows you to use eerily similar semantics to [Redux-Sagas](https://redux-saga.js.org/) built on top of [KafkaJS](https://kafka.js.org/). With Kafka-Sagas, Kafka topics are treated as streams that a saga can dispatch actions into, as well as tapped for particular actions to initiate a saga.
 
+## [API Reference](https://social-native.github.io/snpkg-snapi-kafka-sagas/index.html)
+
 - [Kafka Sagas 🌼](#kafka-sagas-)
     - [What's A Saga?](#whats-a-saga)
     - [What's A Consumer?](#whats-a-consumer)
