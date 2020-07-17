@@ -4,8 +4,6 @@ describe(createActionMessage.name, function() {
     it('creates kafka message from the action', function() {
         expect(
             createActionMessage({
-                userId: 5,
-                roles: ['admin'],
                 headers: {
                     key: Buffer.from('value')
                 },

@@ -9,26 +9,14 @@ import {
     ActionChannelInput,
     ICombinatatorEffectDescription,
     IPredicateRecord,
-    ISnapiHeaders,
     IDelayEffectDescription
 } from './types';
 import {EffectDescriptionKind} from './enums';
-import {enums} from '@social-native/snpkg-snapi-authorization';
 
 export function isTransactionMessage<Payload>(
     messageValue: IAction | any
-): messageValue is Omit<IAction<Payload>, 'topic' | 'userId' | 'userRoles'> {
+): messageValue is Omit<IAction<Payload>, 'topic'> {
     return messageValue && messageValue.transaction_id;
-}
-
-export function isSnapiHeaders(
-    messageHeaders: Record<string, string | undefined>
-): messageHeaders is ISnapiHeaders {
-    return (
-        messageHeaders &&
-        messageHeaders[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID] !== undefined &&
-        messageHeaders[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES] !== undefined
-    );
 }
 
 export function isTakeEffectDescription(

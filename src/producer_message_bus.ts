@@ -43,13 +43,7 @@ export class ProducerMessageBus {
             acks: -1,
             compression: CompressionTypes.GZIP,
             topic: action.topic,
-            messages: [
-                createActionMessage({
-                    action,
-                    userId: action.userId,
-                    roles: action.userRoles
-                })
-            ]
+            messages: [createActionMessage({action})]
         });
     }
 

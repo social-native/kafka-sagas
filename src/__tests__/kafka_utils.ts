@@ -62,13 +62,6 @@ export function withTopicCleanup(topics: string[], seeding: boolean = true) {
 export function createKafkaMessageFromAction<Payload>(action: IAction<Payload>): KafkaMessage {
     const headers: IHeaders = {};
 
-    if (action.userId && action.userRoles) {
-        headers[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID] = Buffer.from(`${action.userId}`);
-        headers[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES] = Buffer.from(
-            action.userRoles.join(',')
-        );
-    }
-
     return {
         headers,
         key: Buffer.from(''),

@@ -1,5 +1,4 @@
 import pino from 'pino';
-import {enums} from '@social-native/snpkg-snapi-authorization';
 
 import {EffectBuilder} from './effect_builder';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
@@ -169,7 +168,7 @@ export type CallableSaga<
 
 export interface IBaseSagaContext {
     effects: EffectBuilder;
-    headers: Record<string, any>;
+    headers: Record<string, string>;
 }
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;
@@ -205,12 +204,6 @@ export interface ILoggerConfig {
     logger?: ReturnType<typeof pino>;
 }
 
-export interface ISnapiHeaders {
-    [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID]: string;
-    [enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES]: string;
-    [index: string]: string | undefined;
-}
-
 /**
  * Actions
  */
@@ -219,8 +212,7 @@ export interface IAction<Payload = DefaultPayload> {
     topic: string;
     transaction_id: string;
     payload: Payload;
-    userId?: string | number;
-    userRoles?: string[];
+    headers?: Record<string, string>;
 }
 
 export type DefaultPayload = Record<string, any> | undefined;

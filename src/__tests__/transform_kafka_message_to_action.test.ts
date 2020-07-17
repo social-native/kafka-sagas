@@ -18,32 +18,6 @@ describe(transformKafkaMessageToAction.name, function() {
         });
     });
 
-    it('adds userId and roles if present in headers', function() {
-        expect(
-            transformKafkaMessageToAction(
-                'topic',
-                createKafkaMessageFromAction({
-                    payload: 'asdf',
-                    topic: 'dsaf',
-                    transaction_id: 'fafas',
-                    userId: 4,
-                    userRoles: ['admin', 'machine']
-                })
-            )
-        ).toMatchInlineSnapshot(`
-            Object {
-              "payload": "asdf",
-              "topic": "topic",
-              "transaction_id": "fafas",
-              "userId": "4",
-              "userRoles": Array [
-                "admin",
-                "machine",
-              ],
-            }
-        `);
-    });
-
     it('throws if it receives a misshapen message', function() {
         const getAction = () =>
             transformKafkaMessageToAction(

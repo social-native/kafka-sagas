@@ -10,7 +10,7 @@ export function parseHeaders(headers?: IHeaders): Record<keyof typeof headers, s
     return keys.reduce((parsed, header) => {
         return {
             ...parsed,
-            [header.toString()]: headers[header] ? headers[header].toString() : undefined
+            [header.toString()]: headers[header].toString()
         };
-    }, {} as Record<keyof typeof headers, string | undefined>);
+    }, {} as Record<keyof typeof headers, string>);
 }

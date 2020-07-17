@@ -140,13 +140,8 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
                 payload: effectDescription.payload
             };
 
-            if (
-                context.headers &&
-                context.headers[WORKER_USER_ID] &&
-                context.headers[WORKER_USER_ROLES]
-            ) {
-                action.userId = context.headers[WORKER_USER_ID];
-                action.userRoles = context.headers[WORKER_USER_ROLES].split(',');
+            if (context.headers) {
+                action.headers = context.headers;
             }
 
             await this.producerMessageBus.putAction(action);
