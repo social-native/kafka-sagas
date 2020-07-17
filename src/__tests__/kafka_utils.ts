@@ -1,7 +1,6 @@
 import {kafka} from './test_clients';
 import {KafkaMessage, IHeaders} from 'kafkajs';
 import {IAction} from '../types';
-import {enums} from '@social-native/snpkg-snapi-authorization';
 
 export async function createTopic(topic: string) {
     const admin = kafka.admin();
