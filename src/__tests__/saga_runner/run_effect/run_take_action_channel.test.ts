@@ -37,6 +37,7 @@ describe(SagaRunner.name, function() {
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
+                          "headers": Object {},
                           "payload": Object {
                             "bart_simpson": "eat_my_shorts",
                           },

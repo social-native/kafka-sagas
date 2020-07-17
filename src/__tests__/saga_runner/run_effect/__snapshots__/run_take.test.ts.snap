@@ -2,6 +2,7 @@
 
 exports[`SagaRunner take given an action channel pattern takes from the action channel's buffer 1`] = `
 Object {
+  "headers": Object {},
   "payload": Object {
     "bart_simpson": "bad",
   },
@@ -34,6 +35,7 @@ exports[`SagaRunner take given an action channel pattern takes from the action c
 Array [
   Array [
     Object {
+      "headers": Object {},
       "payload": Object {
         "bart_simpson": "bad",
       },
@@ -46,6 +48,7 @@ Array [
 
 exports[`SagaRunner take given simple patterns given a pattern of kind PredicateRecord begins streaming actions from the stream matching the pattern 1`] = `
 Object {
+  "headers": Object {},
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
@@ -76,6 +79,7 @@ Array [
 
 exports[`SagaRunner take given simple patterns given a pattern of kind string begins streaming actions from the stream matching the pattern 1`] = `
 Object {
+  "headers": Object {},
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
@@ -106,6 +110,7 @@ Array [
 
 exports[`SagaRunner take given simple patterns given a pattern of kind string[] begins streaming actions from the stream matching the pattern 1`] = `
 Object {
+  "headers": Object {},
   "payload": Object {
     "bart_simpson": "eat_my_shorts",
   },
@@ -146,6 +151,7 @@ Array [
 
 exports[`SagaRunner take races results from the streams 1`] = `
 Object {
+  "headers": Object {},
   "payload": Object {
     "bart_simpson": "winner",
   },

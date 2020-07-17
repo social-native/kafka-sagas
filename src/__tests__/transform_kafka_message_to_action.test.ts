@@ -12,34 +12,12 @@ describe(transformKafkaMessageToAction.name, function() {
                     transaction_id: '420'
                 })
             )
-        ).toEqual({
-            topic: 'test',
-            transaction_id: '420'
-        });
-    });
-
-    it('adds userId and roles if present in headers', function() {
-        expect(
-            transformKafkaMessageToAction(
-                'topic',
-                createKafkaMessageFromAction({
-                    payload: 'asdf',
-                    topic: 'dsaf',
-                    transaction_id: 'fafas',
-                    userId: 4,
-                    userRoles: ['admin', 'machine']
-                })
-            )
         ).toMatchInlineSnapshot(`
             Object {
-              "payload": "asdf",
-              "topic": "topic",
-              "transaction_id": "fafas",
-              "userId": "4",
-              "userRoles": Array [
-                "admin",
-                "machine",
-              ],
+              "headers": Object {},
+              "payload": undefined,
+              "topic": "test",
+              "transaction_id": "420",
             }
         `);
     });

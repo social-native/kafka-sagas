@@ -119,8 +119,7 @@ export class TopicSagaConsumer<
                     {
                         topic: initialAction.topic,
                         transaction_id: initialAction.transaction_id,
-                        user_id: initialAction.userId,
-                        user_roles: initialAction.userRoles,
+                        headers: initialAction.headers,
                         timestamp: Date.now()
                     },
                     'Beginning consumption of message'
@@ -143,8 +142,7 @@ export class TopicSagaConsumer<
                         {
                             topic: initialAction.topic,
                             transaction_id: initialAction.transaction_id,
-                            user_id: initialAction.userId,
-                            user_roles: initialAction.userRoles,
+                            headers: initialAction.headers,
                             timestamp: Date.now()
                         },
                         'Successfully consumed message'
@@ -155,8 +153,7 @@ export class TopicSagaConsumer<
                         {
                             transaction_id: initialAction.transaction_id,
                             topic: initialAction.topic,
-                            user_id: initialAction.userId,
-                            user_roles: initialAction.userRoles,
+                            headers: initialAction.headers,
                             timestamp: Date.now(),
                             error
                         },

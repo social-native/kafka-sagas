@@ -54,6 +54,7 @@ describe(SagaRunner.name, function() {
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
+                          "headers": Object {},
                           "payload": Object {
                             "bart_simpson": "first",
                           },
@@ -118,6 +119,7 @@ describe(SagaRunner.name, function() {
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
                           "fast": Object {
+                            "headers": Object {},
                             "payload": Object {
                               "bart_simpson": "first",
                             },

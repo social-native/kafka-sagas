@@ -1,19 +1,16 @@
 import {KafkaMessage, IHeaders} from 'kafkajs';
-import {enums} from '@social-native/snpkg-snapi-authorization';
-
-import {isTransactionMessage, isSnapiHeaders} from './type_guard';
+import {isTransactionMessage} from './type_guard';
 import {IAction} from './types';
 import {parseHeaders} from './parse_headers';
 
 export function transformKafkaMessageToAction<Payload>(
     topic: string,
     message: KafkaMessage,
-    headerParser: (h: IHeaders | undefined) => any = parseHeaders,
+    headerParser: (h: IHeaders | undefined) => Record<string, string> = parseHeaders,
     valueParser: (val: string) => any = JSON.parse
 ): IAction<Payload> {
     const {headers, value} = message;
 
-    const parsedHeaders: Record<string, string | undefined> = headerParser(headers);
     const parsedValue = valueParser(value.toString());
 
     if (!isTransactionMessage<Payload>(parsedValue)) {
@@ -23,17 +20,9 @@ export function transformKafkaMessageToAction<Payload>(
     const action: IAction<Payload> = {
         topic,
         transaction_id: parsedValue.transaction_id,
-        payload: parsedValue.payload
+        payload: parsedValue.payload,
+        headers: headerParser(headers)
     };
-
-    if (isSnapiHeaders(parsedHeaders)) {
-        action.userId = parsedHeaders[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ID];
-        const rolesList = parsedHeaders[enums.WORKER_USER_IDENTITY_HEADER.WORKER_USER_ROLES].split(
-            ','
-        );
-
-        action.userRoles = rolesList;
-    }
 
     return action;
 }
