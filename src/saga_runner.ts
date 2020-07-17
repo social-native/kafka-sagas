@@ -1,5 +1,4 @@
 import Bluebird from 'bluebird';
-import {enums} from '@social-native/snpkg-snapi-authorization';
 
 import {
     IAction,
@@ -23,10 +22,6 @@ import {
     isDelayEffectDescription,
     isGenerator
 } from './type_guard';
-
-const {
-    WORKER_USER_IDENTITY_HEADER: {WORKER_USER_ID, WORKER_USER_ROLES}
-} = enums;
 
 export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
     protected runEffectWithMiddleware: <EffectDescription extends IEffectDescription>(
