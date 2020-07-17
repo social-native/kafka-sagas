@@ -54,6 +54,7 @@ describe(TopicSagaConsumer.name, function() {
                     Array [
                       Array [
                         Object {
+                          "headers": Object {},
                           "payload": Object {
                             "dogs_go": "awoo",
                           },

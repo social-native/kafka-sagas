@@ -93,6 +93,7 @@ describe(SagaRunner.name, function() {
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
                           "one": Object {
+                            "headers": Object {},
                             "payload": Object {
                               "bart_simpson": "first",
                             },
@@ -100,6 +101,7 @@ describe(SagaRunner.name, function() {
                             "transaction_id": "static-transaction-id",
                           },
                           "two": Object {
+                            "headers": Object {},
                             "payload": Object {
                               "bart_simpson": "second",
                             },

@@ -1,5 +1,6 @@
 import pino from 'pino';
 
+import {IHeaders} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 import {SagaRunner} from './saga_runner';
@@ -212,7 +213,7 @@ export interface IAction<Payload = DefaultPayload> {
     topic: string;
     transaction_id: string;
     payload: Payload;
-    headers?: Record<string, string>;
+    headers?: IHeaders;
 }
 
 export type DefaultPayload = Record<string, any> | undefined;

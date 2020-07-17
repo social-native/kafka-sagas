@@ -12,10 +12,14 @@ describe(transformKafkaMessageToAction.name, function() {
                     transaction_id: '420'
                 })
             )
-        ).toEqual({
-            topic: 'test',
-            transaction_id: '420'
-        });
+        ).toMatchInlineSnapshot(`
+            Object {
+              "headers": Object {},
+              "payload": undefined,
+              "topic": "test",
+              "transaction_id": "420",
+            }
+        `);
     });
 
     it('throws if it receives a misshapen message', function() {
