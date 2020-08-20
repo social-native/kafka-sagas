@@ -30,8 +30,8 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
     ) => Promise<any>;
 
     constructor(
-        private ConsumerPool: ConsumerPool,
-        private ProducerPool: ProducerPool,
+        private consumerPool: ConsumerPool,
+        private producerPool: ProducerPool,
         middlewares: Array<Middleware<IEffectDescription, Context>> = []
     ) {
         const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
@@ -50,9 +50,9 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
         context: Context,
         saga: Saga<InitialActionPayload, Context>
     ): Promise<any> => {
-        this.ConsumerPool.startTransaction(initialAction.transaction_id);
+        this.consumerPool.startTransaction(initialAction.transaction_id);
         const result = await this.runGeneratorFsm(saga(initialAction, context), context);
-        this.ConsumerPool.stopTransaction(initialAction.transaction_id);
+        this.consumerPool.stopTransaction(initialAction.transaction_id);
         return result;
     };
 
@@ -90,13 +90,13 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
 
         if (isActionChannelEffectDescription(effectDescription)) {
             for (const topic of effectDescription.topics) {
-                this.ConsumerPool.registerTopicObserver({
+                this.consumerPool.registerTopicObserver({
                     transactionId: effectDescription.transactionId,
                     topic,
                     observer: effectDescription.observer
                 });
 
-                await this.ConsumerPool.streamActionsFromTopic(topic);
+                await this.consumerPool.streamActionsFromTopic(topic);
             }
 
             return effectDescription;
@@ -116,13 +116,13 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
 
         if (isTakeEffectDescription(effectDescription)) {
             await Bluebird.map(effectDescription.topics, async topic => {
-                this.ConsumerPool.registerTopicObserver({
+                this.consumerPool.registerTopicObserver({
                     transactionId: effectDescription.transactionId,
                     topic,
                     observer: effectDescription.observer
                 });
 
-                await this.ConsumerPool.streamActionsFromTopic(topic);
+                await this.consumerPool.streamActionsFromTopic(topic);
             });
 
             return await effectDescription.buffer.take();
@@ -139,7 +139,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
                 action.headers = context.headers;
             }
 
-            await this.ProducerPool.putAction(action);
+            await this.producerPool.putAction(action);
 
             return;
         }
