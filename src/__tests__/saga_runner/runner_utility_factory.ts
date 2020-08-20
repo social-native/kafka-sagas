@@ -1,40 +1,42 @@
-import {ConsumerMessageBus} from '../../consumer_message_bus';
+import {ConsumerPool} from '../../consumer_pool';
 import {kafka} from '../test_clients';
-import {ProducerMessageBus} from '../../producer_message_bus';
+import {ProducerPool} from '../../producer_pool';
 import {EffectBuilder} from '../../effect_builder';
 import {SagaRunner} from '../../saga_runner';
 
 export async function runnerUtilityFactory() {
     const transactionId = 'static-transaction-id';
-    const consumerBus = new ConsumerMessageBus(kafka, 'test', {
+    const consumerPool = new ConsumerPool(kafka, 'test', {
         sessionTimeout: 50000,
         heartbeatInterval: 15000
     });
 
-    const producerBus = new ProducerMessageBus(kafka);
+    const producerPool = new ProducerPool(kafka);
 
-    consumerBus.startTransaction(transactionId);
-    await producerBus.connect();
+    consumerPool.startTransaction(transactionId);
+    await producerPool.connect();
 
-    const runner = new SagaRunner(consumerBus, producerBus);
+    const runner = new SagaRunner(consumerPool, producerPool);
     const effectBuilder = new EffectBuilder(transactionId);
 
     return {
         transactionId,
         effectBuilder,
         spy: {
-            consumer: (methodName: keyof typeof consumerBus) => jest.spyOn(consumerBus, methodName),
-            producer: (methodName: keyof typeof producerBus) => jest.spyOn(producerBus, methodName)
+            consumer: (methodName: keyof typeof consumerPool) =>
+                jest.spyOn(consumerPool, methodName),
+            producer: (methodName: keyof typeof producerPool) =>
+                jest.spyOn(producerPool, methodName)
         },
         runner,
         context: {
             effects: effectBuilder,
             headers: {}
         },
-        async closeBuses() {
-            consumerBus.stopTransaction(transactionId);
-            await consumerBus.disconnectConsumers();
-            await producerBus.disconnect();
+        async closePools() {
+            consumerPool.stopTransaction(transactionId);
+            await consumerPool.disconnectConsumers();
+            await producerPool.disconnect();
         }
     };
 }

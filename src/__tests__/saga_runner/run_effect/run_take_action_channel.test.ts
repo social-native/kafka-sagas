@@ -13,7 +13,7 @@ describe(SagaRunner.name, function() {
                         effectBuilder,
                         runner,
                         transactionId,
-                        closeBuses,
+                        closePools,
                         context
                     } = await runnerUtilityFactory();
 
@@ -33,7 +33,7 @@ describe(SagaRunner.name, function() {
 
                     const payload = await runner.runEffect(takeActionChannel, context);
 
-                    await closeBuses();
+                    await closePools();
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {

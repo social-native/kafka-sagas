@@ -20,7 +20,7 @@ describe(SagaRunner.name, function() {
                 })
             ]);
 
-            await util.closeBuses();
+            await util.closePools();
 
             expect(result).toEqual('toolbelt');
         });

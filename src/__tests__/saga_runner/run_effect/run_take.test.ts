@@ -65,7 +65,7 @@ describe(SagaRunner.name, function() {
                                 expect(observerRegisteredSpy.mock.calls).toMatchSnapshot();
                                 expect(streamActionsSpy.mock.calls).toMatchSnapshot();
 
-                                await runnerUtils.closeBuses();
+                                await runnerUtils.closePools();
                             });
                         },
                         DEFAULT_TEST_TIMEOUT * 2
@@ -117,7 +117,7 @@ describe(SagaRunner.name, function() {
                         expect(observerRegisteredSpy.mock.calls).toMatchSnapshot();
                         expect(streamActionsSpy.mock.calls).toMatchSnapshot();
 
-                        await runnerUtils.closeBuses();
+                        await runnerUtils.closePools();
                     }
                 );
             },
@@ -161,7 +161,7 @@ describe(SagaRunner.name, function() {
                         expect(streamActionsSpy.mock.calls).toMatchSnapshot();
                         expect(bufferSpy.mock.calls).toMatchSnapshot();
 
-                        await runnerUtils.closeBuses();
+                        await runnerUtils.closePools();
                     });
                 },
                 DEFAULT_TEST_TIMEOUT

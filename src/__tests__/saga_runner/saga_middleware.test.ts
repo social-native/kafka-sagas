@@ -1,8 +1,8 @@
 import {SagaRunner} from '../../saga_runner';
 import {kafka} from '../test_clients';
-import {ConsumerMessageBus} from '../../consumer_message_bus';
+import {ConsumerPool} from '../../consumer_pool';
 import {withTopicCleanup} from '../kafka_utils';
-import {ProducerMessageBus} from '../../producer_message_bus';
+import {ProducerPool} from '../../producer_pool';
 import {EffectBuilder} from '../../effect_builder';
 import {isPutEffectDescription} from '../../type_guard';
 
@@ -10,11 +10,11 @@ describe('Saga middleware', function() {
     it('calls middlewares in the correct order', async function() {
         await withTopicCleanup(['middleware-test-order'])(async ([topic]) => {
             const calls: string[] = [];
-            const consumerBus = new ConsumerMessageBus(kafka, topic);
-            const producerbus = new ProducerMessageBus(kafka);
-            await producerbus.connect();
+            const consumerPool = new ConsumerPool(kafka, topic);
+            const producerPool = new ProducerPool(kafka);
+            await producerPool.connect();
 
-            const sagaRunner = new SagaRunner(consumerBus, producerbus, [
+            const sagaRunner = new SagaRunner(consumerPool, producerPool, [
                 next => async (effectDescription, ctx) => {
                     calls.push('first');
                     const result = await next(effectDescription, ctx);
@@ -44,8 +44,8 @@ describe('Saga middleware', function() {
                 }
             );
 
-            await consumerBus.disconnectConsumers();
-            await producerbus.disconnect();
+            await consumerPool.disconnectConsumers();
+            await producerPool.disconnect();
 
             expect(calls).toEqual(['first', 'second', 'third', 'fourth']);
         });
@@ -54,13 +54,13 @@ describe('Saga middleware', function() {
     it('allows modifying effectDescriptions', async function() {
         await withTopicCleanup(['middleware-test-mutating-effect', 'redirected'])(
             async ([topic]) => {
-                const consumerBus = new ConsumerMessageBus(kafka, topic);
-                const producerbus = new ProducerMessageBus(kafka);
-                await producerbus.connect();
+                const consumerPool = new ConsumerPool(kafka, topic);
+                const producerPool = new ProducerPool(kafka);
+                await producerPool.connect();
 
                 let redirectedPattern: string | null = null;
 
-                const sagaRunner = new SagaRunner(consumerBus, producerbus, [
+                const sagaRunner = new SagaRunner(consumerPool, producerPool, [
                     next => async (effect, ctx) => {
                         if (isPutEffectDescription(effect)) {
                             effect.pattern = 'redirected';
@@ -92,8 +92,8 @@ describe('Saga middleware', function() {
                     }
                 );
 
-                await consumerBus.disconnectConsumers();
-                await producerbus.disconnect();
+                await consumerPool.disconnectConsumers();
+                await producerPool.disconnect();
 
                 expect(redirectedPattern).toEqual('redirected');
             }
@@ -102,11 +102,11 @@ describe('Saga middleware', function() {
 
     it('bubbles errors up from middleware into the saga', async function() {
         await withTopicCleanup(['middleware-test-error-bubbling'])(async ([topic]) => {
-            const consumerBus = new ConsumerMessageBus(kafka, topic);
-            const producerbus = new ProducerMessageBus(kafka);
-            await producerbus.connect();
+            const consumerPool = new ConsumerPool(kafka, topic);
+            const producerPool = new ProducerPool(kafka);
+            await producerPool.connect();
 
-            const sagaRunner = new SagaRunner(consumerBus, producerbus, [
+            const sagaRunner = new SagaRunner(consumerPool, producerPool, [
                 () => async () => {
                     throw new Error('Symbolic Error');
                 }
@@ -133,17 +133,17 @@ describe('Saga middleware', function() {
                 }
             );
 
-            await consumerBus.disconnectConsumers();
-            await producerbus.disconnect();
+            await consumerPool.disconnectConsumers();
+            await producerPool.disconnect();
             expect(error).toMatchInlineSnapshot(`[Error: Symbolic Error]`);
         });
     });
 
     it('runs effects with middleware from error continuation in the saga', async function() {
         await withTopicCleanup(['middleware-test-error-bubbling'])(async ([topic]) => {
-            const consumerBus = new ConsumerMessageBus(kafka, topic);
-            const producerbus = new ProducerMessageBus(kafka);
-            await producerbus.connect();
+            const consumerPool = new ConsumerPool(kafka, topic);
+            const producerPool = new ProducerPool(kafka);
+            await producerPool.connect();
 
             const spyMiddleware = jest
                 .fn()
@@ -152,7 +152,7 @@ describe('Saga middleware', function() {
                         next(effect, context)
                 );
 
-            const sagaRunner = new SagaRunner(consumerBus, producerbus, [spyMiddleware]);
+            const sagaRunner = new SagaRunner(consumerPool, producerPool, [spyMiddleware]);
 
             await sagaRunner.runSaga(
                 {
@@ -173,8 +173,8 @@ describe('Saga middleware', function() {
                 }
             );
 
-            await consumerBus.disconnectConsumers();
-            await producerbus.disconnect();
+            await consumerPool.disconnectConsumers();
+            await producerPool.disconnect();
             expect(spyMiddleware.mock.calls.length).toEqual(1);
         });
     });

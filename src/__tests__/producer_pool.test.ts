@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import {ProducerMessageBus} from '../../src/producer_message_bus';
+import {ProducerPool} from '../producer_pool';
 import {IAction} from '../../src/types';
 import {kafka} from './test_clients';
 import {withTopicCleanup, deleteTopic} from './kafka_utils';
@@ -9,19 +9,19 @@ import {DEFAULT_TEST_TIMEOUT} from './constants';
 
 type TestAction = IAction<{thing: true}>;
 
-describe(ProducerMessageBus.name, function() {
+describe(ProducerPool.name, function() {
     it(
         'puts messages into the topic',
         async function() {
-            await withTopicCleanup(['producer_message_bus_test'])(async ([topic]) => {
+            await withTopicCleanup(['producer_pool_test'])(async ([topic]) => {
                 const expectedMessage: Omit<TestAction, 'topic'> = {
                     payload: {thing: true},
                     transaction_id: '4'
                 };
 
-                const bus = new ProducerMessageBus(kafka);
-                await bus.connect();
-                await bus.putAction({
+                const pool = new ProducerPool(kafka);
+                await pool.connect();
+                await pool.putAction({
                     transaction_id: expectedMessage.transaction_id,
                     payload: expectedMessage.payload,
                     topic
@@ -43,7 +43,7 @@ describe(ProducerMessageBus.name, function() {
 
                 expect(receivedMessage).toEqual(expectedMessage);
                 await consumer.disconnect();
-                await bus.disconnect();
+                await pool.disconnect();
             });
         },
         DEFAULT_TEST_TIMEOUT
@@ -55,17 +55,17 @@ describe(ProducerMessageBus.name, function() {
         try {
             const transactionId = 'super-cool-transaction';
 
-            const bus = new ProducerMessageBus(kafka);
+            const pool = new ProducerPool(kafka);
 
-            await bus.connect();
+            await pool.connect();
 
-            await bus.putAction({
+            await pool.putAction({
                 topic: newTopic,
                 transaction_id: transactionId,
                 payload: {}
             });
 
-            await bus.disconnect();
+            await pool.disconnect();
 
             const admin = kafka.admin();
 

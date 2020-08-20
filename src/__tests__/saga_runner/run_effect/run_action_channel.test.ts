@@ -65,7 +65,7 @@ describe(SagaRunner.name, function() {
 
                             expect(await channel.buffer.take()).toMatchSnapshot();
 
-                            await runnerUtils.closeBuses();
+                            await runnerUtils.closePools();
                         });
                     },
                     DEFAULT_TEST_TIMEOUT
@@ -100,7 +100,7 @@ describe(SagaRunner.name, function() {
 
                             expect(await buffer.take()).toMatchSnapshot();
 
-                            await runnerUtils.closeBuses();
+                            await runnerUtils.closePools();
                         });
                     },
                     DEFAULT_TEST_TIMEOUT
@@ -149,7 +149,7 @@ describe(SagaRunner.name, function() {
 
                         expect(await channel.buffer.take()).toMatchSnapshot();
 
-                        await runnerUtils.closeBuses();
+                        await runnerUtils.closePools();
                     });
                 },
                 DEFAULT_TEST_TIMEOUT

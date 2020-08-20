@@ -1,9 +1,9 @@
 import {SagaRunner} from '../../saga_runner';
 import {withTopicCleanup} from '../kafka_utils';
 import {DEFAULT_TEST_TIMEOUT} from '../constants';
-import {ConsumerMessageBus} from '../../consumer_message_bus';
+import {ConsumerPool} from '../../consumer_pool';
 import {kafka} from '../test_clients';
-import {ProducerMessageBus} from '../../producer_message_bus';
+import {ProducerPool} from '../../producer_pool';
 import {EffectBuilder} from '../../effect_builder';
 import uuid from 'uuid';
 import Bluebird from 'bluebird';
@@ -106,13 +106,13 @@ describe(SagaRunner.name, function() {
                     const transactionId = 'run-saga-trx-id';
                     const remoteSaga = createMockRemoteCopyCampaignSaga(transactionId);
                     await remoteSaga.start();
-                    const consumerBus = new ConsumerMessageBus(kafka, topics.CLONE_CAMPAIGN_START);
-                    const producerBus = new ProducerMessageBus(kafka);
-                    await producerBus.connect();
+                    const consumerPool = new ConsumerPool(kafka, topics.CLONE_CAMPAIGN_START);
+                    const producerPool = new ProducerPool(kafka);
+                    await producerPool.connect();
 
                     const runner = new SagaRunner<{campaignId: number}, SagaContext>(
-                        consumerBus,
-                        producerBus
+                        consumerPool,
+                        producerPool
                     );
 
                     const effectBuilder = new EffectBuilder(transactionId);
@@ -188,8 +188,8 @@ describe(SagaRunner.name, function() {
 
                     expect(finalResult.transaction_id).toEqual(transactionId);
 
-                    await consumerBus.disconnectConsumers();
-                    await producerBus.disconnect();
+                    await consumerPool.disconnectConsumers();
+                    await producerPool.disconnect();
                     await remoteSaga.stop();
                 });
             },

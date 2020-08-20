@@ -1,11 +1,11 @@
 import Bluebird from 'bluebird';
-import {ConsumerMessageBus} from '../../src/consumer_message_bus';
+import {ConsumerPool} from '../consumer_pool';
 import {kafka} from './test_clients';
 import {seedTopic, withTopicCleanup, deleteTopic} from './kafka_utils';
 import {IAction} from '../types';
 import uuid from 'uuid';
 
-describe(ConsumerMessageBus.name, function() {
+describe(ConsumerPool.name, function() {
     it('notifies observers of new messages only', async function() {
         await withTopicCleanup(['bart-report-card-arrived'])(async ([topic]) => {
             const transactionId = 'super-cool-transaction';
@@ -17,17 +17,17 @@ describe(ConsumerMessageBus.name, function() {
 
             await seedTopic(topic, [preseededMessage]);
 
-            const bus = new ConsumerMessageBus(kafka, 'consumer_message_bus_test');
+            const pool = new ConsumerPool(kafka, 'consumer_pool_test');
             const receivedMessages: IAction[] = [];
-            bus.startTransaction(transactionId);
+            pool.startTransaction(transactionId);
 
-            bus.registerTopicObserver({
+            pool.registerTopicObserver({
                 transactionId,
                 topic,
                 observer: action => receivedMessages.push(action)
             });
 
-            await bus.streamActionsFromTopic(topic);
+            await pool.streamActionsFromTopic(topic);
 
             await seedTopic(topic, [
                 {
@@ -39,7 +39,7 @@ describe(ConsumerMessageBus.name, function() {
             // give it some time to deliver
             await Bluebird.delay(1000);
 
-            await bus.disconnectConsumers();
+            await pool.disconnectConsumers();
 
             expect(receivedMessages.map(({payload}) => payload)).toContainEqual({
                 new_message: true
@@ -53,17 +53,17 @@ describe(ConsumerMessageBus.name, function() {
         try {
             const transactionId = 'super-cool-transaction';
 
-            const bus = new ConsumerMessageBus(kafka, newTopic);
-            bus.startTransaction(transactionId);
+            const pool = new ConsumerPool(kafka, newTopic);
+            pool.startTransaction(transactionId);
 
-            bus.registerTopicObserver({
+            pool.registerTopicObserver({
                 transactionId,
                 topic: newTopic,
                 // tslint:disable-next-line: no-empty
                 observer: () => {}
             });
 
-            await bus.streamActionsFromTopic(newTopic);
+            await pool.streamActionsFromTopic(newTopic);
 
             await seedTopic(newTopic, [
                 {
@@ -72,9 +72,9 @@ describe(ConsumerMessageBus.name, function() {
                 }
             ]);
 
-            bus.stopTransaction(transactionId);
+            pool.stopTransaction(transactionId);
 
-            await bus.disconnectConsumers();
+            await pool.disconnectConsumers();
 
             const admin = kafka.admin();
 

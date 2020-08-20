@@ -3,7 +3,7 @@ import {IAction} from './types';
 import {createActionMessage} from './create_action_message';
 import {TopicAdministrator} from './topic_administrator';
 
-export class ProducerMessageBus {
+export class ProducerPool {
     private producer: Producer;
     private topicAdministrator: TopicAdministrator;
     private isConnected: boolean = false;
