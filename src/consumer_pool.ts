@@ -5,7 +5,7 @@ import {IAction, ActionObserver} from './types';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {TopicAdministrator} from './topic_administrator';
 
-export class ConsumerMessageBus {
+export class ConsumerPool {
     private topicAdministrator: TopicAdministrator;
     private consumers: Map<string, Consumer> = new Map();
     private observersByTransaction: Map<
@@ -19,8 +19,7 @@ export class ConsumerMessageBus {
         private consumerConfig: Omit<ConsumerConfig, 'groupId' | 'allowAutoTopicCreation'> = {},
         topicAdministrator?: TopicAdministrator
     ) {
-        this.topicAdministrator =
-            topicAdministrator || new TopicAdministrator(kafka, {replicationFactor: 1});
+        this.topicAdministrator = topicAdministrator || new TopicAdministrator(kafka);
     }
 
     public async streamActionsFromTopic(topic: string) {

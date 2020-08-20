@@ -13,7 +13,7 @@ describe(SagaRunner.name, function() {
                     const {
                         effectBuilder,
                         runner,
-                        closeBuses,
+                        closePools,
                         context
                     } = await runnerUtilityFactory();
 
@@ -48,7 +48,7 @@ describe(SagaRunner.name, function() {
                     /** Order doesn't matter in this case */
                     expect(actions).toHaveLength(2);
 
-                    await closeBuses();
+                    await closePools();
                 });
             },
             DEFAULT_TEST_TIMEOUT
@@ -61,7 +61,7 @@ describe(SagaRunner.name, function() {
                     const {
                         effectBuilder,
                         runner,
-                        closeBuses,
+                        closePools,
                         context
                     } = await runnerUtilityFactory();
                     const channel = effectBuilder.actionChannel<{
@@ -111,7 +111,7 @@ describe(SagaRunner.name, function() {
                         }
                     `);
 
-                    await closeBuses();
+                    await closePools();
                 });
             },
             DEFAULT_TEST_TIMEOUT

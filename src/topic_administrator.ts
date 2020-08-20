@@ -11,7 +11,7 @@ export class TopicAdministrator {
 
     constructor(
         protected kafka: Kafka,
-        protected topicConfig: Omit<ITopicConfig, 'topic'>,
+        protected topicConfig: Omit<ITopicConfig, 'topic'> = {},
         protected adminConfig: AdminConfig = TopicAdministrator.adminClientConfiguration
     ) {
         this.createTopic = this.createTopic.bind(this);

@@ -5,9 +5,9 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 
 import {EffectBuilder} from './effect_builder';
-import {ConsumerMessageBus} from './consumer_message_bus';
+import {ConsumerPool} from './consumer_pool';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
-import {ProducerMessageBus} from './producer_message_bus';
+import {ProducerPool} from './producer_pool';
 import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig, Middleware, IEffectDescription} from './types';
 import {getLoggerFromConfig} from './logger';
@@ -30,8 +30,8 @@ export class TopicSagaConsumer<
     private logger: ReturnType<typeof pino>;
     private middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
 
-    private consumerMessageBus: ConsumerMessageBus;
-    private producerMessageBus: ProducerMessageBus;
+    private consumerPool: ConsumerPool;
+    private producerPool: ProducerPool;
 
     constructor({
         kafka,
@@ -67,14 +67,9 @@ export class TopicSagaConsumer<
             package: 'snpkg-snapi-kafka-sagas'
         });
 
-        this.consumerMessageBus = new ConsumerMessageBus(
-            kafka,
-            topic,
-            undefined,
-            topicAdministrator
-        );
+        this.consumerPool = new ConsumerPool(kafka, topic, undefined, topicAdministrator);
 
-        this.producerMessageBus = new ProducerMessageBus(kafka, undefined, topicAdministrator);
+        this.producerPool = new ProducerPool(kafka, undefined, topicAdministrator);
 
         this.run = this.run.bind(this);
         this.disconnect = this.disconnect.bind(this);
@@ -90,11 +85,11 @@ export class TopicSagaConsumer<
             fromBeginning: true
         });
 
-        await this.producerMessageBus.connect();
+        await this.producerPool.connect();
 
         const runner = new SagaRunner<InitialActionPayload, SagaContext<Context>>(
-            this.consumerMessageBus,
-            this.producerMessageBus,
+            this.consumerPool,
+            this.producerPool,
             this.middlewares
         );
 
@@ -148,7 +143,7 @@ export class TopicSagaConsumer<
                         'Successfully consumed message'
                     );
                 } catch (error) {
-                    this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
+                    this.consumerPool.stopTransaction(initialAction.transaction_id);
                     this.logger.error(
                         {
                             transaction_id: initialAction.transaction_id,
@@ -169,8 +164,8 @@ export class TopicSagaConsumer<
     public async disconnect() {
         await this.consumer.disconnect();
         await Bluebird.all([
-            this.consumerMessageBus.disconnectConsumers(),
-            this.producerMessageBus.disconnect()
+            this.consumerPool.disconnectConsumers(),
+            this.producerPool.disconnect()
         ]);
     }
 }

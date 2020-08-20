@@ -96,8 +96,8 @@
 						<section class="tsd-index-section tsd-is-private-protected">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="sagarunner.html#consumermessagebus" class="tsd-kind-icon">consumer<wbr>Message<wbr>Bus</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="sagarunner.html#producermessagebus" class="tsd-kind-icon">producer<wbr>Message<wbr>Bus</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="sagarunner.html#consumerpool" class="tsd-kind-icon">Consumer<wbr>Pool</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="sagarunner.html#producerpool" class="tsd-kind-icon">Producer<wbr>Pool</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="sagarunner.html#runeffectwithmiddleware" class="tsd-kind-icon">run<wbr>Effect<wbr>With<wbr>Middleware</a></li>
 							</ul>
 						</section>
@@ -118,22 +118,22 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Saga<wbr>Runner<span class="tsd-signature-symbol">(</span>consumerMessageBus<span class="tsd-signature-symbol">: </span><a href="consumermessagebus.html" class="tsd-signature-type">ConsumerMessageBus</a>, producerMessageBus<span class="tsd-signature-symbol">: </span><a href="producermessagebus.html" class="tsd-signature-type">ProducerMessageBus</a>, middlewares<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#middleware" class="tsd-signature-type">Middleware</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sagarunner.html" class="tsd-signature-type">SagaRunner</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Saga<wbr>Runner<span class="tsd-signature-symbol">(</span>ConsumerPool<span class="tsd-signature-symbol">: </span><a href="consumerpool.html" class="tsd-signature-type">ConsumerPool</a>, ProducerPool<span class="tsd-signature-symbol">: </span><a href="producerpool.html" class="tsd-signature-type">ProducerPool</a>, middlewares<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#middleware" class="tsd-signature-type">Middleware</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sagarunner.html" class="tsd-signature-type">SagaRunner</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/b5eda5c/src/saga_runner.ts#L35">src/saga_runner.ts:35</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/73ef8b8/src/saga_runner.ts#L30">src/saga_runner.ts:30</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>consumerMessageBus: <a href="consumermessagebus.html" class="tsd-signature-type">ConsumerMessageBus</a></h5>
+									<h5>ConsumerPool: <a href="consumerpool.html" class="tsd-signature-type">ConsumerPool</a></h5>
 								</li>
 								<li>
-									<h5>producerMessageBus: <a href="producermessagebus.html" class="tsd-signature-type">ProducerMessageBus</a></h5>
+									<h5>ProducerPool: <a href="producerpool.html" class="tsd-signature-type">ProducerPool</a></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> middlewares: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#middleware" class="tsd-signature-type">Middleware</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = []</span></h5>
@@ -147,22 +147,22 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-private-protected">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="consumermessagebus" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> consumer<wbr>Message<wbr>Bus</h3>
-					<div class="tsd-signature tsd-kind-icon">consumer<wbr>Message<wbr>Bus<span class="tsd-signature-symbol">:</span> <a href="consumermessagebus.html" class="tsd-signature-type">ConsumerMessageBus</a></div>
+					<a name="consumerpool" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> Consumer<wbr>Pool</h3>
+					<div class="tsd-signature tsd-kind-icon">Consumer<wbr>Pool<span class="tsd-signature-symbol">:</span> <a href="consumerpool.html" class="tsd-signature-type">ConsumerPool</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/b5eda5c/src/saga_runner.ts#L38">src/saga_runner.ts:38</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/73ef8b8/src/saga_runner.ts#L33">src/saga_runner.ts:33</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="producermessagebus" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> producer<wbr>Message<wbr>Bus</h3>
-					<div class="tsd-signature tsd-kind-icon">producer<wbr>Message<wbr>Bus<span class="tsd-signature-symbol">:</span> <a href="producermessagebus.html" class="tsd-signature-type">ProducerMessageBus</a></div>
+					<a name="producerpool" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> Producer<wbr>Pool</h3>
+					<div class="tsd-signature tsd-kind-icon">Producer<wbr>Pool<span class="tsd-signature-symbol">:</span> <a href="producerpool.html" class="tsd-signature-type">ProducerPool</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/b5eda5c/src/saga_runner.ts#L39">src/saga_runner.ts:39</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/73ef8b8/src/saga_runner.ts#L34">src/saga_runner.ts:34</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -172,7 +172,7 @@
 					<div class="tsd-signature tsd-kind-icon">run<wbr>Effect<wbr>With<wbr>Middleware<span class="tsd-signature-symbol">:</span> &lt;EffectDescription&gt;<span class="tsd-signature-symbol">(</span>effect<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EffectDescription</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/b5eda5c/src/saga_runner.ts#L32">src/saga_runner.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/73ef8b8/src/saga_runner.ts#L27">src/saga_runner.ts:27</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -219,7 +219,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/b5eda5c/src/saga_runner.ts#L65">src/saga_runner.ts:65</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/73ef8b8/src/saga_runner.ts#L60">src/saga_runner.ts:60</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -251,7 +251,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/b5eda5c/src/saga_runner.ts#L168">src/saga_runner.ts:168</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/73ef8b8/src/saga_runner.ts#L158">src/saga_runner.ts:158</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -294,7 +294,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/b5eda5c/src/saga_runner.ts#L53">src/saga_runner.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/73ef8b8/src/saga_runner.ts#L48">src/saga_runner.ts:48</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -334,10 +334,10 @@
 								<a href="sagarunner.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="sagarunner.html#consumermessagebus" class="tsd-kind-icon">consumer<wbr>Message<wbr>Bus</a>
+								<a href="sagarunner.html#consumerpool" class="tsd-kind-icon">Consumer<wbr>Pool</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="sagarunner.html#producermessagebus" class="tsd-kind-icon">producer<wbr>Message<wbr>Bus</a>
+								<a href="sagarunner.html#producerpool" class="tsd-kind-icon">Producer<wbr>Pool</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
 								<a href="sagarunner.html#runeffectwithmiddleware" class="tsd-kind-icon">run<wbr>Effect<wbr>With<wbr>Middleware</a>

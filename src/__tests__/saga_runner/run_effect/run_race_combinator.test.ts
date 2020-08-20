@@ -13,7 +13,7 @@ describe(SagaRunner.name, function() {
                     const {
                         effectBuilder,
                         runner,
-                        closeBuses,
+                        closePools,
                         context
                     } = await runnerUtilityFactory();
                     const fastChannel = effectBuilder.actionChannel<{
@@ -50,7 +50,7 @@ describe(SagaRunner.name, function() {
                         context
                     );
 
-                    await closeBuses();
+                    await closePools();
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {
@@ -74,7 +74,7 @@ describe(SagaRunner.name, function() {
                     const {
                         effectBuilder,
                         runner,
-                        closeBuses,
+                        closePools,
                         context
                     } = await runnerUtilityFactory();
                     const fastChannel = effectBuilder.actionChannel<{
@@ -114,7 +114,7 @@ describe(SagaRunner.name, function() {
                         context
                     );
 
-                    await closeBuses();
+                    await closePools();
 
                     expect(payload).toMatchInlineSnapshot(`
                         Object {

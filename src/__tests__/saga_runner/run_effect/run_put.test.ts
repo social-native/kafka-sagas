@@ -12,7 +12,7 @@ describe(SagaRunner.name, function() {
                     const {
                         effectBuilder,
                         runner,
-                        closeBuses,
+                        closePools,
                         context
                     } = await runnerUtilityFactory();
                     const channel = effectBuilder.actionChannel<{
@@ -39,7 +39,7 @@ describe(SagaRunner.name, function() {
                         }
                     `);
 
-                    await closeBuses();
+                    await closePools();
                 });
             },
             DEFAULT_TEST_TIMEOUT

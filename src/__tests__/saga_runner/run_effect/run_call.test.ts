@@ -22,7 +22,7 @@ describe(SagaRunner.name, function() {
                 headers: {}
             });
 
-            await util.closeBuses();
+            await util.closePools();
 
             expect(spy.mock.calls).toMatchInlineSnapshot(`
                 Array [
@@ -47,7 +47,7 @@ describe(SagaRunner.name, function() {
                 headers: {}
             });
 
-            await util.closeBuses();
+            await util.closePools();
 
             expect(spy.mock.calls).toMatchInlineSnapshot(`
                 Array [
@@ -87,7 +87,7 @@ describe(SagaRunner.name, function() {
                     }
                 );
 
-                await util.closeBuses();
+                await util.closePools();
 
                 expect(result).toEqual('return-value-from-other-saga');
             });
@@ -124,7 +124,7 @@ describe(SagaRunner.name, function() {
                     }
                 );
 
-                await util.closeBuses();
+                await util.closePools();
 
                 expect(error).toMatchInlineSnapshot(`[Error: Big Fail]`);
             });

@@ -10,8 +10,8 @@ import {
     Middleware,
     Next
 } from './types';
-import {ConsumerMessageBus} from './consumer_message_bus';
-import {ProducerMessageBus} from './producer_message_bus';
+import {ConsumerPool} from './consumer_pool';
+import {ProducerPool} from './producer_pool';
 import {
     isActionChannelEffectDescription,
     isTakeEffectDescription,
@@ -30,8 +30,8 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
     ) => Promise<any>;
 
     constructor(
-        private consumerMessageBus: ConsumerMessageBus,
-        private producerMessageBus: ProducerMessageBus,
+        private consumerPool: ConsumerPool,
+        private producerPool: ProducerPool,
         middlewares: Array<Middleware<IEffectDescription, Context>> = []
     ) {
         const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
@@ -50,9 +50,9 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
         context: Context,
         saga: Saga<InitialActionPayload, Context>
     ): Promise<any> => {
-        this.consumerMessageBus.startTransaction(initialAction.transaction_id);
+        this.consumerPool.startTransaction(initialAction.transaction_id);
         const result = await this.runGeneratorFsm(saga(initialAction, context), context);
-        this.consumerMessageBus.stopTransaction(initialAction.transaction_id);
+        this.consumerPool.stopTransaction(initialAction.transaction_id);
         return result;
     };
 
@@ -90,13 +90,13 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
 
         if (isActionChannelEffectDescription(effectDescription)) {
             for (const topic of effectDescription.topics) {
-                this.consumerMessageBus.registerTopicObserver({
+                this.consumerPool.registerTopicObserver({
                     transactionId: effectDescription.transactionId,
                     topic,
                     observer: effectDescription.observer
                 });
 
-                await this.consumerMessageBus.streamActionsFromTopic(topic);
+                await this.consumerPool.streamActionsFromTopic(topic);
             }
 
             return effectDescription;
@@ -116,13 +116,13 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
 
         if (isTakeEffectDescription(effectDescription)) {
             await Bluebird.map(effectDescription.topics, async topic => {
-                this.consumerMessageBus.registerTopicObserver({
+                this.consumerPool.registerTopicObserver({
                     transactionId: effectDescription.transactionId,
                     topic,
                     observer: effectDescription.observer
                 });
 
-                await this.consumerMessageBus.streamActionsFromTopic(topic);
+                await this.consumerPool.streamActionsFromTopic(topic);
             });
 
             return await effectDescription.buffer.take();
@@ -139,7 +139,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
                 action.headers = context.headers;
             }
 
-            await this.producerMessageBus.putAction(action);
+            await this.producerPool.putAction(action);
 
             return;
         }
