@@ -25,11 +25,7 @@ export class ProducerPool {
         this.connect = this.connect.bind(this);
         this.putAction = this.putAction.bind(this);
         this.disconnect = this.disconnect.bind(this);
-        this.topicAdministrator =
-            topicAdministrator ||
-            new TopicAdministrator(kafka, {
-                replicationFactor: 1
-            });
+        this.topicAdministrator = topicAdministrator || new TopicAdministrator(kafka);
     }
 
     public async putAction<Action extends IAction>(action: Action) {

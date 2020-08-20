@@ -19,8 +19,7 @@ export class ConsumerPool {
         private consumerConfig: Omit<ConsumerConfig, 'groupId' | 'allowAutoTopicCreation'> = {},
         topicAdministrator?: TopicAdministrator
     ) {
-        this.topicAdministrator =
-            topicAdministrator || new TopicAdministrator(kafka, {replicationFactor: 1});
+        this.topicAdministrator = topicAdministrator || new TopicAdministrator(kafka);
     }
 
     public async streamActionsFromTopic(topic: string) {
