@@ -66,6 +66,9 @@
 					<h1>Kafka Sagas 🌼</h1>
 				</a>
 				<p>Kafka-sagas is a package that allows you to use eerily similar semantics to <a href="https://redux-saga.js.org/">Redux-Sagas</a> built on top of <a href="https://kafka.js.org/">KafkaJS</a>. With Kafka-Sagas, Kafka topics are treated as streams that a saga can dispatch actions into, as well as tapped for particular actions to initiate a saga.</p>
+				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
+					<h2><a href="https://social-native.github.io/snpkg-snapi-kafka-sagas/index.html">API Reference</a></h2>
+				</a>
 				<ul>
 					<li><a href="#kafka-sagas-">Kafka Sagas 🌼</a><ul>
 							<li><a href="#whats-a-saga">What&#39;s A Saga?</a></li>
@@ -177,7 +180,7 @@
 						<a href="classes/actionchannelbuffer.html" class="tsd-kind-icon">Action<wbr>Channel<wbr>Buffer</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="classes/consumermessagebus.html" class="tsd-kind-icon">Consumer<wbr>Message<wbr>Bus</a>
+						<a href="classes/consumerpool.html" class="tsd-kind-icon">Consumer<wbr>Pool</a>
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/effectbuilder.html" class="tsd-kind-icon">Effect<wbr>Builder</a>
@@ -186,7 +189,7 @@
 						<a href="classes/ephemeralbuffer.html" class="tsd-kind-icon">Ephemeral<wbr>Buffer</a>
 					</li>
 					<li class=" tsd-kind-class">
-						<a href="classes/producermessagebus.html" class="tsd-kind-icon">Producer<wbr>Message<wbr>Bus</a>
+						<a href="classes/producerpool.html" class="tsd-kind-icon">Producer<wbr>Pool</a>
 					</li>
 					<li class=" tsd-kind-class tsd-has-type-parameter">
 						<a href="classes/sagarunner.html" class="tsd-kind-icon">Saga<wbr>Runner</a>
@@ -232,9 +235,6 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/iputeffectdescription.html" class="tsd-kind-icon">IPut<wbr>Effect<wbr>Description</a>
-					</li>
-					<li class=" tsd-kind-interface">
-						<a href="interfaces/isnapiheaders.html" class="tsd-kind-icon">ISnapi<wbr>Headers</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/itakeactionchanneleffectdescription.html" class="tsd-kind-icon">ITake<wbr>Action<wbr>Channel<wbr>Effect<wbr>Description</a>
@@ -305,15 +305,6 @@
 					<li class=" tsd-kind-type-alias tsd-has-type-parameter">
 						<a href="globals.html#unpromisify" class="tsd-kind-icon">Un<wbr>Promisify</a>
 					</li>
-					<li class=" tsd-kind-variable">
-						<a href="globals.html#worker_user_id" class="tsd-kind-icon">WORKER_<wbr>USER_<wbr>ID</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="globals.html#worker_user_identity_header" class="tsd-kind-icon">WORKER_<wbr>USER_<wbr>IDENTITY_<wbr>HEADER</a>
-					</li>
-					<li class=" tsd-kind-variable">
-						<a href="globals.html#worker_user_roles" class="tsd-kind-icon">WORKER_<wbr>USER_<wbr>ROLES</a>
-					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="globals.html#actionpatternispredicaterecord" class="tsd-kind-icon">action<wbr>Pattern<wbr>IsPredicate<wbr>Record</a>
 					</li>
@@ -343,9 +334,6 @@
 					</li>
 					<li class=" tsd-kind-function tsd-has-type-parameter">
 						<a href="globals.html#isputeffectdescription" class="tsd-kind-icon">is<wbr>Put<wbr>Effect<wbr>Description</a>
-					</li>
-					<li class=" tsd-kind-function">
-						<a href="globals.html#issnapiheaders" class="tsd-kind-icon">is<wbr>Snapi<wbr>Headers</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="globals.html#istakeactionchanneleffectdescription" class="tsd-kind-icon">is<wbr>Take<wbr>Action<wbr>Channel<wbr>Effect<wbr>Description</a>
