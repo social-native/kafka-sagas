@@ -116,38 +116,6 @@ jobs:
             - *save-cache
             - run: npm run prettier -- --check
 
-    dependency-check:
-        <<: *defaults
-        docker:
-            - image: circleci/node:10.16.3-stretch
-        steps:
-            - *npm-config
-            - checkout
-            - *restore-cache
-            - run: npm install
-            - *save-cache
-            - run: npm run dep-check
-            - store_artifacts:
-                  path: /tmp/dependency-check-output.json
-
-    package-version-validation:
-        <<: *defaults
-        docker:
-            - image: circleci/node:10.16.3-stretch
-        steps:
-            - *npm-config
-            - checkout
-            - run: npm install
-            - run: npm run package-version-validation
-    tag-version-validation:
-        <<: *defaults
-        docker:
-            - image: circleci/node:10.16.3-stretch
-        steps:
-            - *npm-config
-            - checkout
-            - run: npm install
-            - run: npm run tag-version-validation
     build-for-publishing:
         <<: *defaults
         docker:
@@ -180,7 +148,7 @@ jobs:
 
 workflows:
     version: 2
-    test-build-deploy:
+    integration:
         jobs:
             - test:
                   context: NPM_PACKAGE_CONTEXT
@@ -211,32 +179,9 @@ workflows:
                   filters:
                       tags: # run for every branch
                           only: /^[0-9]+(\.[0-9]+)*$/
-
-            - dependency-check:
-                  context: NPM_PACKAGE_CONTEXT
-                  filters:
-                      tags: # run for every branch
-                          only: /^[0-9]+(\.[0-9]+)*$/
-    snpkg-publish:
+    publish:
         jobs:
-            - package-version-validation:
-                  context: NPM_PACKAGE_CONTEXT
-                  filters:
-                      branches: # run for every branch
-                          ignore:
-                              - master
-                      tags:
-                          ignore: /.*/
-            - tag-version-validation:
-                  context: NPM_PACKAGE_CONTEXT
-                  filters:
-                      branches:
-                          ignore: /.*/
-                      tags:
-                          only: /^v{0,1}\d+\.\d+\.\d+$/
             - build-for-publishing:
-                  requires:
-                      - tag-version-validation
                   context: NPM_PACKAGE_CONTEXT
                   filters:
                       branches:

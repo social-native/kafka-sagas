@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>@social-native/snpkg-snapi-kafka-sagas</title>
+	<title>kafka-sagas</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">@social-native/snpkg-snapi-kafka-sagas</a>
+					<a href="index.html" class="title">kafka-sagas</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -54,7 +54,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1>@social-native/snpkg-snapi-kafka-sagas</h1>
+			<h1>kafka-sagas</h1>
 		</div>
 	</div>
 </header>
@@ -66,23 +66,40 @@
 					<h1>Kafka Sagas 🌼</h1>
 				</a>
 				<p>Kafka-sagas is a package that allows you to use eerily similar semantics to <a href="https://redux-saga.js.org/">Redux-Sagas</a> built on top of <a href="https://kafka.js.org/">KafkaJS</a>. With Kafka-Sagas, Kafka topics are treated as streams that a saga can dispatch actions into, as well as tapped for particular actions to initiate a saga.</p>
-				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
-					<h2><a href="https://social-native.github.io/snpkg-snapi-kafka-sagas/index.html">API Reference</a></h2>
-				</a>
 				<ul>
 					<li><a href="#kafka-sagas-">Kafka Sagas 🌼</a><ul>
-							<li><a href="#whats-a-saga">What&#39;s A Saga?</a></li>
-							<li><a href="#whats-a-consumer">What&#39;s A Consumer?</a></li>
-							<li><a href="#whats-an-action">What&#39;s An Action?</a></li>
-							<li><a href="#whats-an-effect">What&#39;s an Effect?</a></li>
-							<li><a href="#whats-a-transaction">What&#39;s A Transaction?</a><ul>
-									<li><a href="#advanced">Advanced</a></li>
+							<li><a href="#usage">Usage</a></li>
+							<li><a href="#1-install">1. Install</a></li>
+							<li><a href="#2-make-sure-peer-dependencies-are-installed">2. Make sure peer dependencies are installed</a></li>
+							<li><a href="#api-reference">API Reference</a><ul>
+									<li><a href="#whats-a-saga">What&#39;s A Saga?</a></li>
+									<li><a href="#whats-a-consumer">What&#39;s A Consumer?</a></li>
+									<li><a href="#whats-an-action">What&#39;s An Action?</a></li>
+									<li><a href="#whats-an-effect">What&#39;s an Effect?</a></li>
+									<li><a href="#whats-a-transaction">What&#39;s A Transaction?</a></li>
 								</ul>
 							</li>
-							<li><a href="#communication-between-sagas">Communication between sagas</a></li>
+							<li><a href="#advanced">Advanced</a><ul>
+									<li><a href="#communication-between-sagas">Communication between sagas</a></li>
+								</ul>
+							</li>
 						</ul>
 					</li>
 				</ul>
+				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+					<h2>Usage</h2>
+				</a>
+				<a href="#1-install" id="1-install" style="color: inherit; text-decoration: none;">
+					<h2>1. Install</h2>
+				</a>
+				<pre><code class="language-typescript">npm install --save kafka-sagas</code></pre>
+				<a href="#2-make-sure-peer-dependencies-are-installed" id="2-make-sure-peer-dependencies-are-installed" style="color: inherit; text-decoration: none;">
+					<h2>2. Make sure peer dependencies are installed</h2>
+				</a>
+				<pre><code class="language-typescript">npm install --save kafkajs</code></pre>
+				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
+					<h2><a href="https://social-native.github.io/kafka-sagas/index.html">API Reference</a></h2>
+				</a>
 				<a href="#what39s-a-saga" id="what39s-a-saga" style="color: inherit; text-decoration: none;">
 					<h3>What&#39;s A Saga?</h3>
 				</a>

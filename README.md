@@ -2,9 +2,11 @@
 
 Kafka-sagas is a package that allows you to use eerily similar semantics to [Redux-Sagas](https://redux-saga.js.org/) built on top of [KafkaJS](https://kafka.js.org/). With Kafka-Sagas, Kafka topics are treated as streams that a saga can dispatch actions into, as well as tapped for particular actions to initiate a saga.
 
-## [API Reference](https://social-native.github.io/snpkg-snapi-kafka-sagas/index.html)
-
 - [Kafka Sagas 🌼](#kafka-sagas-)
+  - [Usage](#usage)
+  - [1. Install](#1-install)
+  - [2. Make sure peer dependencies are installed](#2-make-sure-peer-dependencies-are-installed)
+  - [API Reference](#api-reference)
     - [What's A Saga?](#whats-a-saga)
     - [What's A Consumer?](#whats-a-consumer)
     - [What's An Action?](#whats-an-action)
@@ -12,6 +14,22 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
     - [What's A Transaction?](#whats-a-transaction)
   - [Advanced](#advanced)
     - [Communication between sagas](#communication-between-sagas)
+
+## Usage
+
+## 1. Install
+
+```typescript
+npm install --save kafka-sagas
+```
+
+##  2. Make sure peer dependencies are installed
+
+```typescript
+npm install --save kafkajs
+```
+
+## [API Reference](https://social-native.github.io/kafka-sagas/index.html)
 
 ### What's A Saga?
 
