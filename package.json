@@ -1,6 +1,6 @@
 {
     "name": "kafka-sagas",
-    "version": "9.1.2",
+    "version": "10.0.0",
     "description": "Build sagas that consume from a kafka topic",
     "main": "dist/index.cjs.js",
     "module": "dist/index.es.js",
