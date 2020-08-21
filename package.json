@@ -1,7 +1,7 @@
 {
-    "name": "@social-native/snpkg-snapi-kafka-sagas",
-    "version": "9.0.0",
-    "description": "",
+    "name": "kafka-sagas",
+    "version": "9.1.0",
+    "description": "Build sagas that consume from a kafka topic",
     "main": "dist/index.cjs.js",
     "module": "dist/index.es.js",
     "types": "dist/index.d.ts",
@@ -19,20 +19,34 @@
         "test:local": "dotenv -e .env.local.test jest -- --no-cache --runInBand",
         "test:watch": "dotenv -e .env.local.test jest -- --no-cache --runInBand --watchAll",
         "type-check:watch": "npm run type-check -- --watch",
-        "type-check": "tsc --noEmit",
-        "dep-check": "snpkg-dependency-check",
-        "package-version-validation": "snpkg-package-version-validation package-version-validation",
-        "tag-version-validation": "snpkg-package-version-validation tag-version-validation"
+        "type-check": "tsc --noEmit"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/social-native/snpkg-snapi-kafka-sagas.git"
+        "url": "git+https://github.com/social-native/kafka-sagas.git"
     },
-    "license": "ISC",
+    "keywords": [
+        "Saga",
+        "Kafka",
+        "Microservice",
+        "Side effect",
+        "Async"
+    ],
+    "contributors": [
+        {
+            "name": "Ricky Sidhu",
+            "email": "seeingsaturn@gmail.com"
+        },
+        {
+            "name": "Ethan Hathaway",
+            "email": "erhathaway@gmail.com"
+        }
+    ],
+    "license": "Apache-2.0",
     "bugs": {
-        "url": "https://github.com/social-native/snpkg-snapi-kafka-sagas/issues"
+        "url": "https://github.com/social-native/kafka-sagas/issues"
     },
-    "homepage": "https://github.com/social-native/snpkg-snapi-kafka-sagas#readme",
+    "homepage": "https://github.com/social-native/kafka-sagas#readme",
     "dependencies": {
         "bluebird": "^3.7.1",
         "kafkajs": "^1.12.0",
@@ -45,8 +59,6 @@
         "kafkajs": "^1.12.0"
     },
     "devDependencies": {
-        "@social-native/snpkg-dependency-check": "^0.1.0",
-        "@social-native/snpkg-package-version-validation": "^3.1.0",
         "@types/bluebird": "^3.5.29",
         "@types/jest": "^24.0.13",
         "@types/uuid": "^3.4.6",
@@ -64,7 +76,7 @@
         "tslint-config-prettier": "^1.18.0",
         "tslint-eslint-rules": "^5.4.0",
         "tslint-immutable": "^5.5.2",
-        "typescript": "^3.8.3",
-        "typedoc": "^0.16.11"
+        "typedoc": "^0.16.11",
+        "typescript": "^3.8.3"
     }
 }
