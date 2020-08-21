@@ -2,6 +2,7 @@ import {Producer, Kafka, CompressionTypes, ProducerConfig} from 'kafkajs';
 import {IAction} from './types';
 import {createActionMessage} from './create_action_message';
 import {TopicAdministrator} from './topic_administrator';
+import {isKafkaJSProtocolError} from './type_guard';
 
 export class ProducerPool {
     private producer: Producer;
@@ -9,18 +10,14 @@ export class ProducerPool {
     private isConnected: boolean = false;
 
     constructor(
-        kafka: Kafka,
-        producerConfig: Omit<
+        protected kafka: Kafka,
+        protected producerConfig: Omit<
             ProducerConfig,
             'allowAutoTopicCreation' | 'maxInflightRequests' | 'idempotent'
         > = {},
         topicAdministrator?: TopicAdministrator
     ) {
-        this.producer = kafka.producer({
-            maxInFlightRequests: 1,
-            idempotent: true,
-            ...producerConfig
-        });
+        this.createProducer();
 
         this.connect = this.connect.bind(this);
         this.putAction = this.putAction.bind(this);
@@ -28,19 +25,42 @@ export class ProducerPool {
         this.topicAdministrator = topicAdministrator || new TopicAdministrator(kafka);
     }
 
-    public async putAction<Action extends IAction>(action: Action) {
+    // tslint:disable-next-line: cyclomatic-complexity
+    public async putAction<Action extends IAction>(action: Action, retryCounter = 0) {
         if (!this.isConnected) {
             throw new Error('You must .connect before producing actions');
         }
 
         await this.topicAdministrator.createTopic(action.topic);
 
-        await this.producer.send({
-            acks: -1,
-            compression: CompressionTypes.GZIP,
-            topic: action.topic,
-            messages: [createActionMessage({action})]
-        });
+        const message = createActionMessage({action});
+
+        try {
+            await this.producer.send({
+                acks: -1,
+                compression: CompressionTypes.GZIP,
+                topic: action.topic,
+                messages: [message]
+            });
+        } catch (error) {
+            /**
+             * If for some reason this producer is no longer recognized by the broker,
+             *
+             */
+            if (
+                isKafkaJSProtocolError(error) &&
+                error.type === 'UNKNOWN_PRODUCER_ID' &&
+                retryCounter < 6
+            ) {
+                await this.disconnect();
+                this.createProducer();
+                await this.connect();
+                await this.putAction(action, retryCounter + 1);
+                return;
+            }
+
+            throw error;
+        }
     }
 
     public async connect() {
@@ -58,5 +78,14 @@ export class ProducerPool {
         }
 
         await this.producer.disconnect();
+        this.isConnected = false;
     }
+
+    private createProducer = () => {
+        this.producer = this.kafka.producer({
+            maxInFlightRequests: 1,
+            idempotent: true,
+            ...this.producerConfig
+        });
+    };
 }

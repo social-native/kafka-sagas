@@ -9,7 +9,8 @@ import {
     ActionChannelInput,
     ICombinatatorEffectDescription,
     IPredicateRecord,
-    IDelayEffectDescription
+    IDelayEffectDescription,
+    IKafkaJSProtocolError
 } from './types';
 import {EffectDescriptionKind} from './enums';
 
@@ -112,4 +113,8 @@ export function isGenerator(possibleGenerator: any): possibleGenerator is Genera
         !!(possibleGenerator as Generator).throw &&
         !!(possibleGenerator as Generator).return
     );
+}
+
+export function isKafkaJSProtocolError(error: unknown): error is IKafkaJSProtocolError {
+    return error && typeof error === 'object' && (error as any).name === 'KafkaJSProtocolError';
 }
