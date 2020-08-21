@@ -82,11 +82,13 @@
 								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="producerpool.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-private tsd-is-private-protected">
+						<section class="tsd-index-section tsd-is-private-protected">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="producerpool.html#isconnected" class="tsd-kind-icon">is<wbr>Connected</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="producerpool.html#kafka" class="tsd-kind-icon">kafka</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="producerpool.html#producer" class="tsd-kind-icon">producer</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="producerpool.html#producerconfig" class="tsd-kind-icon">producer<wbr>Config</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="producerpool.html#topicadministrator" class="tsd-kind-icon">topic<wbr>Administrator</a></li>
 							</ul>
 						</section>
@@ -94,6 +96,7 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="producerpool.html#connect" class="tsd-kind-icon">connect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="producerpool.html#createproducer" class="tsd-kind-icon">create<wbr>Producer</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="producerpool.html#disconnect" class="tsd-kind-icon">disconnect</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter"><a href="producerpool.html#putaction" class="tsd-kind-icon">put<wbr>Action</a></li>
 							</ul>
@@ -113,7 +116,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/653acfc/src/producer_pool.ts#L9">src/producer_pool.ts:9</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L10">src/producer_pool.ts:10</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -133,7 +136,7 @@
 					</ul>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-private tsd-is-private-protected">
+			<section class="tsd-panel-group tsd-member-group tsd-is-private-protected">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
 					<a name="isconnected" class="tsd-anchor"></a>
@@ -141,7 +144,17 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Connected<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/653acfc/src/producer_pool.ts#L9">src/producer_pool.ts:9</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L10">src/producer_pool.ts:10</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+					<a name="kafka" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> kafka</h3>
+					<div class="tsd-signature tsd-kind-icon">kafka<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Kafka</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L13">src/producer_pool.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -151,7 +164,17 @@
 					<div class="tsd-signature tsd-kind-icon">producer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Producer</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/653acfc/src/producer_pool.ts#L7">src/producer_pool.ts:7</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L8">src/producer_pool.ts:8</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+					<a name="producerconfig" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> producer<wbr>Config</h3>
+					<div class="tsd-signature tsd-kind-icon">producer<wbr>Config<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ProducerConfig</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"allowAutoTopicCreation"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"maxInflightRequests"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"idempotent"</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L14">src/producer_pool.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -161,7 +184,7 @@
 					<div class="tsd-signature tsd-kind-icon">topic<wbr>Administrator<span class="tsd-signature-symbol">:</span> <a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/653acfc/src/producer_pool.ts#L8">src/producer_pool.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L9">src/producer_pool.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -178,10 +201,27 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/653acfc/src/producer_pool.ts#L46">src/producer_pool.ts:46</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L66">src/producer_pool.ts:66</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="createproducer" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> create<wbr>Producer</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">create<wbr>Producer<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L84">src/producer_pool.ts:84</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -195,7 +235,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/653acfc/src/producer_pool.ts#L55">src/producer_pool.ts:55</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L75">src/producer_pool.ts:75</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -206,13 +246,13 @@
 					<a name="putaction" class="tsd-anchor"></a>
 					<h3>put<wbr>Action</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-has-type-parameter">
-						<li class="tsd-signature tsd-kind-icon">put<wbr>Action&lt;Action&gt;<span class="tsd-signature-symbol">(</span>action<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Action</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">put<wbr>Action&lt;Action&gt;<span class="tsd-signature-symbol">(</span>action<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Action</span>, retryCounter<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/653acfc/src/producer_pool.ts#L31">src/producer_pool.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/2888066/src/producer_pool.ts#L29">src/producer_pool.ts:29</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -225,6 +265,9 @@
 							<ul class="tsd-parameters">
 								<li>
 									<h5>action: <span class="tsd-signature-type">Action</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> retryCounter: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -254,14 +297,23 @@
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="producerpool.html#isconnected" class="tsd-kind-icon">is<wbr>Connected</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+								<a href="producerpool.html#kafka" class="tsd-kind-icon">kafka</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="producerpool.html#producer" class="tsd-kind-icon">producer</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+								<a href="producerpool.html#producerconfig" class="tsd-kind-icon">producer<wbr>Config</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="producerpool.html#topicadministrator" class="tsd-kind-icon">topic<wbr>Administrator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="producerpool.html#connect" class="tsd-kind-icon">connect</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="producerpool.html#createproducer" class="tsd-kind-icon">create<wbr>Producer</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="producerpool.html#disconnect" class="tsd-kind-icon">disconnect</a>

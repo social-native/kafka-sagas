@@ -49,6 +49,70 @@ describe(ProducerPool.name, function() {
         DEFAULT_TEST_TIMEOUT
     );
 
+    it(
+        'puts messages into the topic even if producer metadata expired',
+        async function() {
+            const topic = 'stale_producer_test';
+
+            const admin = kafka.admin();
+            await admin.connect();
+            await admin.createTopics({
+                topics: [
+                    {
+                        topic,
+                        configEntries: [
+                            {name: 'cleanup.policy', value: 'delete'},
+                            {name: 'retention.ms', value: '100'}
+                        ]
+                    }
+                ]
+            });
+
+            const expectedMessage: Omit<TestAction, 'topic'> = {
+                payload: {thing: true},
+                transaction_id: '4'
+            };
+
+            const pool = new ProducerPool(kafka);
+
+            await pool.connect();
+            await pool.putAction({
+                transaction_id: expectedMessage.transaction_id,
+                payload: expectedMessage.payload,
+                topic
+            });
+
+            await admin.deleteTopics({
+                topics: [topic]
+            });
+
+            await admin.createTopics({
+                topics: [
+                    {
+                        topic,
+                        configEntries: [
+                            {name: 'cleanup.policy', value: 'delete'},
+                            {name: 'retention.ms', value: '100'}
+                        ]
+                    }
+                ]
+            });
+
+            await pool.putAction({
+                transaction_id: expectedMessage.transaction_id,
+                payload: expectedMessage.payload,
+                topic
+            });
+
+            await pool.disconnect();
+            await admin.deleteTopics({
+                topics: [topic]
+            });
+            await admin.disconnect();
+        },
+        DEFAULT_TEST_TIMEOUT
+    );
+
     it('creates topics that do not already exist', async function() {
         const newTopic = uuid.v4();
 

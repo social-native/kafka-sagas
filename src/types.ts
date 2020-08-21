@@ -217,3 +217,11 @@ export interface IAction<Payload = DefaultPayload> {
 }
 
 export type DefaultPayload = Record<string, any> | undefined;
+
+export interface IKafkaJSProtocolError {
+    name: string;
+    retriable: boolean;
+    helpUrl?: string;
+    type: string;
+    code: number;
+}
