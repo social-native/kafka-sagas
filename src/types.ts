@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {IHeaders} from 'kafkajs';
+import {IHeaders, ProducerRecord} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 import {SagaRunner} from './saga_runner';
@@ -224,4 +224,10 @@ export interface IKafkaJSProtocolError {
     helpUrl?: string;
     type: string;
     code: number;
+}
+
+export interface IQueuedRecord {
+    resolve: () => void;
+    reject: (...args: any[]) => void;
+    record: Pick<ProducerRecord, 'topic' | 'messages'>;
 }

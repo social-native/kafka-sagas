@@ -7,7 +7,7 @@ import TypedEmitter from 'typed-emitter';
 import {EffectBuilder} from './effect_builder';
 import {ConsumerPool} from './consumer_pool';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
-import {ProducerPool} from './producer_pool';
+import {ThrottledProducer} from './throttled_producer';
 import {SagaRunner} from './saga_runner';
 import {SagaContext, Saga, ILoggerConfig, Middleware, IEffectDescription} from './types';
 import {getLoggerFromConfig} from './logger';
@@ -31,7 +31,7 @@ export class TopicSagaConsumer<
     private middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
 
     private consumerPool: ConsumerPool;
-    private producerPool: ProducerPool;
+    private throttledProducer: ThrottledProducer;
 
     constructor({
         kafka,
@@ -69,7 +69,12 @@ export class TopicSagaConsumer<
 
         this.consumerPool = new ConsumerPool(kafka, topic, undefined, topicAdministrator);
 
-        this.producerPool = new ProducerPool(kafka, undefined, topicAdministrator);
+        this.throttledProducer = new ThrottledProducer(
+            kafka,
+            undefined,
+            topicAdministrator,
+            this.logger
+        );
 
         this.run = this.run.bind(this);
         this.disconnect = this.disconnect.bind(this);
@@ -85,11 +90,11 @@ export class TopicSagaConsumer<
             fromBeginning: true
         });
 
-        await this.producerPool.connect();
+        await this.throttledProducer.connect();
 
         const runner = new SagaRunner<InitialActionPayload, SagaContext<Context>>(
             this.consumerPool,
-            this.producerPool,
+            this.throttledProducer,
             this.middlewares
         );
 
@@ -165,7 +170,7 @@ export class TopicSagaConsumer<
         await this.consumer.disconnect();
         await Bluebird.all([
             this.consumerPool.disconnectConsumers(),
-            this.producerPool.disconnect()
+            this.throttledProducer.disconnect()
         ]);
     }
 }
