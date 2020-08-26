@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {IHeaders, ProducerRecord, RecordMetadata} from 'kafkajs';
+import {IHeaders, ProducerRecord} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 import {SagaRunner} from './saga_runner';
