@@ -226,8 +226,8 @@ export interface IKafkaJSProtocolError {
     code: number;
 }
 
-export interface IOutgoingRecord {
-    resolve: () => any;
-    reject: (...args: any[]) => any;
-    record: ProducerRecord;
+export interface IQueuedRecord {
+    resolve: () => void;
+    reject: (...args: any[]) => void;
+    record: Pick<ProducerRecord, 'topic' | 'messages'>;
 }
