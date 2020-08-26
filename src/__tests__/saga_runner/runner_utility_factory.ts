@@ -25,7 +25,7 @@ export async function runnerUtilityFactory() {
         spy: {
             consumer: (methodName: keyof typeof consumerPool) =>
                 jest.spyOn(consumerPool, methodName),
-            producer: (methodName: keyof typeof throttledProducer) =>
+            producer: (methodName: keyof Omit<typeof throttledProducer, 'recordsSent'>) =>
                 jest.spyOn(throttledProducer, methodName)
         },
         runner,
