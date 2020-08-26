@@ -151,7 +151,7 @@ describe(ThrottledProducer.name, function() {
     });
 
     it(
-        'handles asynchronous throughput',
+        'handles asynchronous, high (1ms) throughput',
         async function() {
             await withTopicCleanup(['high_throughput'])(async ([topic]) => {
                 const throttledProducer = new ThrottledProducer(kafka);
