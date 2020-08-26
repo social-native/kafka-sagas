@@ -13,15 +13,15 @@ describe(ThrottledProducer.name, function() {
     it(
         'puts messages into the topic',
         async function() {
-            await withTopicCleanup(['producer_pool_test'])(async ([topic]) => {
+            await withTopicCleanup(['producer_throttledProducer_test'])(async ([topic]) => {
                 const expectedMessage: Omit<TestAction, 'topic'> = {
                     payload: {thing: true},
                     transaction_id: '4'
                 };
 
                 const throttledProducer = new ThrottledProducer(kafka);
-                await pool.connect();
-                await pool.putAction({
+                await throttledProducer.connect();
+                await throttledProducer.putAction({
                     transaction_id: expectedMessage.transaction_id,
                     payload: expectedMessage.payload,
                     topic
@@ -43,7 +43,7 @@ describe(ThrottledProducer.name, function() {
 
                 expect(receivedMessage).toEqual(expectedMessage);
                 await consumer.disconnect();
-                await pool.disconnect();
+                await throttledProducer.disconnect();
             });
         },
         DEFAULT_TEST_TIMEOUT
@@ -75,8 +75,8 @@ describe(ThrottledProducer.name, function() {
 
             const throttledProducer = new ThrottledProducer(kafka);
 
-            await pool.connect();
-            await pool.putAction({
+            await throttledProducer.connect();
+            await throttledProducer.putAction({
                 transaction_id: expectedMessage.transaction_id,
                 payload: expectedMessage.payload,
                 topic
@@ -98,13 +98,13 @@ describe(ThrottledProducer.name, function() {
                 ]
             });
 
-            await pool.putAction({
+            await throttledProducer.putAction({
                 transaction_id: expectedMessage.transaction_id,
                 payload: expectedMessage.payload,
                 topic
             });
 
-            await pool.disconnect();
+            await throttledProducer.disconnect();
             await admin.deleteTopics({
                 topics: [topic]
             });
@@ -121,15 +121,15 @@ describe(ThrottledProducer.name, function() {
 
             const throttledProducer = new ThrottledProducer(kafka);
 
-            await pool.connect();
+            await throttledProducer.connect();
 
-            await pool.putAction({
+            await throttledProducer.putAction({
                 topic: newTopic,
                 transaction_id: transactionId,
                 payload: {}
             });
 
-            await pool.disconnect();
+            await throttledProducer.disconnect();
 
             const admin = kafka.admin();
 
@@ -155,7 +155,7 @@ describe(ThrottledProducer.name, function() {
         async function() {
             await withTopicCleanup(['high_throughput'])(async ([topic]) => {
                 const throttledProducer = new ThrottledProducer(kafka);
-                await pool.connect();
+                await throttledProducer.connect();
                 const messages: any[] = [];
 
                 for (let num = 0; num < 10000; num++) {
@@ -167,7 +167,7 @@ describe(ThrottledProducer.name, function() {
 
                 for (const message of messages) {
                     setImmediate(async () => {
-                        await pool.putAction({
+                        await throttledProducer.putAction({
                             transaction_id: message.transaction_id,
                             payload: message.payload,
                             topic
@@ -206,7 +206,7 @@ describe(ThrottledProducer.name, function() {
                     }, 100);
                 });
 
-                await pool.disconnect();
+                await throttledProducer.disconnect();
                 await consumer.disconnect();
                 expect(receivedMessages.length).toEqual(messages.length);
             });
