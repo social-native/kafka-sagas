@@ -149,4 +149,68 @@ describe(ProducerPool.name, function() {
 
         await deleteTopic(newTopic);
     });
+
+    it.only(
+        'handles asynchronous throughput',
+        async function() {
+            await withTopicCleanup(['high_throughput'])(async ([topic]) => {
+                const pool = new ProducerPool(kafka);
+                await pool.connect();
+                const messages: any[] = [];
+
+                for (let num = 0; num < 10000; num++) {
+                    messages.push({
+                        payload: {index: num},
+                        transaction_id: '4'
+                    });
+                }
+
+                for (const message of messages) {
+                    setImmediate(async () => {
+                        await pool.putAction({
+                            transaction_id: message.transaction_id,
+                            payload: message.payload,
+                            topic
+                        });
+                    });
+
+                    await Bluebird.delay(1);
+                }
+
+                // consume messages and ensure the number sent are what come back
+
+                const consumer = kafka.consumer({
+                    groupId: uuid.v4()
+                });
+
+                const receivedMessages = [];
+
+                await consumer.subscribe({topic});
+                await consumer.connect();
+                await consumer.run({
+                    eachMessage: async ({message}) => {
+                        receivedMessages.push(message);
+                    }
+                });
+
+                await new Promise(resolve => {
+                    const intervalId = setInterval(() => {
+                        if (
+                            receivedMessages.length === messages.length &&
+                            receivedMessages.length > 0
+                        ) {
+                            setImmediate(consumer.stop);
+                            clearInterval(intervalId);
+                            resolve();
+                        }
+                    }, 100);
+                });
+
+                await pool.disconnect();
+                await consumer.disconnect();
+                expect(receivedMessages.length).toEqual(messages.length);
+            });
+        },
+        DEFAULT_TEST_TIMEOUT * 5
+    );
 });
