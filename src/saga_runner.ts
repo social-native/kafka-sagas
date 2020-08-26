@@ -11,7 +11,7 @@ import {
     Next
 } from './types';
 import {ConsumerPool} from './consumer_pool';
-import {ProducerPool} from './producer_pool';
+import {ThrottledProducer} from './throttled_producer';
 import {
     isActionChannelEffectDescription,
     isTakeEffectDescription,
@@ -31,7 +31,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
 
     constructor(
         private consumerPool: ConsumerPool,
-        private producerPool: ProducerPool,
+        private throttledProducer: ThrottledProducer,
         middlewares: Array<Middleware<IEffectDescription, Context>> = []
     ) {
         const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
@@ -139,7 +139,7 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
                 action.headers = context.headers;
             }
 
-            await this.producerPool.putAction(action);
+            await this.throttledProducer.putAction(action);
 
             return;
         }

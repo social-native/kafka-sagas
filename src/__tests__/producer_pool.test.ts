@@ -1,5 +1,5 @@
 import Bluebird from 'bluebird';
-import {ProducerPool} from '../producer_pool';
+import {ThrottledProducer} from '../throttled_producer';
 import {IAction} from '../../src/types';
 import {kafka} from './test_clients';
 import {withTopicCleanup, deleteTopic} from './kafka_utils';
@@ -9,7 +9,7 @@ import {DEFAULT_TEST_TIMEOUT} from './constants';
 
 type TestAction = IAction<{thing: true}>;
 
-describe(ProducerPool.name, function() {
+describe(ThrottledProducer.name, function() {
     it(
         'puts messages into the topic',
         async function() {
@@ -19,7 +19,7 @@ describe(ProducerPool.name, function() {
                     transaction_id: '4'
                 };
 
-                const pool = new ProducerPool(kafka);
+                const throttledProducer = new ThrottledProducer(kafka);
                 await pool.connect();
                 await pool.putAction({
                     transaction_id: expectedMessage.transaction_id,
@@ -73,7 +73,7 @@ describe(ProducerPool.name, function() {
                 transaction_id: '4'
             };
 
-            const pool = new ProducerPool(kafka);
+            const throttledProducer = new ThrottledProducer(kafka);
 
             await pool.connect();
             await pool.putAction({
@@ -119,7 +119,7 @@ describe(ProducerPool.name, function() {
         try {
             const transactionId = 'super-cool-transaction';
 
-            const pool = new ProducerPool(kafka);
+            const throttledProducer = new ThrottledProducer(kafka);
 
             await pool.connect();
 
@@ -154,7 +154,7 @@ describe(ProducerPool.name, function() {
         'handles asynchronous throughput',
         async function() {
             await withTopicCleanup(['high_throughput'])(async ([topic]) => {
-                const pool = new ProducerPool(kafka);
+                const throttledProducer = new ThrottledProducer(kafka);
                 await pool.connect();
                 const messages: any[] = [];
 

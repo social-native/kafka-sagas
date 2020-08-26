@@ -2,7 +2,7 @@ export {TopicSagaConsumer} from './topic_saga_consumer';
 export {TopicEventEmitter} from './topic_event_emitter';
 export {TopicAdministrator} from './topic_administrator';
 export {ConsumerPool} from './consumer_pool';
-export {ProducerPool} from './producer_pool';
+export {ThrottledProducer as ProducerPool} from './throttled_producer';
 export {SagaRunner} from './saga_runner';
 export {EphemeralBuffer, ActionChannelBuffer} from './buffers';
 export {transformKafkaMessageToAction} from './transform_kafka_message_to_action';

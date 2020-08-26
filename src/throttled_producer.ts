@@ -4,7 +4,7 @@ import {createActionMessage} from './create_action_message';
 import {TopicAdministrator} from './topic_administrator';
 import {isKafkaJSProtocolError} from './type_guard';
 
-export class ProducerPool {
+export class ThrottledProducer {
     private producer: Producer;
     private topicAdministrator: TopicAdministrator;
     private isConnected: boolean = false;

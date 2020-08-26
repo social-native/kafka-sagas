@@ -3,7 +3,7 @@ import {withTopicCleanup} from '../kafka_utils';
 import {DEFAULT_TEST_TIMEOUT} from '../constants';
 import {ConsumerPool} from '../../consumer_pool';
 import {kafka} from '../test_clients';
-import {ProducerPool} from '../../producer_pool';
+import {ThrottledProducer} from '../../throttled_producer';
 import {EffectBuilder} from '../../effect_builder';
 import uuid from 'uuid';
 import Bluebird from 'bluebird';
@@ -107,12 +107,12 @@ describe(SagaRunner.name, function() {
                     const remoteSaga = createMockRemoteCopyCampaignSaga(transactionId);
                     await remoteSaga.start();
                     const consumerPool = new ConsumerPool(kafka, topics.CLONE_CAMPAIGN_START);
-                    const producerPool = new ProducerPool(kafka);
-                    await producerPool.connect();
+                    const throttledProducer = new ThrottledProducer(kafka);
+                    await throttledProducer.connect();
 
                     const runner = new SagaRunner<{campaignId: number}, SagaContext>(
                         consumerPool,
-                        producerPool
+                        throttledProducer
                     );
 
                     const effectBuilder = new EffectBuilder(transactionId);
@@ -189,7 +189,7 @@ describe(SagaRunner.name, function() {
                     expect(finalResult.transaction_id).toEqual(transactionId);
 
                     await consumerPool.disconnectConsumers();
-                    await producerPool.disconnect();
+                    await throttledProducer.disconnect();
                     await remoteSaga.stop();
                 });
             },
