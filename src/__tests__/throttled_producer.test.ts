@@ -6,6 +6,7 @@ import {withTopicCleanup, deleteTopic} from './kafka_utils';
 import uuid from 'uuid';
 import {KafkaMessage} from 'kafkajs';
 import {DEFAULT_TEST_TIMEOUT} from './constants';
+import pino from 'pino';
 
 type TestAction = IAction<{thing: true}>;
 
@@ -119,7 +120,12 @@ describe(ThrottledProducer.name, function() {
         try {
             const transactionId = 'super-cool-transaction';
 
-            const throttledProducer = new ThrottledProducer(kafka);
+            const throttledProducer = new ThrottledProducer(
+                kafka,
+                undefined,
+                undefined,
+                pino({level: 'debug'})
+            );
 
             await throttledProducer.connect();
 
@@ -151,31 +157,17 @@ describe(ThrottledProducer.name, function() {
     });
 
     it(
-        'handles asynchronous, high (1ms) throughput',
+        'handles asynchronous, high (10ms) throughput',
         async function() {
             await withTopicCleanup(['high_throughput'])(async ([topic]) => {
-                const throttledProducer = new ThrottledProducer(kafka);
+                const throttledProducer = new ThrottledProducer(
+                    kafka,
+                    undefined,
+                    undefined,
+                    pino({level: 'debug'})
+                );
                 await throttledProducer.connect();
-                const messages: any[] = [];
-
-                for (let num = 0; num < 10000; num++) {
-                    messages.push({
-                        payload: {index: num},
-                        transaction_id: '4'
-                    });
-                }
-
-                for (const message of messages) {
-                    setImmediate(async () => {
-                        await throttledProducer.putAction({
-                            transaction_id: message.transaction_id,
-                            payload: message.payload,
-                            topic
-                        });
-                    });
-
-                    await Bluebird.delay(1);
-                }
+                const messages: Array<{payload: {index: number}; transaction_id: string}> = [];
 
                 // consume messages and ensure the number sent are what come back
 
@@ -183,32 +175,73 @@ describe(ThrottledProducer.name, function() {
                     groupId: uuid.v4()
                 });
 
-                const receivedMessages = [];
+                const receivedMessages: Array<{
+                    payload: {index: number};
+                    transaction_id: string;
+                }> = [];
 
-                await consumer.subscribe({topic});
+                await consumer.subscribe({topic, fromBeginning: true});
                 await consumer.connect();
                 await consumer.run({
                     eachMessage: async ({message}) => {
-                        receivedMessages.push(message);
+                        receivedMessages.push(JSON.parse(message.value.toString()));
                     }
                 });
 
-                await new Promise(resolve => {
-                    const intervalId = setInterval(() => {
-                        if (
-                            receivedMessages.length === messages.length &&
-                            receivedMessages.length > 0
-                        ) {
-                            setImmediate(consumer.stop);
-                            clearInterval(intervalId);
-                            resolve();
-                        }
-                    }, 100);
-                });
+                for (let num = 0; num < 2000; num++) {
+                    messages.push({
+                        payload: {index: num},
+                        transaction_id: '4'
+                    });
+                }
+
+                for (const message of messages) {
+                    setTimeout(
+                        () =>
+                            throttledProducer.putAction({
+                                transaction_id: message.transaction_id,
+                                payload: message.payload,
+                                topic
+                            }),
+                        0
+                    );
+
+                    await Bluebird.delay(10);
+                }
+
+                try {
+                    await Bluebird.resolve(
+                        new Promise(resolve => {
+                            const intervalId = setInterval(() => {
+                                if (
+                                    receivedMessages.length === messages.length &&
+                                    receivedMessages.length > 0
+                                ) {
+                                    setImmediate(consumer.stop);
+                                    clearInterval(intervalId);
+                                    resolve();
+                                }
+                            }, 1000);
+                        })
+                    ).timeout(40 * 1000, 'Did not consume expected messages within 40 seconds');
+                } catch (error) {
+                    await throttledProducer.disconnect();
+                    await consumer.disconnect();
+                    throw error;
+                }
 
                 await throttledProducer.disconnect();
                 await consumer.disconnect();
+
+                /** Ensure expected output is consumable */
                 expect(receivedMessages.length).toEqual(messages.length);
+
+                /** Ensure all messages present */
+                expect(
+                    messages.filter(message =>
+                        receivedMessages.find(m => m.payload.index === message.payload.index)
+                    ).length
+                ).toEqual(messages.length);
             });
         },
         DEFAULT_TEST_TIMEOUT * 5
