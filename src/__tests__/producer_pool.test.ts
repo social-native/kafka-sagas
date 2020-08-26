@@ -150,7 +150,7 @@ describe(ProducerPool.name, function() {
         await deleteTopic(newTopic);
     });
 
-    it.only(
+    it(
         'handles asynchronous throughput',
         async function() {
             await withTopicCleanup(['high_throughput'])(async ([topic]) => {
