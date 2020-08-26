@@ -180,7 +180,7 @@ describe(ThrottledProducer.name, function() {
                     transaction_id: string;
                 }> = [];
 
-                await consumer.subscribe({topic, fromBeginning: true});
+                await consumer.subscribe({topic});
                 await consumer.connect();
                 await consumer.run({
                     eachMessage: async ({message}) => {
@@ -188,7 +188,7 @@ describe(ThrottledProducer.name, function() {
                     }
                 });
 
-                for (let num = 0; num < 2000; num++) {
+                for (let num = 0; num < 1000; num++) {
                     messages.push({
                         payload: {index: num},
                         transaction_id: '4'
@@ -196,15 +196,11 @@ describe(ThrottledProducer.name, function() {
                 }
 
                 for (const message of messages) {
-                    setTimeout(
-                        () =>
-                            throttledProducer.putAction({
-                                transaction_id: message.transaction_id,
-                                payload: message.payload,
-                                topic
-                            }),
-                        0
-                    );
+                    throttledProducer.putAction({
+                        transaction_id: message.transaction_id,
+                        payload: message.payload,
+                        topic
+                    });
 
                     await Bluebird.delay(10);
                 }
@@ -213,17 +209,14 @@ describe(ThrottledProducer.name, function() {
                     await Bluebird.resolve(
                         new Promise(resolve => {
                             const intervalId = setInterval(() => {
-                                if (
-                                    receivedMessages.length === messages.length &&
-                                    receivedMessages.length > 0
-                                ) {
+                                if (receivedMessages.length === messages.length) {
                                     setImmediate(consumer.stop);
                                     clearInterval(intervalId);
                                     resolve();
                                 }
                             }, 1000);
                         })
-                    ).timeout(40 * 1000, 'Did not consume expected messages within 40 seconds');
+                    ).timeout(60 * 1000, 'Did not consume expected messages within 60 seconds');
                 } catch (error) {
                     await throttledProducer.disconnect();
                     await consumer.disconnect();

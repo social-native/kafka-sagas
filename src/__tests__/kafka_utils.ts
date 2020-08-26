@@ -38,14 +38,6 @@ export function withTopicCleanup(topics: string[], seeding: boolean = true) {
             }
         }
 
-        for (const topic of topics) {
-            try {
-                await deleteTopic(topic);
-            } catch (error) {
-                // do nothing
-            }
-        }
-
         let err: Error | null = null;
 
         try {

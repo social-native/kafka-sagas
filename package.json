@@ -15,8 +15,8 @@
         "watch": "rollup -cw",
         "prettier": "./node_modules/.bin/prettier \"src/**/*\" --write",
         "lint": "tslint -t stylish --project \"tsconfig.json\"",
-        "test:ci": "dotenv -e .env.ci.test jest -- --no-cache --runInBand",
-        "test:local": "dotenv -e .env.local.test jest -- --no-cache --runInBand",
+        "test:ci": "dotenv -e .env.ci.test jest -- --no-cache --runInBand --forceExit",
+        "test:local": "dotenv -e .env.local.test jest -- --no-cache --runInBand --forceExit",
         "test:watch": "dotenv -e .env.local.test jest -- --no-cache --runInBand --watchAll",
         "type-check:watch": "npm run type-check -- --watch",
         "type-check": "tsc --noEmit"
