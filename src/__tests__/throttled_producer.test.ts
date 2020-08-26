@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird';
 import {ThrottledProducer} from '../throttled_producer';
-import {IAction} from '../../src/types';
+import {IAction} from '../types';
 import {kafka} from './test_clients';
 import {withTopicCleanup, deleteTopic} from './kafka_utils';
 import uuid from 'uuid';
