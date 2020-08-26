@@ -14,6 +14,7 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
     - [What's A Transaction?](#whats-a-transaction)
   - [Advanced](#advanced)
     - [Communication between sagas](#communication-between-sagas)
+    - [Production speed](#production-speed)
 
 ## Usage
 
@@ -111,3 +112,6 @@ A transaction is a string of events that share a transaction_id. By being in the
 
 The following diagram illustrates how 3 independently deployed sagas can interact and react to each other.
 ![3 sagas communicate](https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png)
+
+### Production speed
+Due to [this bug](https://github.com/tulios/kafkajs/issues/598), the underlying producer batches messages into sets of 10,000 and sends a batch of 10,000 messages per second. This isn't currently configurable, but it is my understanding that this should be no trouble for a Kafka cluster. This means `PUT` effects may take up to a second to resolve. See the `ThrottledProducer` class to understand the finer workings of the producer.
