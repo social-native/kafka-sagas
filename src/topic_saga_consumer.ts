@@ -69,7 +69,12 @@ export class TopicSagaConsumer<
 
         this.consumerPool = new ConsumerPool(kafka, topic, undefined, topicAdministrator);
 
-        this.throttledProducer = new ThrottledProducer(kafka, undefined, topicAdministrator);
+        this.throttledProducer = new ThrottledProducer(
+            kafka,
+            undefined,
+            topicAdministrator,
+            this.logger
+        );
 
         this.run = this.run.bind(this);
         this.disconnect = this.disconnect.bind(this);
