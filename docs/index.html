@@ -81,6 +81,7 @@
 							</li>
 							<li><a href="#advanced">Advanced</a><ul>
 									<li><a href="#communication-between-sagas">Communication between sagas</a></li>
+									<li><a href="#production-speed">Production speed</a></li>
 								</ul>
 							</li>
 						</ul>
@@ -178,6 +179,10 @@
 				</a>
 				<p>The following diagram illustrates how 3 independently deployed sagas can interact and react to each other.
 				<img src="https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png" alt="3 sagas communicate"></p>
+				<a href="#production-speed" id="production-speed" style="color: inherit; text-decoration: none;">
+					<h3>Production speed</h3>
+				</a>
+				<p>Due to <a href="https://github.com/tulios/kafkajs/issues/598">this bug</a>, the underlying producer batches messages into sets of 10,000 and sends a batch of 10,000 messages per second. This isn&#39;t currently configurable, but it is my understanding that this should be no trouble for a Kafka cluster. This means <code>PUT</code> effects may take up to a second to resolve. See the <code>ThrottledProducer</code> class to understand the finer workings of the producer.</p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -205,11 +210,11 @@
 					<li class=" tsd-kind-class tsd-has-type-parameter">
 						<a href="classes/ephemeralbuffer.html" class="tsd-kind-icon">Ephemeral<wbr>Buffer</a>
 					</li>
-					<li class=" tsd-kind-class">
-						<a href="classes/producerpool.html" class="tsd-kind-icon">Producer<wbr>Pool</a>
-					</li>
 					<li class=" tsd-kind-class tsd-has-type-parameter">
 						<a href="classes/sagarunner.html" class="tsd-kind-icon">Saga<wbr>Runner</a>
+					</li>
+					<li class=" tsd-kind-class">
+						<a href="classes/throttledproducer.html" class="tsd-kind-icon">Throttled<wbr>Producer</a>
 					</li>
 					<li class=" tsd-kind-class">
 						<a href="classes/topicadministrator.html" class="tsd-kind-icon">Topic<wbr>Administrator</a>
@@ -255,6 +260,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/iputeffectdescription.html" class="tsd-kind-icon">IPut<wbr>Effect<wbr>Description</a>
+					</li>
+					<li class=" tsd-kind-interface">
+						<a href="interfaces/iqueuedrecord.html" class="tsd-kind-icon">IQueued<wbr>Record</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/itakeactionchanneleffectdescription.html" class="tsd-kind-icon">ITake<wbr>Action<wbr>Channel<wbr>Effect<wbr>Description</a>
