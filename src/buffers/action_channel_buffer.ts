@@ -16,7 +16,7 @@ export default class ActionChannelBuffer<Action extends IAction> implements IAct
     }
 
     // tslint:disable-next-line: cyclomatic-complexity
-    public notifyObservers() {
+    protected notifyObservers() {
         const countObservers = this.observers.length;
         const countActions = this.actions.length;
 

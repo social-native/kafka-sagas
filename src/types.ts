@@ -2,7 +2,6 @@ import pino from 'pino';
 
 import {IHeaders, ProducerRecord} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
-import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 import {SagaRunner} from './saga_runner';
 import {EffectDescriptionKind} from './enums';
 
@@ -33,7 +32,7 @@ export type CallEffect<Fn extends (...args: any[]) => any> = (
 
 export type ActionChannelEffect<Payload> = (
     pattern: ActionChannelInput<IAction<Payload>>,
-    actionBuffer?: ActionChannelBuffer<IAction<Payload>>
+    actionBuffer?: IActionBuffer<IAction<Payload>>
 ) => IActionChannelEffectDescription<IAction<Payload>>;
 
 export type DelayEffect<Payload extends {} | undefined = undefined> = (
@@ -89,7 +88,7 @@ export interface ITakeEffectDescription<Action extends IAction = IAction>
     patterns: TakePattern;
     kind: EffectDescriptionKind.TAKE;
     topics: string[];
-    buffer: EphemeralBuffer<Action>;
+    buffer: IActionBuffer<Action>;
     observer: ActionObserver<Action>;
 }
 
@@ -97,7 +96,7 @@ export interface ITakeActionChannelEffectDescription<Action extends IAction = IA
     extends IEffectDescription {
     patterns: ActionChannelInput<Action>;
     kind: EffectDescriptionKind.TAKE_ACTION_CHANNEL;
-    buffer: ActionChannelBuffer<Action>;
+    buffer: IActionBuffer<Action>;
     topics: string[];
     observer: ActionObserver<Action>;
 }
@@ -113,7 +112,7 @@ export interface IActionChannelEffectDescription<Action extends IAction = IActio
     extends IEffectDescription {
     pattern: ActionChannelInput<Action>;
     kind: EffectDescriptionKind.ACTION_CHANNEL;
-    buffer: ActionChannelBuffer<Action>;
+    buffer: IActionBuffer<Action>;
     topics: string[];
     observer: ActionObserver<Action>;
 }
