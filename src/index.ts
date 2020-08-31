@@ -10,5 +10,6 @@ export {parseHeaders} from './parse_headers';
 export {EffectBuilder} from './effect_builder';
 export {createActionMessage} from './create_action_message';
 export * from './types';
+export * from './enums';
 import * as TypeGuard from './type_guard';
 export {TypeGuard};
