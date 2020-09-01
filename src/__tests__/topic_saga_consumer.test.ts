@@ -4,6 +4,8 @@ import {withTopicCleanup} from './kafka_utils';
 import {CompressionTypes} from 'kafkajs';
 import {DEFAULT_TEST_TIMEOUT} from './constants';
 import Bluebird from 'bluebird';
+import uuid from 'uuid';
+import {TopicAdministrator} from '../topic_administrator';
 
 // tslint:disable-next-line: no-empty
 describe(TopicSagaConsumer.name, function() {
@@ -129,5 +131,42 @@ describe(TopicSagaConsumer.name, function() {
             });
         },
         DEFAULT_TEST_TIMEOUT * 3
+    );
+
+    it(
+        'creates nonexistent topics using the topic administrator',
+        async function() {
+            const nonexistentTopic = uuid.v4();
+
+            const topicAdmin = new TopicAdministrator(kafka, {
+                numPartitions: 10
+            });
+
+            const topicConsumer = new TopicSagaConsumer({
+                kafka,
+                topic: nonexistentTopic,
+                topicAdministrator: topicAdmin,
+                *saga() {
+                    return;
+                }
+            });
+
+            await topicConsumer.run();
+
+            const admin = kafka.admin({retry: {retries: 0}});
+            await admin.connect();
+
+            const topicMetadata = await admin.fetchTopicMetadata({
+                topics: [nonexistentTopic]
+            });
+
+            await admin.deleteTopics({topics: [nonexistentTopic]});
+            await admin.disconnect();
+            await topicConsumer.disconnect();
+
+            expect(topicMetadata.topics[0].name).toEqual(nonexistentTopic);
+            expect(topicMetadata.topics[0].partitions.length).toEqual(10);
+        },
+        DEFAULT_TEST_TIMEOUT
     );
 });
