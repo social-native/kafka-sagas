@@ -4,6 +4,7 @@ import {Consumer, Kafka, ConsumerConfig} from 'kafkajs';
 import {IAction, ActionObserver} from './types';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {TopicAdministrator} from './topic_administrator';
+import {isKafkaJSProtocolError} from './type_guard';
 
 export class ConsumerPool {
     private topicAdministrator: TopicAdministrator;
@@ -27,15 +28,23 @@ export class ConsumerPool {
             return;
         }
 
-        await this.topicAdministrator.createTopic(topic);
-
         const consumer = this.kafka.consumer({
             groupId: `${this.rootTopic}-${uuid.v4()}`,
             ...this.consumerConfig
         });
 
         await consumer.connect();
-        await consumer.subscribe({topic});
+
+        try {
+            await consumer.subscribe({topic});
+        } catch (error) {
+            if (isKafkaJSProtocolError(error) && error.type === 'UNKNOWN_TOPIC_OR_PARTITION') {
+                await this.topicAdministrator.createTopic(topic);
+            } else {
+                throw error;
+            }
+        }
+
         this.consumers.set(topic, consumer);
 
         await consumer.run({

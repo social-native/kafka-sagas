@@ -15,6 +15,7 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
   - [Advanced](#advanced)
     - [Communication between sagas](#communication-between-sagas)
     - [Production speed](#production-speed)
+    - [Auto Topic Creation](#auto-topic-creation)
 
 ## Usage
 
@@ -24,7 +25,7 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
 npm install --save kafka-sagas
 ```
 
-##  2. Make sure peer dependencies are installed
+## 2. Make sure peer dependencies are installed
 
 ```typescript
 npm install --save kafkajs
@@ -114,4 +115,47 @@ The following diagram illustrates how 3 independently deployed sagas can interac
 ![3 sagas communicate](https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png)
 
 ### Production speed
+
 Due to [this bug](https://github.com/tulios/kafkajs/issues/598), the underlying producer batches messages into sets of 10,000 and sends a batch of 10,000 messages per second. This isn't currently configurable, but it is my understanding that this should be no trouble for a Kafka cluster. This means `PUT` effects may take up to a second to resolve. See the `ThrottledProducer` class to understand the finer workings of the producer.
+
+### Auto Topic Creation
+
+By default, a TopicSagaConsumer will automatically create a topic if it attempts to subscribe to nonexistent one. If you would like to control how topics are created by both the primary consumer and underlying consumers and producers, instantiate the TopicSagaConsumer with your own TopicAdministrator instance.
+
+The following example creates **three** topics with 10 partitions each:
+
+```ts
+const topic = 'some_topic_that_does_not_exist_yet';
+
+const topicAdministrator = new TopicAdministrator(kafka, {
+    numPartitions: 10
+});
+
+const topicConsumer = new TopicSagaConsumer({
+    kafka,
+    topic,
+    topicAdministrator,
+    *saga(_, {effects: {put, actionChannel}}) {
+        /**
+         * A new topic (with 10 partitions) is created here using the provided topicAdministrator.
+         */
+        yield put('some_other_non_existent_topic');
+
+        /**
+         * A new topic (again, with 10 partitions) is created here as well.
+         */
+        const channel = yield actionChannel('a_third_nonexistent_topic');
+    }
+});
+
+/**
+ * The some_topic_that_does_not_exist_yet topic is created during the consumer startup.
+ */
+await topicConsumer.run();
+```
+
+The topics in the above example will be created in the following order, since the saga won't execute until messages are flowing in:
+
+1. some_topic_that_does_not_exist_yet
+2. some_other_non_existent_topic
+3. a_third_nonexistent_topic

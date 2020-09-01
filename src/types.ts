@@ -230,3 +230,8 @@ export interface IQueuedRecord {
     reject: (...args: any[]) => void;
     record: Pick<ProducerRecord, 'topic' | 'messages'>;
 }
+
+export interface ITopicSagaConsumerConfig {
+    consumptionTimeoutMs: number;
+    partitionConcurrency: number;
+}

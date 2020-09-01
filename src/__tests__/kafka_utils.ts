@@ -3,7 +3,7 @@ import {KafkaMessage, IHeaders} from 'kafkajs';
 import {IAction} from '../types';
 
 export async function createTopic(topic: string) {
-    const admin = kafka.admin();
+    const admin = kafka.admin({retry: {retries: 0}});
     await admin.createTopics({
         topics: [{topic}],
         waitForLeaders: true
@@ -24,7 +24,7 @@ export async function seedTopic(topic: string, seedMessages: any[] = sampleMessa
 }
 
 export async function deleteTopic(topic: string) {
-    const admin = kafka.admin();
+    const admin = kafka.admin({retry: {retries: 0}});
     await admin.deleteTopics({topics: [topic]});
     await admin.disconnect();
 }

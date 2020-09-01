@@ -96,6 +96,7 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="topicsagaconsumer.html#config" class="tsd-kind-icon">config</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="topicsagaconsumer.html#consumer" class="tsd-kind-icon">consumer</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="topicsagaconsumer.html#consumerpool" class="tsd-kind-icon">consumer<wbr>Pool</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="topicsagaconsumer.html#eventemitter" class="tsd-kind-icon">event<wbr>Emitter</a></li>
@@ -105,6 +106,7 @@
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="topicsagaconsumer.html#saga" class="tsd-kind-icon">saga</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="topicsagaconsumer.html#throttledproducer" class="tsd-kind-icon">throttled<wbr>Producer</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="topicsagaconsumer.html#topic" class="tsd-kind-icon">topic</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="topicsagaconsumer.html#topicadminstrator" class="tsd-kind-icon">topic<wbr>Adminstrator</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -123,19 +125,19 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Topic<wbr>Saga<wbr>Consumer<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>kafka<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kafka</span><span class="tsd-signature-symbol">; </span>loggerConfig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/iloggerconfig.html" class="tsd-signature-type">ILoggerConfig</a><span class="tsd-signature-symbol">; </span>middlewares<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>next<span class="tsd-signature-symbol">: </span><a href="../globals.html#next" class="tsd-signature-type">Next</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-symbol">(</span>effectDescription<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EffectDescription</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>saga<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>initialAction<span class="tsd-signature-symbol">: </span><a href="../interfaces/iaction.html" class="tsd-signature-type">IAction</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">InitialActionPayload</span><span class="tsd-signature-symbol">&gt;</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Generator</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><a href="../globals.html#unpromisify" class="tsd-signature-type">UnPromisify</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReturnType</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SagaRunner</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IEffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"runEffect"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>topic<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>topicAdministrator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a><span class="tsd-signature-symbol">; </span>getContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="topicsagaconsumer.html" class="tsd-signature-type">TopicSagaConsumer</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Topic<wbr>Saga<wbr>Consumer<span class="tsd-signature-symbol">(</span>__namedParameters<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>kafka<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kafka</span><span class="tsd-signature-symbol">; </span>loggerConfig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/iloggerconfig.html" class="tsd-signature-type">ILoggerConfig</a><span class="tsd-signature-symbol">; </span>middlewares<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>next<span class="tsd-signature-symbol">: </span><a href="../globals.html#next" class="tsd-signature-type">Next</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-symbol">(</span>effectDescription<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EffectDescription</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>saga<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>initialAction<span class="tsd-signature-symbol">: </span><a href="../interfaces/iaction.html" class="tsd-signature-type">IAction</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">InitialActionPayload</span><span class="tsd-signature-symbol">&gt;</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Generator</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><a href="../globals.html#unpromisify" class="tsd-signature-type">UnPromisify</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReturnType</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SagaRunner</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IEffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"runEffect"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>topic<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>topicAdministrator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a><span class="tsd-signature-symbol">; </span>getContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="topicsagaconsumer.html" class="tsd-signature-type">TopicSagaConsumer</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L34">src/topic_saga_consumer.ts:34</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L44">src/topic_saga_consumer.ts:44</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>__namedParameters: <span class="tsd-signature-symbol">{ </span>kafka<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kafka</span><span class="tsd-signature-symbol">; </span>loggerConfig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/iloggerconfig.html" class="tsd-signature-type">ILoggerConfig</a><span class="tsd-signature-symbol">; </span>middlewares<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>next<span class="tsd-signature-symbol">: </span><a href="../globals.html#next" class="tsd-signature-type">Next</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-symbol">(</span>effectDescription<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EffectDescription</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>saga<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>initialAction<span class="tsd-signature-symbol">: </span><a href="../interfaces/iaction.html" class="tsd-signature-type">IAction</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">InitialActionPayload</span><span class="tsd-signature-symbol">&gt;</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Generator</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><a href="../globals.html#unpromisify" class="tsd-signature-type">UnPromisify</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReturnType</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SagaRunner</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IEffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"runEffect"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>topic<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>topicAdministrator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a><span class="tsd-signature-symbol">; </span>getContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></h5>
+									<h5>__namedParameters: <span class="tsd-signature-symbol">{ </span>kafka<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kafka</span><span class="tsd-signature-symbol">; </span>loggerConfig<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="../interfaces/iloggerconfig.html" class="tsd-signature-type">ILoggerConfig</a><span class="tsd-signature-symbol">; </span>middlewares<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span>next<span class="tsd-signature-symbol">: </span><a href="../globals.html#next" class="tsd-signature-type">Next</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">EffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-symbol">(</span>effectDescription<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EffectDescription</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Response</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">; </span>saga<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span>initialAction<span class="tsd-signature-symbol">: </span><a href="../interfaces/iaction.html" class="tsd-signature-type">IAction</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">InitialActionPayload</span><span class="tsd-signature-symbol">&gt;</span>, context<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Generator</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">, </span><a href="../globals.html#unpromisify" class="tsd-signature-type">UnPromisify</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReturnType</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">SagaRunner</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">IEffectDescription</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">"runEffect"</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">; </span>topic<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">; </span>topicAdministrator<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a><span class="tsd-signature-symbol">; </span>getContext<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">; </span>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol"> }</span></h5>
 									<ul class="tsd-parameters">
 										<li class="tsd-parameter">
 											<h5>kafka<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kafka</span></h5>
@@ -185,10 +187,31 @@
 												<li class="tsd-description">
 													<aside class="tsd-sources">
 														<ul>
-															<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L40">src/topic_saga_consumer.ts:40</a></li>
+															<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L50">src/topic_saga_consumer.ts:50</a></li>
 														</ul>
 													</aside>
 													<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span></h4>
+												</li>
+											</ul>
+										</li>
+										<li class="tsd-parameter">
+											<h5>config<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span></h5>
+											<ul class="tsd-parameters">
+												<li class="tsd-parameter">
+													<h5>consumption<wbr>Timeout<wbr>Ms<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+													<div class="tsd-comment tsd-typography">
+														<div class="lead">
+															<p>How long should a message be allowed to process before automatic retry?</p>
+														</div>
+													</div>
+												</li>
+												<li class="tsd-parameter">
+													<h5>partition<wbr>Concurrency<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+													<div class="tsd-comment tsd-typography">
+														<div class="lead">
+															<p>How many partitions should be consumed concurrently?</p>
+														</div>
+													</div>
 												</li>
 											</ul>
 										</li>
@@ -203,12 +226,22 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="config" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> config</h3>
+					<div class="tsd-signature tsd-kind-icon">config<span class="tsd-signature-symbol">:</span> <a href="../interfaces/itopicsagaconsumerconfig.html" class="tsd-signature-type">ITopicSagaConsumerConfig</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L34">src/topic_saga_consumer.ts:34</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
 					<a name="consumer" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> consumer</h3>
 					<div class="tsd-signature tsd-kind-icon">consumer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Consumer</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L26">src/topic_saga_consumer.ts:26</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L35">src/topic_saga_consumer.ts:35</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -218,7 +251,7 @@
 					<div class="tsd-signature tsd-kind-icon">consumer<wbr>Pool<span class="tsd-signature-symbol">:</span> <a href="consumerpool.html" class="tsd-signature-type">ConsumerPool</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L33">src/topic_saga_consumer.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L43">src/topic_saga_consumer.ts:43</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -228,7 +261,7 @@
 					<div class="tsd-signature tsd-kind-icon">event<wbr>Emitter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">TypedEventEmitter</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">{ </span>comitted_offsets<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">; </span>completed_saga<span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new EventEmitter() as TypedEmitter&lt;{comitted_offsets: (...args: any[]) &#x3D;&gt; void;completed_saga: (...args: any[]) &#x3D;&gt; void;}&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L21">src/topic_saga_consumer.ts:21</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L29">src/topic_saga_consumer.ts:29</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -238,7 +271,7 @@
 					<div class="tsd-signature tsd-kind-icon">get<wbr>Context<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">KafkaMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L29">src/topic_saga_consumer.ts:29</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L38">src/topic_saga_consumer.ts:38</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-type-declaration">
@@ -269,7 +302,7 @@
 					<div class="tsd-signature tsd-kind-icon">logger<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReturnType</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">typeof </span><span class="tsd-signature-type">pino</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L30">src/topic_saga_consumer.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L39">src/topic_saga_consumer.ts:39</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -279,7 +312,7 @@
 					<div class="tsd-signature tsd-kind-icon">middlewares<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../globals.html#middleware" class="tsd-signature-type">Middleware</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/ieffectdescription.html" class="tsd-signature-type">IEffectDescription</a><span class="tsd-signature-symbol">, </span><a href="../globals.html#sagacontext" class="tsd-signature-type">SagaContext</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L31">src/topic_saga_consumer.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L40">src/topic_saga_consumer.ts:40</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -289,7 +322,7 @@
 					<div class="tsd-signature tsd-kind-icon">saga<span class="tsd-signature-symbol">:</span> <a href="../globals.html#saga" class="tsd-signature-type">Saga</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">InitialActionPayload</span><span class="tsd-signature-symbol">, </span><a href="../globals.html#sagacontext" class="tsd-signature-type">SagaContext</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Context</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L27">src/topic_saga_consumer.ts:27</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L36">src/topic_saga_consumer.ts:36</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -299,7 +332,7 @@
 					<div class="tsd-signature tsd-kind-icon">throttled<wbr>Producer<span class="tsd-signature-symbol">:</span> <a href="throttledproducer.html" class="tsd-signature-type">ThrottledProducer</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L34">src/topic_saga_consumer.ts:34</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L44">src/topic_saga_consumer.ts:44</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -309,7 +342,17 @@
 					<div class="tsd-signature tsd-kind-icon">topic<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L28">src/topic_saga_consumer.ts:28</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L37">src/topic_saga_consumer.ts:37</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="topicadminstrator" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> topic<wbr>Adminstrator</h3>
+					<div class="tsd-signature tsd-kind-icon">topic<wbr>Adminstrator<span class="tsd-signature-symbol">:</span> <a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L42">src/topic_saga_consumer.ts:42</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -326,7 +369,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L169">src/topic_saga_consumer.ts:169</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L210">src/topic_saga_consumer.ts:210</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -343,7 +386,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/a2b8dc4/src/topic_saga_consumer.ts#L87">src/topic_saga_consumer.ts:87</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4ad5cbf/src/topic_saga_consumer.ts#L114">src/topic_saga_consumer.ts:114</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -377,6 +420,9 @@
 								<a href="topicsagaconsumer.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="topicsagaconsumer.html#config" class="tsd-kind-icon">config</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="topicsagaconsumer.html#consumer" class="tsd-kind-icon">consumer</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
@@ -402,6 +448,9 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="topicsagaconsumer.html#topic" class="tsd-kind-icon">topic</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="topicsagaconsumer.html#topicadminstrator" class="tsd-kind-icon">topic<wbr>Adminstrator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="topicsagaconsumer.html#disconnect" class="tsd-kind-icon">disconnect</a>

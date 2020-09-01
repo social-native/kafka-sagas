@@ -9,10 +9,18 @@ import {ConsumerPool} from './consumer_pool';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {ThrottledProducer} from './throttled_producer';
 import {SagaRunner} from './saga_runner';
-import {SagaContext, Saga, ILoggerConfig, Middleware, IEffectDescription} from './types';
+import {
+    SagaContext,
+    Saga,
+    ILoggerConfig,
+    Middleware,
+    IEffectDescription,
+    ITopicSagaConsumerConfig
+} from './types';
 import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
 import {TopicAdministrator} from './topic_administrator';
+import {isKafkaJSProtocolError} from './type_guard';
 
 export class TopicSagaConsumer<
     InitialActionPayload,
@@ -23,6 +31,7 @@ export class TopicSagaConsumer<
         completed_saga: (...args: any[]) => void;
     }>;
 
+    private config: ITopicSagaConsumerConfig;
     private consumer: Consumer;
     private saga: Saga<InitialActionPayload, SagaContext<Context>>;
     private topic: string;
@@ -30,6 +39,7 @@ export class TopicSagaConsumer<
     private logger: ReturnType<typeof pino>;
     private middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
 
+    private topicAdminstrator: TopicAdministrator;
     private consumerPool: ConsumerPool;
     private throttledProducer: ThrottledProducer;
 
@@ -42,37 +52,54 @@ export class TopicSagaConsumer<
         },
         loggerConfig,
         middlewares = [],
+        config = {
+            /** How long should a message be allowed to process before automatic retry? */
+            consumptionTimeoutMs: 30000,
+            /** How many partitions should be consumed concurrently? */
+            partitionConcurrency: 1
+        },
         topicAdministrator
     }: {
         kafka: Kafka;
         topic: string;
-        topicAdministrator?: TopicAdministrator;
         saga: Saga<InitialActionPayload, SagaContext<Context>>;
+
+        config?: ITopicSagaConsumerConfig;
         getContext?: (message: KafkaMessage) => Promise<Context>;
+        topicAdministrator?: TopicAdministrator;
         loggerConfig?: ILoggerConfig;
         middlewares?: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
     }) {
         this.consumer = kafka.consumer({
             groupId: topic,
-            allowAutoTopicCreation: true,
-            retry: {retries: 0}
+            allowAutoTopicCreation: false,
+            retry: {retries: 0},
+            sessionTimeout: config.consumptionTimeoutMs
         });
 
         this.saga = saga;
         this.topic = topic;
         this.getContext = getContext;
         this.middlewares = middlewares;
+        this.config = config;
 
         this.logger = getLoggerFromConfig(loggerConfig).child({
             package: 'snpkg-snapi-kafka-sagas'
         });
 
-        this.consumerPool = new ConsumerPool(kafka, topic, undefined, topicAdministrator);
+        this.topicAdminstrator = topicAdministrator || new TopicAdministrator(kafka);
+
+        this.consumerPool = new ConsumerPool(
+            kafka,
+            topic,
+            {retry: {retries: 0}},
+            this.topicAdminstrator
+        );
 
         this.throttledProducer = new ThrottledProducer(
             kafka,
             undefined,
-            topicAdministrator,
+            this.topicAdminstrator,
             this.logger
         );
 
@@ -85,10 +112,23 @@ export class TopicSagaConsumer<
      * so that they can log as they see fit.
      */
     public async run() {
-        await this.consumer.subscribe({
-            topic: this.topic,
-            fromBeginning: true
-        });
+        try {
+            await this.consumer.subscribe({
+                topic: this.topic,
+                fromBeginning: true
+            });
+        } catch (error) {
+            if (isKafkaJSProtocolError(error) && error.type === 'UNKNOWN_TOPIC_OR_PARTITION') {
+                this.logger.info(
+                    {topic: this.topic},
+                    'Unknown topic. Creating topic and partitions.'
+                );
+
+                await this.topicAdminstrator.createTopic(this.topic);
+            } else {
+                throw error;
+            }
+        }
 
         await this.throttledProducer.connect();
 
@@ -109,6 +149,7 @@ export class TopicSagaConsumer<
         await this.consumer.run({
             autoCommit: true,
             autoCommitThreshold: 1,
+            partitionsConsumedConcurrently: this.config.partitionConcurrency,
             eachMessage: async ({message}) => {
                 const initialAction = transformKafkaMessageToAction<InitialActionPayload>(
                     this.topic,
