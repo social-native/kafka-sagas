@@ -98,7 +98,7 @@ export class TopicSagaConsumer<
 
         this.throttledProducer = new ThrottledProducer(
             kafka,
-            {retry: {retries: 0}},
+            undefined,
             this.topicAdminstrator,
             this.logger
         );
