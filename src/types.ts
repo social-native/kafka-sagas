@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {IHeaders, ProducerRecord} from 'kafkajs';
+import {IHeaders, ProducerRecord, GroupDescription} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
 import {SagaRunner} from './saga_runner';
 import {EffectDescriptionKind} from './enums';
@@ -232,6 +232,13 @@ export interface IQueuedRecord {
 }
 
 export interface ITopicSagaConsumerConfig {
-    consumptionTimeoutMs: number;
-    partitionConcurrency: number;
+    consumptionTimeoutMs?: number;
+    partitionConcurrency?: number;
+}
+
+export interface IConsumptionEvent<Payload> {
+    partition: number;
+    offset: string;
+    group: GroupDescription;
+    payload: Payload;
 }
