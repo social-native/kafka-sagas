@@ -16,6 +16,10 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
     - [Communication between sagas](#communication-between-sagas)
     - [Production speed](#production-speed)
     - [Auto Topic Creation](#auto-topic-creation)
+    - [Concurrency](#concurrency)
+      - [Multiple Instances](#multiple-instances)
+      - [Using the `partitionConcurrency` config](#using-the-partitionconcurrency-config)
+      - [Combining The Two](#combining-the-two)
 
 ## Usage
 
@@ -159,3 +163,25 @@ The topics in the above example will be created in the following order, since th
 1. some_topic_that_does_not_exist_yet
 2. some_other_non_existent_topic
 3. a_third_nonexistent_topic
+
+### Concurrency
+
+Topics can be consumed concurrently using two strategies (which may also be combined).
+
+#### Multiple Instances
+By instantiating multiple `TopicSagaConsumer` instances, you are able consume from the same topic concurrently, given there are partitions to support the number of consumers. This is a scenario you would encountere if you were running multiple Kubernetes pods each of which instantiate a single consumer.
+
+#### Using the `partitionConcurrency` config
+By providing a `TopicSagaConsumer` with a `config.partitionConcurrency >= 1`, you can have a single instance consuming from multiple partitions concurrently.
+
+#### Combining The Two
+By combining the two approaches a high level of concurrent consumption can be achieved.
+
+Example:
+
+- We created a topic with 25 partitions.
+- 5 separate docker containers are running a single `TopicSagaConsumer` instance each.
+- Each of these `TopicSagaConsumers` was given a `config.partitionConcurrency: 5`
+
+So, we will be consuming from all 25 partitions concurrently:
+`(5 consumers x 5 partition concurrency per consumer) = 25`
