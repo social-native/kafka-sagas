@@ -7,5 +7,5 @@ module.exports = {
     moduleFileExtensions: ['ts', 'js', 'json'],
     modulePaths: ['<rootDir>/src'],
     testRegex: '(/__tests__/.*|(\\.|/))test.ts?$',
-    verbose: true
+    verbose: false
 };

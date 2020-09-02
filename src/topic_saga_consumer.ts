@@ -15,25 +15,24 @@ import {
     ILoggerConfig,
     Middleware,
     IEffectDescription,
-    ITopicSagaConsumerConfig
+    ITopicSagaConsumerConfig,
+    IConsumptionEvent
 } from './types';
 import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
 import {TopicAdministrator} from './topic_administrator';
 import {isKafkaJSProtocolError} from './type_guard';
 
-export class TopicSagaConsumer<
-    InitialActionPayload,
-    Context extends Record<string, any> = Record<string, any>
-> {
+export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Record<string, any>> {
     public eventEmitter = new EventEmitter() as TypedEmitter<{
         comitted_offsets: (...args: any[]) => void;
         completed_saga: (...args: any[]) => void;
+        consumed_message: (consumptionEvent: IConsumptionEvent<Payload>) => void;
     }>;
 
     private config: ITopicSagaConsumerConfig;
     private consumer: Consumer;
-    private saga: Saga<InitialActionPayload, SagaContext<Context>>;
+    private saga: Saga<Payload, SagaContext<Context>>;
     private topic: string;
     private getContext: (message: KafkaMessage) => Promise<Context>;
     private logger: ReturnType<typeof pino>;
@@ -62,7 +61,7 @@ export class TopicSagaConsumer<
     }: {
         kafka: Kafka;
         topic: string;
-        saga: Saga<InitialActionPayload, SagaContext<Context>>;
+        saga: Saga<Payload, SagaContext<Context>>;
 
         config?: ITopicSagaConsumerConfig;
         getContext?: (message: KafkaMessage) => Promise<Context>;
@@ -132,7 +131,7 @@ export class TopicSagaConsumer<
 
         await this.throttledProducer.connect();
 
-        const runner = new SagaRunner<InitialActionPayload, SagaContext<Context>>(
+        const runner = new SagaRunner<Payload, SagaContext<Context>>(
             this.consumerPool,
             this.throttledProducer,
             this.middlewares
@@ -146,21 +145,22 @@ export class TopicSagaConsumer<
             this.eventEmitter.emit('completed_saga', ...args);
         });
 
+        const consumerGroup = await this.consumer.describeGroup();
+
         await this.consumer.run({
             autoCommit: true,
             autoCommitThreshold: 1,
             partitionsConsumedConcurrently: this.config.partitionConcurrency,
-            eachMessage: async ({message}) => {
-                const initialAction = transformKafkaMessageToAction<InitialActionPayload>(
-                    this.topic,
-                    message
-                );
+            eachMessage: async ({partition, message}) => {
+                const action = transformKafkaMessageToAction<Payload>(this.topic, message);
 
                 this.logger.info(
                     {
-                        topic: initialAction.topic,
-                        transaction_id: initialAction.transaction_id,
-                        headers: initialAction.headers,
+                        partition,
+                        offset: message.offset,
+                        topic: action.topic,
+                        transaction_id: action.transaction_id,
+                        headers: action.headers,
                         timestamp: Date.now()
                     },
                     'Beginning consumption of message'
@@ -170,31 +170,40 @@ export class TopicSagaConsumer<
                     const externalContext = await this.getContext(message);
 
                     await runner.runSaga(
-                        initialAction,
+                        action,
                         {
                             headers: parseHeaders(message.headers),
                             ...externalContext,
-                            effects: new EffectBuilder(initialAction.transaction_id)
+                            effects: new EffectBuilder(action.transaction_id)
                         },
                         this.saga
                     );
 
+                    this.eventEmitter.emit('consumed_message', {
+                        partition,
+                        offset: message.offset,
+                        group: consumerGroup,
+                        payload: action.payload
+                    });
+
                     this.logger.info(
                         {
-                            topic: initialAction.topic,
-                            transaction_id: initialAction.transaction_id,
-                            headers: initialAction.headers,
+                            partition,
+                            offset: message.offset,
+                            topic: action.topic,
+                            transaction_id: action.transaction_id,
+                            headers: action.headers,
                             timestamp: Date.now()
                         },
                         'Successfully consumed message'
                     );
                 } catch (error) {
-                    this.consumerPool.stopTransaction(initialAction.transaction_id);
+                    this.consumerPool.stopTransaction(action.transaction_id);
                     this.logger.error(
                         {
-                            transaction_id: initialAction.transaction_id,
-                            topic: initialAction.topic,
-                            headers: initialAction.headers,
+                            transaction_id: action.transaction_id,
+                            topic: action.topic,
+                            headers: action.headers,
                             timestamp: Date.now(),
                             error
                         },

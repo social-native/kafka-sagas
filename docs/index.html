@@ -83,6 +83,12 @@
 									<li><a href="#communication-between-sagas">Communication between sagas</a></li>
 									<li><a href="#production-speed">Production speed</a></li>
 									<li><a href="#auto-topic-creation">Auto Topic Creation</a></li>
+									<li><a href="#concurrency">Concurrency</a><ul>
+											<li><a href="#multiple-instances">Multiple Instances</a></li>
+											<li><a href="#using-the-partitionconcurrency-config">Using the <code>partitionConcurrency</code> config</a></li>
+											<li><a href="#combining-the-two">Combining The Two</a></li>
+										</ul>
+									</li>
 								</ul>
 							</li>
 						</ul>
@@ -222,6 +228,30 @@
 					<li>some_other_non_existent_topic</li>
 					<li>a_third_nonexistent_topic</li>
 				</ol>
+				<a href="#concurrency" id="concurrency" style="color: inherit; text-decoration: none;">
+					<h3>Concurrency</h3>
+				</a>
+				<p>Topics can be consumed concurrently using two strategies (which may also be combined).</p>
+				<a href="#multiple-instances" id="multiple-instances" style="color: inherit; text-decoration: none;">
+					<h4>Multiple Instances</h4>
+				</a>
+				<p>By instantiating multiple <code>TopicSagaConsumer</code> instances, you are able consume from the same topic concurrently, given there are partitions to support the number of consumers. This is a scenario you would encountere if you were running multiple Kubernetes pods each of which instantiate a single consumer.</p>
+				<a href="#using-the-partitionconcurrency-config" id="using-the-partitionconcurrency-config" style="color: inherit; text-decoration: none;">
+					<h4>Using the <code>partitionConcurrency</code> config</h4>
+				</a>
+				<p>By providing a <code>TopicSagaConsumer</code> with a <code>config.partitionConcurrency &gt;= 1</code>, you can have a single instance consuming from multiple partitions concurrently.</p>
+				<a href="#combining-the-two" id="combining-the-two" style="color: inherit; text-decoration: none;">
+					<h4>Combining The Two</h4>
+				</a>
+				<p>By combining the two approaches a high level of concurrent consumption can be achieved.</p>
+				<p>Example:</p>
+				<ul>
+					<li>We created a topic with 25 partitions.</li>
+					<li>5 separate docker containers are running a single <code>TopicSagaConsumer</code> instance each.</li>
+					<li>Each of these <code>TopicSagaConsumers</code> was given a <code>config.partitionConcurrency: 5</code></li>
+				</ul>
+				<p>So, we will be consuming from all 25 partitions concurrently:
+				<code>(5 consumers x 5 partition concurrency per consumer) = 25</code></p>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
@@ -281,6 +311,9 @@
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/icombinatatoreffectdescription.html" class="tsd-kind-icon">ICombinatator<wbr>Effect<wbr>Description</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-has-type-parameter">
+						<a href="interfaces/iconsumptionevent.html" class="tsd-kind-icon">IConsumption<wbr>Event</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-has-type-parameter">
 						<a href="interfaces/idelayeffectdescription.html" class="tsd-kind-icon">IDelay<wbr>Effect<wbr>Description</a>
