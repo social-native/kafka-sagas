@@ -49,5 +49,60 @@ describe(SagaRunner.name, function() {
             },
             DEFAULT_TEST_TIMEOUT
         );
+
+        it(
+            'allows predicate filtering',
+            async function() {
+                await withTopicCleanup(['take-action-channel-test'])(async ([topic]) => {
+                    const {
+                        effectBuilder,
+                        runner,
+                        transactionId,
+                        closePools,
+                        context
+                    } = await runnerUtilityFactory();
+
+                    const channelDescription = effectBuilder.actionChannel<{bart: string}>(topic);
+
+                    const channel = await runner.runEffect(channelDescription, context);
+
+                    const takeActionChannel = effectBuilder.take<{bart: string}>({
+                        pattern: channel,
+                        predicate: action => action.payload.bart === 'eat_my_shorts'
+                    });
+
+                    await seedTopic(topic, [
+                        {
+                            transaction_id: transactionId,
+                            payload: {
+                                bart_simpson: 'eat_my_pants'
+                            }
+                        },
+                        {
+                            transaction_id: transactionId,
+                            payload: {
+                                bart_simpson: 'eat_my_shorts'
+                            }
+                        }
+                    ]);
+
+                    const payload = await runner.runEffect(takeActionChannel, context);
+
+                    await closePools();
+
+                    expect(payload).toMatchInlineSnapshot(`
+                    Object {
+                      "headers": Object {},
+                      "payload": Object {
+                        "bart_simpson": "eat_my_shorts",
+                      },
+                      "topic": "take-action-channel-test",
+                      "transaction_id": "static-transaction-id",
+                    }
+                `);
+                });
+            },
+            DEFAULT_TEST_TIMEOUT
+        );
     });
 });
