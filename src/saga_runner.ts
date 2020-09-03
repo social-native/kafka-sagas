@@ -20,7 +20,8 @@ import {
     isTakeActionChannelEffectDescription,
     isEffectCombinatorDescription,
     isDelayEffectDescription,
-    isGenerator
+    isGenerator,
+    actionPatternIsPredicateRecord
 } from './type_guard';
 
 export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
@@ -105,7 +106,13 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
         // If this effect already has a stream buffer for events matching the pattern,
         // then just take from the buffer
         if (isTakeActionChannelEffectDescription(effectDescription)) {
-            return await effectDescription.buffer.take();
+            const {pattern} = effectDescription;
+
+            if (actionPatternIsPredicateRecord(pattern)) {
+                // what to do here?
+            } else {
+                return await effectDescription.buffer.take();
+            }
         }
 
         if (isDelayEffectDescription(effectDescription)) {
