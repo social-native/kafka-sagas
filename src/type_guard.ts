@@ -76,15 +76,6 @@ export function actionPatternIsPredicateRecord<Action extends IAction>(
     );
 }
 
-export function isTakePatternActuallyActionChannelEffectDescription(
-    effectDescription: TakePattern | IActionChannelEffectDescription
-): effectDescription is IActionChannelEffectDescription<any> {
-    return (
-        (effectDescription as IActionChannelEffectDescription).kind ===
-        EffectDescriptionKind.ACTION_CHANNEL
-    );
-}
-
 export function takeInputIsActionPattern<Action extends IAction>(
     takeInput: TakePattern<Action> | ActionChannelInput<Action>
 ): takeInput is ActionChannelInput<Action> {
