@@ -37,7 +37,14 @@ describe('Saga middleware', function() {
                 },
                 {
                     effects: new EffectBuilder('boop'),
-                    headers: {}
+                    headers: {},
+                    originalMessage: {
+                        key: Buffer.from('key'),
+                        value: Buffer.from('value'),
+                        offset: '1',
+                        partition: 1,
+                        timestamp: (new Date().valueOf() / 1000).toString()
+                    }
                 },
                 function*(_, {effects}) {
                     yield effects.put(topic);
@@ -85,7 +92,14 @@ describe('Saga middleware', function() {
                     },
                     {
                         effects: new EffectBuilder('boop'),
-                        headers: {}
+                        headers: {},
+                        originalMessage: {
+                            key: Buffer.from('key'),
+                            value: Buffer.from('value'),
+                            offset: '1',
+                            partition: 1,
+                            timestamp: (new Date().valueOf() / 1000).toString()
+                        }
                     },
                     function*(_, {effects}) {
                         yield effects.put(topic);
@@ -122,7 +136,14 @@ describe('Saga middleware', function() {
                 },
                 {
                     effects: new EffectBuilder('boop'),
-                    headers: {}
+                    headers: {},
+                    originalMessage: {
+                        key: Buffer.from('key'),
+                        value: Buffer.from('value'),
+                        offset: '1',
+                        partition: 1,
+                        timestamp: (new Date().valueOf() / 1000).toString()
+                    }
                 },
                 function*(_, {effects}) {
                     try {
@@ -162,7 +183,14 @@ describe('Saga middleware', function() {
                 },
                 {
                     effects: new EffectBuilder('boop'),
-                    headers: {}
+                    headers: {},
+                    originalMessage: {
+                        key: Buffer.from('key'),
+                        value: Buffer.from('value'),
+                        offset: '1',
+                        partition: 1,
+                        timestamp: (new Date().valueOf() / 1000).toString()
+                    }
                 },
                 function*(_, {effects}) {
                     try {

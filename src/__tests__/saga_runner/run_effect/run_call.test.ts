@@ -19,7 +19,14 @@ describe(SagaRunner.name, function() {
 
             await util.runner.runEffect(callEffectDescription, {
                 effects: effectBuilder,
-                headers: {}
+                headers: {},
+                originalMessage: {
+                    key: Buffer.from('key'),
+                    value: Buffer.from('value'),
+                    offset: '1',
+                    partition: 1,
+                    timestamp: (new Date().valueOf() / 1000).toString()
+                }
             });
 
             await util.closePools();
@@ -44,7 +51,14 @@ describe(SagaRunner.name, function() {
 
             await util.runner.runEffect(callEffectDescription, {
                 effects: effectBuilder,
-                headers: {}
+                headers: {},
+                originalMessage: {
+                    key: Buffer.from('key'),
+                    value: Buffer.from('value'),
+                    offset: '1',
+                    partition: 1,
+                    timestamp: (new Date().valueOf() / 1000).toString()
+                }
             });
 
             await util.closePools();
@@ -80,7 +94,14 @@ describe(SagaRunner.name, function() {
                     },
                     {
                         effects: effectBuilder,
-                        headers: {}
+                        headers: {},
+                        originalMessage: {
+                            key: Buffer.from('key'),
+                            value: Buffer.from('value'),
+                            offset: '1',
+                            partition: 1,
+                            timestamp: (new Date().valueOf() / 1000).toString()
+                        }
                     },
                     function*(_, ctx) {
                         result = yield ctx.effects.callFn(otherSaga, [{ding: 3}, ctx]);
@@ -113,7 +134,14 @@ describe(SagaRunner.name, function() {
                     },
                     {
                         effects: effectBuilder,
-                        headers: {}
+                        headers: {},
+                        originalMessage: {
+                            key: Buffer.from('key'),
+                            value: Buffer.from('value'),
+                            offset: '1',
+                            partition: 1,
+                            timestamp: (new Date().valueOf() / 1000).toString()
+                        }
                     },
                     function*(_, ctx) {
                         try {

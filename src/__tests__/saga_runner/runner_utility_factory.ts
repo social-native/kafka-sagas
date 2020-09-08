@@ -6,10 +6,7 @@ import {SagaRunner} from '../../saga_runner';
 
 export async function runnerUtilityFactory() {
     const transactionId = 'static-transaction-id';
-    const consumerPool = new ConsumerPool(kafka, 'test', {
-        sessionTimeout: 50000,
-        heartbeatInterval: 15000
-    });
+    const consumerPool = new ConsumerPool(kafka, 'test');
 
     const throttledProducer = new ThrottledProducer(kafka);
 
@@ -31,7 +28,14 @@ export async function runnerUtilityFactory() {
         runner,
         context: {
             effects: effectBuilder,
-            headers: {}
+            headers: {},
+            originalMessage: {
+                key: Buffer.from('key'),
+                value: Buffer.from('value'),
+                offset: '1',
+                partition: 1,
+                timestamp: (new Date().valueOf() / 1000).toString()
+            }
         },
         async closePools() {
             consumerPool.stopTransaction(transactionId);

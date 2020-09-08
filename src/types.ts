@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {IHeaders, ProducerRecord} from 'kafkajs';
+import {IHeaders, ProducerRecord, KafkaMessage} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
 import {SagaRunner} from './saga_runner';
 import {EffectDescriptionKind} from './enums';
@@ -169,6 +169,13 @@ export type CallableSaga<
 export interface IBaseSagaContext {
     effects: EffectBuilder;
     headers: Record<string, string>;
+    originalMessage: {
+        key: KafkaMessage['key'];
+        value: KafkaMessage['value'];
+        offset: KafkaMessage['offset'];
+        partition: number;
+        timestamp: KafkaMessage['timestamp'];
+    };
 }
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;

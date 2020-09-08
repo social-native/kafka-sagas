@@ -253,7 +253,14 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 {
                     headers: parseHeaders(message.headers),
                     ...externalContext,
-                    effects: new EffectBuilder(action.transaction_id)
+                    effects: new EffectBuilder(action.transaction_id),
+                    originalMessage: {
+                        key: message.key,
+                        value: message.value,
+                        offset: message.offset,
+                        timestamp: message.timestamp,
+                        partition
+                    }
                 },
                 this.saga
             );
