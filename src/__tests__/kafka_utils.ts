@@ -49,7 +49,12 @@ export function withTopicCleanup(topics: string[], seeding: boolean = true) {
         }
 
         for (const topic of topics) {
-            await deleteTopic(topic);
+            try {
+                await deleteTopic(topic);
+            } catch (error) {
+                // tslint:disable-next-line: no-console
+                console.error(error);
+            }
         }
 
         if (err) {

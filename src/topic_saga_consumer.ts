@@ -1,4 +1,4 @@
-import {Kafka, Consumer, KafkaMessage} from 'kafkajs';
+import {Kafka, Consumer, KafkaMessage, EachMessagePayload} from 'kafkajs';
 import Bluebird from 'bluebird';
 import pino from 'pino';
 import EventEmitter from 'events';
@@ -22,6 +22,7 @@ import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
 import {TopicAdministrator} from './topic_administrator';
 import {isKafkaJSProtocolError} from './type_guard';
+import {ConsumptionTimeoutError} from './consumption_timeout_error';
 
 export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Record<string, any>> {
     public eventEmitter = new EventEmitter() as TypedEmitter<{
@@ -52,8 +53,22 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         loggerConfig,
         middlewares = [],
         config = {
-            /** How long should a message be allowed to process before automatic retry? */
+            /** How often should produced message batches be sent out? */
+            producerFlushIntervalMs: 200,
+
+            /** When batching produced messages (with the PUT effect), how many should be flushed at a time? */
+            producerBatchSize: 2000,
+            /**
+             * How much time should be given to a saga to complete
+             * before a consumer is considered unhealthy and killed?
+             *
+             * Providing -1 will allow a saga to run indefinitely.
+             */
             consumptionTimeoutMs: 30000,
+
+            /** How often should heartbeats be sent back to the broker? */
+            heartbeatInterval: 3000,
+
             /** How many partitions should be consumed concurrently? */
             partitionConcurrency: 1
         },
@@ -63,7 +78,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         topic: string;
         saga: Saga<Payload, SagaContext<Context>>;
 
-        config?: ITopicSagaConsumerConfig;
+        config?: Partial<ITopicSagaConsumerConfig>;
         getContext?: (message: KafkaMessage) => Promise<Context>;
         topicAdministrator?: TopicAdministrator;
         loggerConfig?: ILoggerConfig;
@@ -73,14 +88,21 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             groupId: topic,
             allowAutoTopicCreation: false,
             retry: {retries: 0},
-            sessionTimeout: config.consumptionTimeoutMs
+            heartbeatInterval: config.heartbeatInterval
         });
 
         this.saga = saga;
         this.topic = topic;
         this.getContext = getContext;
         this.middlewares = middlewares;
-        this.config = config;
+        this.config = {
+            producerFlushIntervalMs: 200,
+            producerBatchSize: 2000,
+            consumptionTimeoutMs: 30000,
+            heartbeatInterval: 3000,
+            partitionConcurrency: 1,
+            ...config
+        };
 
         this.logger = getLoggerFromConfig(loggerConfig).child({
             package: 'snpkg-snapi-kafka-sagas'
@@ -97,7 +119,10 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
         this.throttledProducer = new ThrottledProducer(
             kafka,
-            undefined,
+            {
+                flushIntervalMs: config.producerFlushIntervalMs,
+                maxOutgoingBatchSize: config.producerBatchSize
+            },
             this.topicAdminstrator,
             this.logger
         );
@@ -145,73 +170,51 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             this.eventEmitter.emit('completed_saga', ...args);
         });
 
-        const consumerGroup = await this.consumer.describeGroup();
-
         await this.consumer.run({
             autoCommit: true,
             autoCommitThreshold: 1,
             partitionsConsumedConcurrently: this.config.partitionConcurrency,
-            eachMessage: async ({partition, message}) => {
-                const action = transformKafkaMessageToAction<Payload>(this.topic, message);
+            eachBatchAutoResolve: true,
+            // tslint:disable-next-line: cyclomatic-complexity
+            eachBatch: async ({
+                batch: {topic, partition, messages},
+                commitOffsetsIfNecessary,
+                heartbeat,
+                resolveOffset,
+                isRunning,
+                isStale
+            }) => {
+                const backgroundHeartbeat = setInterval(heartbeat, this.config.heartbeatInterval);
 
-                this.logger.info(
-                    {
-                        partition,
-                        offset: message.offset,
-                        topic: action.topic,
-                        transaction_id: action.transaction_id,
-                        headers: action.headers,
-                        timestamp: Date.now()
-                    },
-                    'Beginning consumption of message'
-                );
+                for (const message of messages) {
+                    if (!isRunning() || isStale()) {
+                        break;
+                    }
 
-                try {
-                    const externalContext = await this.getContext(message);
+                    try {
+                        if (this.config.consumptionTimeoutMs === -1) {
+                            await this.eachMessage(runner, {topic, partition, message});
+                        } else {
+                            await Bluebird.resolve(
+                                this.eachMessage(runner, {topic, partition, message})
+                            ).timeout(
+                                this.config.consumptionTimeoutMs,
+                                new ConsumptionTimeoutError(
+                                    `Message consumption timed out after ${this.config.consumptionTimeoutMs} milliseconds.`
+                                )
+                            );
+                        }
+                    } catch (e) {
+                        await commitOffsetsIfNecessary();
+                        throw e;
+                    }
 
-                    await runner.runSaga(
-                        action,
-                        {
-                            headers: parseHeaders(message.headers),
-                            ...externalContext,
-                            effects: new EffectBuilder(action.transaction_id)
-                        },
-                        this.saga
-                    );
-
-                    this.eventEmitter.emit('consumed_message', {
-                        partition,
-                        offset: message.offset,
-                        group: consumerGroup,
-                        payload: action.payload
-                    });
-
-                    this.logger.info(
-                        {
-                            partition,
-                            offset: message.offset,
-                            topic: action.topic,
-                            transaction_id: action.transaction_id,
-                            headers: action.headers,
-                            timestamp: Date.now()
-                        },
-                        'Successfully consumed message'
-                    );
-                } catch (error) {
-                    this.consumerPool.stopTransaction(action.transaction_id);
-                    this.logger.error(
-                        {
-                            transaction_id: action.transaction_id,
-                            topic: action.topic,
-                            headers: action.headers,
-                            timestamp: Date.now(),
-                            error
-                        },
-                        error.message
-                            ? `Error while running ${this.topic} saga: ${error.message}`
-                            : `Error while running ${this.topic} saga`
-                    );
+                    resolveOffset(message.offset);
+                    await heartbeat();
+                    await commitOffsetsIfNecessary();
                 }
+
+                clearInterval(backgroundHeartbeat);
             }
         });
     }
@@ -223,4 +226,76 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             this.throttledProducer.disconnect()
         ]);
     }
+
+    private eachMessage = async (
+        runner: SagaRunner<Payload, SagaContext<Context>>,
+        {partition, message}: EachMessagePayload
+    ): Promise<void> => {
+        const action = transformKafkaMessageToAction<Payload>(this.topic, message);
+
+        this.logger.info(
+            {
+                partition,
+                offset: message.offset,
+                topic: action.topic,
+                transaction_id: action.transaction_id,
+                headers: action.headers,
+                timestamp: Date.now()
+            },
+            'Beginning consumption of message'
+        );
+
+        try {
+            const externalContext = await this.getContext(message);
+
+            await runner.runSaga(
+                action,
+                {
+                    headers: parseHeaders(message.headers),
+                    ...externalContext,
+                    effects: new EffectBuilder(action.transaction_id),
+                    originalMessage: {
+                        key: message.key,
+                        value: message.value,
+                        offset: message.offset,
+                        timestamp: message.timestamp,
+                        partition
+                    }
+                },
+                this.saga
+            );
+
+            this.eventEmitter.emit('consumed_message', {
+                partition,
+                offset: message.offset,
+                payload: action.payload
+            });
+
+            this.logger.info(
+                {
+                    partition,
+                    offset: message.offset,
+                    topic: action.topic,
+                    transaction_id: action.transaction_id,
+                    headers: action.headers,
+                    timestamp: Date.now()
+                },
+                'Successfully consumed message'
+            );
+        } catch (error) {
+            this.consumerPool.stopTransaction(action.transaction_id);
+            this.logger.error(
+                {
+                    transaction_id: action.transaction_id,
+                    topic: action.topic,
+                    headers: action.headers,
+                    timestamp: Date.now(),
+                    error
+                },
+                error.message
+                    ? `Error while running ${this.topic} saga: ${error.message}`
+                    : `Error while running ${this.topic} saga`
+            );
+        }
+    };
 }

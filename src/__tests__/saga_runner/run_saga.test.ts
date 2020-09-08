@@ -128,7 +128,14 @@ describe(SagaRunner.name, function() {
                         },
                         {
                             effects: effectBuilder,
-                            headers: parseHeaders({})
+                            headers: parseHeaders({}),
+                            originalMessage: {
+                                key: Buffer.from('key'),
+                                value: Buffer.from('value'),
+                                offset: '1',
+                                partition: 1,
+                                timestamp: (new Date().valueOf() / 1000).toString()
+                            }
                         },
                         function*({payload: {campaignId}}, {effects}) {
                             const {actionChannel, put, race, take} = effects;

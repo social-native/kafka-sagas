@@ -16,7 +16,14 @@ describe(SagaRunner.name, function() {
                 Bluebird.delay(600).then(() => 'poolbelt'),
                 util.runner.runEffect(delayEffectDescription, {
                     effects: effectBuilder,
-                    headers: {}
+                    headers: {},
+                    originalMessage: {
+                        key: Buffer.from('key'),
+                        value: Buffer.from('value'),
+                        offset: '1',
+                        partition: 1,
+                        timestamp: (new Date().valueOf() / 1000).toString()
+                    }
                 })
             ]);
 
