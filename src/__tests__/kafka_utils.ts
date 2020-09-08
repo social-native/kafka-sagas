@@ -52,6 +52,7 @@ export function withTopicCleanup(topics: string[], seeding: boolean = true) {
             try {
                 await deleteTopic(topic);
             } catch (error) {
+                // tslint:disable-next-line: no-console
                 console.error(error);
             }
         }
