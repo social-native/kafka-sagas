@@ -80,7 +80,10 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#consumptiontimeoutms" class="tsd-kind-icon">consumption<wbr>Timeout<wbr>Ms</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#heartbeatinterval" class="tsd-kind-icon">heartbeat<wbr>Interval</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#partitionconcurrency" class="tsd-kind-icon">partition<wbr>Concurrency</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#producerbatchsize" class="tsd-kind-icon">producer<wbr>Batch<wbr>Size</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#producerflushintervalms" class="tsd-kind-icon">producer<wbr>Flush<wbr>Interval<wbr>Ms</a></li>
 							</ul>
 						</section>
 					</div>
@@ -90,23 +93,80 @@
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="consumptiontimeoutms" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> consumption<wbr>Timeout<wbr>Ms</h3>
-					<div class="tsd-signature tsd-kind-icon">consumption<wbr>Timeout<wbr>Ms<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+					<h3>consumption<wbr>Timeout<wbr>Ms</h3>
+					<div class="tsd-signature tsd-kind-icon">consumption<wbr>Timeout<wbr>Ms<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/817ecda/src/types.ts#L235">src/types.ts:235</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L250">src/types.ts:250</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>How much time should be given to a saga to complete
+							before a consumer is considered unhealthy and killed?</p>
+						</div>
+						<p>Providing -1 will allow a saga to run indefinitely.</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="heartbeatinterval" class="tsd-anchor"></a>
+					<h3>heartbeat<wbr>Interval</h3>
+					<div class="tsd-signature tsd-kind-icon">heartbeat<wbr>Interval<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L243">src/types.ts:243</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>How often should heartbeats be sent back to the broker?</p>
+						</div>
+					</div>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="partitionconcurrency" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagOptional">Optional</span> partition<wbr>Concurrency</h3>
-					<div class="tsd-signature tsd-kind-icon">partition<wbr>Concurrency<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span></div>
+					<h3>partition<wbr>Concurrency</h3>
+					<div class="tsd-signature tsd-kind-icon">partition<wbr>Concurrency<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/817ecda/src/types.ts#L236">src/types.ts:236</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L253">src/types.ts:253</a></li>
 						</ul>
 					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>How many partitions should be consumed concurrently?</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="producerbatchsize" class="tsd-anchor"></a>
+					<h3>producer<wbr>Batch<wbr>Size</h3>
+					<div class="tsd-signature tsd-kind-icon">producer<wbr>Batch<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L256">src/types.ts:256</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>When batching produced messages (with the PUT effect), how many should be flushed at a time?</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="producerflushintervalms" class="tsd-anchor"></a>
+					<h3>producer<wbr>Flush<wbr>Interval<wbr>Ms</h3>
+					<div class="tsd-signature tsd-kind-icon">producer<wbr>Flush<wbr>Interval<wbr>Ms<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L259">src/types.ts:259</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>How often should produced message batches be sent out?</p>
+						</div>
+					</div>
 				</section>
 			</section>
 		</div>
@@ -129,7 +189,16 @@
 								<a href="itopicsagaconsumerconfig.html#consumptiontimeoutms" class="tsd-kind-icon">consumption<wbr>Timeout<wbr>Ms</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="itopicsagaconsumerconfig.html#heartbeatinterval" class="tsd-kind-icon">heartbeat<wbr>Interval</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="itopicsagaconsumerconfig.html#partitionconcurrency" class="tsd-kind-icon">partition<wbr>Concurrency</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="itopicsagaconsumerconfig.html#producerbatchsize" class="tsd-kind-icon">producer<wbr>Batch<wbr>Size</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="itopicsagaconsumerconfig.html#producerflushintervalms" class="tsd-kind-icon">producer<wbr>Flush<wbr>Interval<wbr>Ms</a>
 							</li>
 						</ul>
 					</li>
