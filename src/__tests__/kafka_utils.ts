@@ -49,7 +49,11 @@ export function withTopicCleanup(topics: string[], seeding: boolean = true) {
         }
 
         for (const topic of topics) {
-            await deleteTopic(topic);
+            try {
+                await deleteTopic(topic);
+            } catch (error) {
+                console.error(error);
+            }
         }
 
         if (err) {

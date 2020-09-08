@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {IHeaders, ProducerRecord, GroupDescription} from 'kafkajs';
+import {IHeaders, ProducerRecord} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
 import {SagaRunner} from './saga_runner';
 import {EffectDescriptionKind} from './enums';
@@ -232,13 +232,28 @@ export interface IQueuedRecord {
 }
 
 export interface ITopicSagaConsumerConfig {
-    consumptionTimeoutMs?: number;
-    partitionConcurrency?: number;
+    /** How often should heartbeats be sent back to the broker? */
+    heartbeatInterval: number;
+    /**
+     * How much time should be given to a saga to complete
+     * before a consumer is considered unhealthy and killed?
+     *
+     * Providing -1 will allow a saga to run indefinitely.
+     */
+    consumptionTimeoutMs: number;
+
+    /** How many partitions should be consumed concurrently? */
+    partitionConcurrency: number;
+
+    /** When batching produced messages (with the PUT effect), how many should be flushed at a time? */
+    producerBatchSize: number;
+
+    /** How often should produced message batches be sent out? */
+    producerFlushIntervalMs: number;
 }
 
 export interface IConsumptionEvent<Payload> {
     partition: number;
     offset: string;
-    group: GroupDescription;
     payload: Payload;
 }

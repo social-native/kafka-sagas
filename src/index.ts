@@ -9,6 +9,7 @@ export {transformKafkaMessageToAction} from './transform_kafka_message_to_action
 export {parseHeaders} from './parse_headers';
 export {EffectBuilder} from './effect_builder';
 export {createActionMessage} from './create_action_message';
+export {ConsumptionTimeoutError} from './consumption_timeout_error';
 export * from './types';
 export * from './enums';
 import * as TypeGuard from './type_guard';
