@@ -20,6 +20,7 @@ describe(createActionMessage.name, function() {
               "headers": Object {
                 "key": "value",
               },
+              "key": "test-transaction-id",
               "value": "{\\"transaction_id\\":\\"test-transaction-id\\",\\"payload\\":{\\"persimmon\\":\\"yum\\"}}",
             }
         `);

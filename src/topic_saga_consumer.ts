@@ -184,7 +184,13 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 isRunning,
                 isStale
             }) => {
-                const backgroundHeartbeat = setInterval(heartbeat, this.config.heartbeatInterval);
+                const backgroundHeartbeat = setInterval(async () => {
+                    try {
+                        await heartbeat();
+                    } catch (error) {
+                        this.logger.error(error, error.message);
+                    }
+                }, this.config.heartbeatInterval);
 
                 for (const message of messages) {
                     if (!isRunning() || isStale()) {
@@ -221,10 +227,8 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
     public async disconnect() {
         await this.consumer.disconnect();
-        await Bluebird.all([
-            this.consumerPool.disconnectConsumers(),
-            this.throttledProducer.disconnect()
-        ]);
+        await this.consumerPool.disconnectConsumers();
+        await this.throttledProducer.disconnect();
     }
 
     private eachMessage = async (
