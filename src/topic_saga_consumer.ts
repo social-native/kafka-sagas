@@ -227,10 +227,8 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
     public async disconnect() {
         await this.consumer.disconnect();
-        await Bluebird.all([
-            this.consumerPool.disconnectConsumers(),
-            this.throttledProducer.disconnect()
-        ]);
+        await this.consumerPool.disconnectConsumers();
+        await this.throttledProducer.disconnect();
     }
 
     private eachMessage = async (
