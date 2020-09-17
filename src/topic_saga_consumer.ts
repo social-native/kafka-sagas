@@ -70,7 +70,15 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             heartbeatInterval: 3000,
 
             /** How many partitions should be consumed concurrently? */
-            partitionConcurrency: 1
+            partitionConcurrency: 1,
+
+            /**
+             * Is this a special consumer group?
+             * Use case: Provide a custom consumerGroup if this saga is not the primary consumer of an event.
+             * For instance, you may want to have multiple different reactions to an event aside from the primary work
+             * to kick off notifactions.
+             */
+            consumerGroup: undefined
         },
         topicAdministrator
     }: {
@@ -85,7 +93,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         middlewares?: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
     }) {
         this.consumer = kafka.consumer({
-            groupId: topic,
+            groupId: config.consumerGroup || topic,
             allowAutoTopicCreation: false,
             retry: {retries: 0},
             heartbeatInterval: config.heartbeatInterval
