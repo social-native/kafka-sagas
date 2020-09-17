@@ -257,6 +257,14 @@ export interface ITopicSagaConsumerConfig {
 
     /** How often should produced message batches be sent out? */
     producerFlushIntervalMs: number;
+
+    /**
+     * Is this a special consumer group?
+     * Use case: Provide a custom consumerGroup if this saga is not the primary consumer of an event.
+     * For instance, you may want to have multiple different reactions to an event aside from the primary work
+     * to kick off notifactions.
+     */
+    consumerGroup?: string;
 }
 
 export interface IConsumptionEvent<Payload> {

@@ -79,6 +79,7 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#consumergroup" class="tsd-kind-icon">consumer<wbr>Group</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#consumptiontimeoutms" class="tsd-kind-icon">consumption<wbr>Timeout<wbr>Ms</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#heartbeatinterval" class="tsd-kind-icon">heartbeat<wbr>Interval</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="itopicsagaconsumerconfig.html#partitionconcurrency" class="tsd-kind-icon">partition<wbr>Concurrency</a></li>
@@ -92,12 +93,30 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="consumergroup" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> consumer<wbr>Group</h3>
+					<div class="tsd-signature tsd-kind-icon">consumer<wbr>Group<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/types.ts#L267">src/types.ts:267</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Is this a special consumer group?
+								Use case: Provide a custom consumerGroup if this saga is not the primary consumer of an event.
+								For instance, you may want to have multiple different reactions to an event aside from the primary work
+							to kick off notifactions.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
 					<a name="consumptiontimeoutms" class="tsd-anchor"></a>
 					<h3>consumption<wbr>Timeout<wbr>Ms</h3>
 					<div class="tsd-signature tsd-kind-icon">consumption<wbr>Timeout<wbr>Ms<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L250">src/types.ts:250</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/types.ts#L250">src/types.ts:250</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -114,7 +133,7 @@
 					<div class="tsd-signature tsd-kind-icon">heartbeat<wbr>Interval<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L243">src/types.ts:243</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/types.ts#L243">src/types.ts:243</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -129,7 +148,7 @@
 					<div class="tsd-signature tsd-kind-icon">partition<wbr>Concurrency<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L253">src/types.ts:253</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/types.ts#L253">src/types.ts:253</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -144,7 +163,7 @@
 					<div class="tsd-signature tsd-kind-icon">producer<wbr>Batch<wbr>Size<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L256">src/types.ts:256</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/types.ts#L256">src/types.ts:256</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -159,7 +178,7 @@
 					<div class="tsd-signature tsd-kind-icon">producer<wbr>Flush<wbr>Interval<wbr>Ms<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/658717b/src/types.ts#L259">src/types.ts:259</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/types.ts#L259">src/types.ts:259</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -185,6 +204,9 @@
 					<li class="current tsd-kind-interface">
 						<a href="itopicsagaconsumerconfig.html" class="tsd-kind-icon">ITopic<wbr>Saga<wbr>Consumer<wbr>Config</a>
 						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="itopicsagaconsumerconfig.html#consumergroup" class="tsd-kind-icon">consumer<wbr>Group</a>
+							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="itopicsagaconsumerconfig.html#consumptiontimeoutms" class="tsd-kind-icon">consumption<wbr>Timeout<wbr>Ms</a>
 							</li>
