@@ -131,7 +131,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 flushIntervalMs: config.producerFlushIntervalMs,
                 maxOutgoingBatchSize: config.producerBatchSize
             },
-            this.topicAdminstrator,
             this.logger
         );
 

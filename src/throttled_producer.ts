@@ -1,7 +1,6 @@
 import {Producer, Kafka, CompressionTypes, ProducerConfig} from 'kafkajs';
 import {IAction, IQueuedRecord} from './types';
 import {createActionMessage} from './create_action_message';
-import {TopicAdministrator} from './topic_administrator';
 import {isKafkaJSProtocolError} from './type_guard';
 import Bluebird from 'bluebird';
 import pino from 'pino';
@@ -11,10 +10,8 @@ export class ThrottledProducer {
     public recordsSent = 0;
 
     private producer: Producer;
-    private topicAdministrator: TopicAdministrator;
     private isConnected: boolean = false;
     private intervalTimeout: NodeJS.Timeout;
-    private createdTopics = new Set<string>();
     private recordQueue: IQueuedRecord[] = [];
     private isFlushing = false;
     private logger: pino.Logger;
@@ -28,10 +25,8 @@ export class ThrottledProducer {
             maxOutgoingBatchSize: 10000,
             flushIntervalMs: 1000
         },
-        topicAdministrator?: TopicAdministrator,
         logger?: pino.Logger
     ) {
-        this.topicAdministrator = topicAdministrator || new TopicAdministrator(kafka);
         this.logger = logger
             ? logger.child({class: 'KafkaSagasThrottledProducer'})
             : pino().child({class: 'KafkaSagasThrottledProducer'});
@@ -42,12 +37,6 @@ export class ThrottledProducer {
     public putAction = async <Action extends IAction>(action: Action) => {
         if (!this.isConnected) {
             throw new Error('You must .connect before producing actions');
-        }
-
-        if (!this.createdTopics.has(action.topic)) {
-            this.logger.debug({topic: action.topic}, 'Creating topic');
-            await this.topicAdministrator.createTopic(action.topic);
-            this.createdTopics.add(action.topic);
         }
 
         return new Promise<void>((resolve, reject) => {
@@ -103,6 +92,7 @@ export class ThrottledProducer {
         this.producer = this.kafka.producer({
             maxInFlightRequests: 1,
             idempotent: true,
+            allowAutoTopicCreation: true,
             ...this.producerConfig
         });
         this.logger.debug('Created a new producer');
