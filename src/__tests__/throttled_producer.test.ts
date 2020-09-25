@@ -123,7 +123,6 @@ describe(ThrottledProducer.name, function() {
             const throttledProducer = new ThrottledProducer(
                 kafka,
                 undefined,
-                undefined,
                 pino({level: 'debug'})
             );
 
@@ -162,7 +161,6 @@ describe(ThrottledProducer.name, function() {
             await withTopicCleanup(['high_throughput'])(async ([topic]) => {
                 const throttledProducer = new ThrottledProducer(
                     kafka,
-                    undefined,
                     undefined,
                     pino({level: 'debug'})
                 );
