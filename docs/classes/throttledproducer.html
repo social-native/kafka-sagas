@@ -85,7 +85,6 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="throttledproducer.html#createdtopics" class="tsd-kind-icon">created<wbr>Topics</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="throttledproducer.html#intervaltimeout" class="tsd-kind-icon">interval<wbr>Timeout</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="throttledproducer.html#isconnected" class="tsd-kind-icon">is<wbr>Connected</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="throttledproducer.html#isflushing" class="tsd-kind-icon">is<wbr>Flushing</a></li>
@@ -95,7 +94,6 @@
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="throttledproducer.html#producerconfig" class="tsd-kind-icon">producer<wbr>Config</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="throttledproducer.html#recordqueue" class="tsd-kind-icon">record<wbr>Queue</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-class"><a href="throttledproducer.html#recordssent" class="tsd-kind-icon">records<wbr>Sent</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="throttledproducer.html#topicadministrator" class="tsd-kind-icon">topic<wbr>Administrator</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -117,13 +115,13 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Throttled<wbr>Producer<span class="tsd-signature-symbol">(</span>kafka<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kafka</span>, producerConfig<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ProducerConfig</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"allowAutoTopicCreation"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"maxInFlightRequests"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"idempotent"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>flushIntervalMs<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>maxOutgoingBatchSize<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> }</span>, topicAdministrator<span class="tsd-signature-symbol">?: </span><a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a>, logger<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">pino.Logger</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="throttledproducer.html" class="tsd-signature-type">ThrottledProducer</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Throttled<wbr>Producer<span class="tsd-signature-symbol">(</span>kafka<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kafka</span>, producerConfig<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ProducerConfig</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"allowAutoTopicCreation"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"maxInFlightRequests"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"idempotent"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>flushIntervalMs<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>maxOutgoingBatchSize<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> }</span>, logger<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">pino.Logger</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="throttledproducer.html" class="tsd-signature-type">ThrottledProducer</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L20">src/throttled_producer.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L17">src/throttled_producer.ts:17</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -133,9 +131,6 @@
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> producerConfig: <span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ProducerConfig</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"allowAutoTopicCreation"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"maxInFlightRequests"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"idempotent"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>flushIntervalMs<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>maxOutgoingBatchSize<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> = {maxOutgoingBatchSize: 10000,flushIntervalMs: 1000}</span></h5>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> topicAdministrator: <a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagOptional">Optional</span> logger: <span class="tsd-signature-type">pino.Logger</span></h5>
@@ -149,22 +144,12 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="createdtopics" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> created<wbr>Topics</h3>
-					<div class="tsd-signature tsd-kind-icon">created<wbr>Topics<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Set&lt;string&gt;()</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L17">src/throttled_producer.ts:17</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
 					<a name="intervaltimeout" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagPrivate">Private</span> interval<wbr>Timeout</h3>
 					<div class="tsd-signature tsd-kind-icon">interval<wbr>Timeout<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Timeout</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L16">src/throttled_producer.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L14">src/throttled_producer.ts:14</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -174,7 +159,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Connected<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L15">src/throttled_producer.ts:15</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L13">src/throttled_producer.ts:13</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -184,7 +169,7 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Flushing<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L19">src/throttled_producer.ts:19</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L16">src/throttled_producer.ts:16</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -194,7 +179,7 @@
 					<div class="tsd-signature tsd-kind-icon">kafka<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Kafka</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L23">src/throttled_producer.ts:23</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L20">src/throttled_producer.ts:20</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -204,7 +189,7 @@
 					<div class="tsd-signature tsd-kind-icon">logger<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">pino.Logger</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L20">src/throttled_producer.ts:20</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L17">src/throttled_producer.ts:17</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -214,7 +199,7 @@
 					<div class="tsd-signature tsd-kind-icon">producer<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Producer</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L13">src/throttled_producer.ts:13</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L12">src/throttled_producer.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -224,7 +209,7 @@
 					<div class="tsd-signature tsd-kind-icon">producer<wbr>Config<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Omit</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ProducerConfig</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"allowAutoTopicCreation"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"maxInFlightRequests"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"idempotent"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> &amp; </span><span class="tsd-signature-symbol">{ </span>flushIntervalMs<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>maxOutgoingBatchSize<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> }</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L24">src/throttled_producer.ts:24</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L21">src/throttled_producer.ts:21</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -234,7 +219,7 @@
 					<div class="tsd-signature tsd-kind-icon">record<wbr>Queue<span class="tsd-signature-symbol">:</span> <a href="../interfaces/iqueuedrecord.html" class="tsd-signature-type">IQueuedRecord</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L18">src/throttled_producer.ts:18</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L15">src/throttled_producer.ts:15</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -244,17 +229,7 @@
 					<div class="tsd-signature tsd-kind-icon">records<wbr>Sent<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L11">src/throttled_producer.ts:11</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="topicadministrator" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> topic<wbr>Administrator</h3>
-					<div class="tsd-signature tsd-kind-icon">topic<wbr>Administrator<span class="tsd-signature-symbol">:</span> <a href="topicadministrator.html" class="tsd-signature-type">TopicAdministrator</a></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L14">src/throttled_producer.ts:14</a></li>
+							<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L10">src/throttled_producer.ts:10</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -271,7 +246,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L70">src/throttled_producer.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L59">src/throttled_producer.ts:59</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -288,7 +263,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L101">src/throttled_producer.ts:101</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L90">src/throttled_producer.ts:90</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -305,7 +280,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L88">src/throttled_producer.ts:88</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L77">src/throttled_producer.ts:77</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -322,7 +297,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L112">src/throttled_producer.ts:112</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L102">src/throttled_producer.ts:102</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -351,7 +326,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/4dfabf9/src/throttled_producer.ts#L42">src/throttled_producer.ts:42</a></li>
+									<li>Defined in <a href="https://github.com/social-native/snpkg-snapi-kafka-sagas/blob/afe96fd/src/throttled_producer.ts#L37">src/throttled_producer.ts:37</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-type-parameters-title">Type parameters</h4>
@@ -391,9 +366,6 @@
 								<a href="throttledproducer.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="throttledproducer.html#createdtopics" class="tsd-kind-icon">created<wbr>Topics</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="throttledproducer.html#intervaltimeout" class="tsd-kind-icon">interval<wbr>Timeout</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
@@ -419,9 +391,6 @@
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
 								<a href="throttledproducer.html#recordssent" class="tsd-kind-icon">records<wbr>Sent</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="throttledproducer.html#topicadministrator" class="tsd-kind-icon">topic<wbr>Administrator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="throttledproducer.html#connect" class="tsd-kind-icon">connect</a>
