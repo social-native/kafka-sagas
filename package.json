@@ -65,7 +65,7 @@
         "dotenv-cli": "^3.0.0",
         "jest": "^24.9.0",
         "nodemon": "^1.18.10",
-        "prettier": "~1.19.1",
+        "prettier": "~2.1.2",
         "rimraf": "^2.6.3",
         "rollup": "^1.2.2",
         "rollup-plugin-typescript2": "^0.21.1",
