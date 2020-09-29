@@ -22,8 +22,8 @@ export class ThrottledProducer {
             ProducerConfig,
             'allowAutoTopicCreation' | 'maxInFlightRequests' | 'idempotent'
         > & {maxOutgoingBatchSize?: number; flushIntervalMs?: number} = {
-            maxOutgoingBatchSize: 10000,
-            flushIntervalMs: 1000
+            maxOutgoingBatchSize: 1000,
+            flushIntervalMs: 100
         },
         logger?: pino.Logger
     ) {

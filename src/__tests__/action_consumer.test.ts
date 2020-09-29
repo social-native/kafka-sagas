@@ -4,6 +4,7 @@ import {kafka} from './test_clients';
 import {seedTopic, withTopicCleanup, deleteTopic} from './kafka_utils';
 import {IAction} from '../types';
 import uuid from 'uuid';
+import {DEFAULT_TEST_TIMEOUT} from './constants';
 
 describe(ActionConsumer.name, function() {
     it('notifies observers of new messages only', async function() {
@@ -94,4 +95,85 @@ describe(ActionConsumer.name, function() {
 
         await deleteTopic(newTopic);
     });
+
+    it(
+        'can follow new topics even after beginning once',
+        async function() {
+            const firstTopic = uuid.v4();
+            const secondTopic = uuid.v4();
+
+            try {
+                const transactionId = 'super-cool-transaction';
+
+                const pool = new ActionConsumer(kafka, firstTopic);
+                pool.startTransaction(transactionId);
+
+                const events: any[] = [];
+
+                pool.registerTopicObserver({
+                    transactionId,
+                    topic: firstTopic,
+                    // tslint:disable-next-line: no-empty
+                    observer: event => events.push(event)
+                });
+
+                pool.registerTopicObserver({
+                    transactionId,
+                    topic: secondTopic,
+                    // tslint:disable-next-line: no-empty
+                    observer: event => events.push(event)
+                });
+
+                await pool.streamActionsFromTopic(firstTopic);
+
+                await seedTopic(firstTopic, [
+                    {
+                        transaction_id: transactionId,
+                        payload: {message_number: 1}
+                    }
+                ]);
+
+                await pool.streamActionsFromTopic(secondTopic);
+
+                await seedTopic(secondTopic, [
+                    {
+                        transaction_id: transactionId,
+                        payload: {message_number: 2}
+                    }
+                ]);
+
+                await new Promise(resolve => {
+                    const interval = setInterval(() => {
+                        if (events.length === 2) {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 100);
+                });
+
+                pool.stopTransaction(transactionId);
+
+                await pool.disconnect();
+
+                await deleteTopic(firstTopic);
+                await deleteTopic(secondTopic);
+
+                expect(events.map(({payload}) => payload)).toMatchInlineSnapshot(`
+                    Array [
+                      Object {
+                        "message_number": 1,
+                      },
+                      Object {
+                        "message_number": 2,
+                      },
+                    ]
+                `);
+            } catch (error) {
+                await deleteTopic(firstTopic);
+                await deleteTopic(secondTopic);
+                throw error;
+            }
+        },
+        DEFAULT_TEST_TIMEOUT
+    );
 });
