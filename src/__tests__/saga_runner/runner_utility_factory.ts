@@ -1,4 +1,4 @@
-import {ConsumerPool} from '../../consumer_pool';
+import {ActionConsumer} from '../../action_consumer';
 import {kafka} from '../test_clients';
 import {ThrottledProducer} from '../../throttled_producer';
 import {EffectBuilder} from '../../effect_builder';
@@ -6,22 +6,22 @@ import {SagaRunner} from '../../saga_runner';
 
 export async function runnerUtilityFactory() {
     const transactionId = 'static-transaction-id';
-    const consumerPool = new ConsumerPool(kafka, 'test');
+    const actionConsumer = new ActionConsumer(kafka, 'test');
 
     const throttledProducer = new ThrottledProducer(kafka);
 
-    consumerPool.startTransaction(transactionId);
+    actionConsumer.startTransaction(transactionId);
     await throttledProducer.connect();
 
-    const runner = new SagaRunner(consumerPool, throttledProducer);
+    const runner = new SagaRunner(actionConsumer, throttledProducer);
     const effectBuilder = new EffectBuilder(transactionId);
 
     return {
         transactionId,
         effectBuilder,
         spy: {
-            consumer: (methodName: keyof typeof consumerPool) =>
-                jest.spyOn(consumerPool, methodName),
+            consumer: (methodName: keyof typeof actionConsumer) =>
+                jest.spyOn(actionConsumer, methodName),
             producer: (methodName: keyof Omit<typeof throttledProducer, 'recordsSent'>) =>
                 jest.spyOn(throttledProducer, methodName)
         },
@@ -38,8 +38,8 @@ export async function runnerUtilityFactory() {
             }
         },
         async closePools() {
-            consumerPool.stopTransaction(transactionId);
-            await consumerPool.disconnectConsumers();
+            actionConsumer.stopTransaction(transactionId);
+            await actionConsumer.disconnect();
             await throttledProducer.disconnect();
         }
     };

@@ -1,7 +1,7 @@
 import {SagaRunner} from '../../saga_runner';
 import {withTopicCleanup} from '../kafka_utils';
 import {DEFAULT_TEST_TIMEOUT} from '../constants';
-import {ConsumerPool} from '../../consumer_pool';
+import {ActionConsumer} from '../../action_consumer';
 import {kafka} from '../test_clients';
 import {ThrottledProducer} from '../../throttled_producer';
 import {EffectBuilder} from '../../effect_builder';
@@ -106,12 +106,12 @@ describe(SagaRunner.name, function() {
                     const transactionId = 'run-saga-trx-id';
                     const remoteSaga = createMockRemoteCopyCampaignSaga(transactionId);
                     await remoteSaga.start();
-                    const consumerPool = new ConsumerPool(kafka, topics.CLONE_CAMPAIGN_START);
+                    const actionConsumer = new ActionConsumer(kafka, topics.CLONE_CAMPAIGN_START);
                     const throttledProducer = new ThrottledProducer(kafka);
                     await throttledProducer.connect();
 
                     const runner = new SagaRunner<{campaignId: number}, SagaContext>(
-                        consumerPool,
+                        actionConsumer,
                         throttledProducer
                     );
 
@@ -195,7 +195,7 @@ describe(SagaRunner.name, function() {
 
                     expect(finalResult.transaction_id).toEqual(transactionId);
 
-                    await consumerPool.disconnectConsumers();
+                    await actionConsumer.disconnect();
                     await throttledProducer.disconnect();
                     await remoteSaga.stop();
                 });

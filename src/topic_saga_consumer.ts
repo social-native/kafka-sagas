@@ -5,7 +5,7 @@ import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
 
 import {EffectBuilder} from './effect_builder';
-import {ConsumerPool} from './consumer_pool';
+import {ActionConsumer} from './action_consumer';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
 import {ThrottledProducer} from './throttled_producer';
 import {SagaRunner} from './saga_runner';
@@ -40,7 +40,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
     private middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
 
     private topicAdminstrator: TopicAdministrator;
-    private consumerPool: ConsumerPool;
+    private actionConsumer: ActionConsumer;
     private throttledProducer: ThrottledProducer;
 
     constructor({
@@ -118,12 +118,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
         this.topicAdminstrator = topicAdministrator || new TopicAdministrator(kafka);
 
-        this.consumerPool = new ConsumerPool(
-            kafka,
-            topic,
-            {retry: {retries: 0}},
-            this.topicAdminstrator
-        );
+        this.actionConsumer = new ActionConsumer(kafka, topic, {retry: {retries: 0}});
 
         this.throttledProducer = new ThrottledProducer(
             kafka,
@@ -164,7 +159,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         await this.throttledProducer.connect();
 
         const runner = new SagaRunner<Payload, SagaContext<Context>>(
-            this.consumerPool,
+            this.actionConsumer,
             this.throttledProducer,
             this.middlewares
         );
@@ -234,7 +229,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
     public async disconnect() {
         await this.consumer.disconnect();
-        await this.consumerPool.disconnectConsumers();
+        await this.actionConsumer.disconnect();
         await this.throttledProducer.disconnect();
     }
 
@@ -294,7 +289,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 'Successfully consumed message'
             );
         } catch (error) {
-            this.consumerPool.stopTransaction(action.transaction_id);
+            this.actionConsumer.stopTransaction(action.transaction_id);
             this.logger.error(
                 {
                     transaction_id: action.transaction_id,

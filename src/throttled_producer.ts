@@ -35,10 +35,6 @@ export class ThrottledProducer {
 
     // tslint:disable-next-line: cyclomatic-complexity
     public putAction = async <Action extends IAction>(action: Action) => {
-        if (!this.isConnected) {
-            throw new Error('You must .connect before producing actions');
-        }
-
         return new Promise<void>((resolve, reject) => {
             this.recordQueue = [
                 ...this.recordQueue,
@@ -61,6 +57,8 @@ export class ThrottledProducer {
             return;
         }
 
+        this.isConnected = true;
+
         const flushIntervalMs = this.producerConfig.flushIntervalMs || 1000;
 
         this.logger.debug('Connecting producer');
@@ -70,8 +68,6 @@ export class ThrottledProducer {
         this.logger.debug({flushIntervalMs}, 'Creating flush interval');
         this.intervalTimeout = setInterval(this.flush, flushIntervalMs);
         this.logger.debug('Created flush interval');
-
-        this.isConnected = true;
     };
 
     public disconnect = async () => {
@@ -104,7 +100,7 @@ export class ThrottledProducer {
         retryCounter = 0,
         retryBatchId?: string
     ) => {
-        if (!retryRecords && this.isFlushing) {
+        if (!this.isConnected || (!retryRecords && this.isFlushing)) {
             return;
         }
 

@@ -70,7 +70,7 @@ describe(SagaRunner.name, function() {
         it(
             'runs all of a record of effects',
             async function() {
-                await withTopicCleanup(['race-fast', 'race-slow'])(async ([fast, slow]) => {
+                await withTopicCleanup(['race-fast-2', 'race-slow-2'])(async ([fast, slow]) => {
                     const {
                         effectBuilder,
                         runner,
@@ -123,7 +123,7 @@ describe(SagaRunner.name, function() {
                             "payload": Object {
                               "bart_simpson": "first",
                             },
-                            "topic": "race-fast",
+                            "topic": "race-fast-2",
                             "transaction_id": "static-transaction-id",
                           },
                           "slow": null,

@@ -1,11 +1,11 @@
 import Bluebird from 'bluebird';
-import {ConsumerPool} from '../consumer_pool';
+import {ActionConsumer} from '../action_consumer';
 import {kafka} from './test_clients';
 import {seedTopic, withTopicCleanup, deleteTopic} from './kafka_utils';
 import {IAction} from '../types';
 import uuid from 'uuid';
 
-describe(ConsumerPool.name, function() {
+describe(ActionConsumer.name, function() {
     it('notifies observers of new messages only', async function() {
         await withTopicCleanup(['bart-report-card-arrived'])(async ([topic]) => {
             const transactionId = 'super-cool-transaction';
@@ -17,7 +17,7 @@ describe(ConsumerPool.name, function() {
 
             await seedTopic(topic, [preseededMessage]);
 
-            const pool = new ConsumerPool(kafka, 'consumer_pool_test');
+            const pool = new ActionConsumer(kafka, 'consumer_pool_test');
             const receivedMessages: IAction[] = [];
             pool.startTransaction(transactionId);
 
@@ -39,7 +39,7 @@ describe(ConsumerPool.name, function() {
             // give it some time to deliver
             await Bluebird.delay(1000);
 
-            await pool.disconnectConsumers();
+            await pool.disconnect();
 
             expect(receivedMessages.map(({payload}) => payload)).toContainEqual({
                 new_message: true
@@ -53,7 +53,7 @@ describe(ConsumerPool.name, function() {
         try {
             const transactionId = 'super-cool-transaction';
 
-            const pool = new ConsumerPool(kafka, newTopic);
+            const pool = new ActionConsumer(kafka, newTopic);
             pool.startTransaction(transactionId);
 
             pool.registerTopicObserver({
@@ -74,7 +74,7 @@ describe(ConsumerPool.name, function() {
 
             pool.stopTransaction(transactionId);
 
-            await pool.disconnectConsumers();
+            await pool.disconnect();
 
             const admin = kafka.admin();
 

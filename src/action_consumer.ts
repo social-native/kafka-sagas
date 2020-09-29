@@ -3,54 +3,39 @@ import {Consumer, Kafka, ConsumerConfig} from 'kafkajs';
 
 import {IAction, ActionObserver} from './types';
 import {transformKafkaMessageToAction} from './transform_kafka_message_to_action';
-import {TopicAdministrator} from './topic_administrator';
-import {isKafkaJSProtocolError} from './type_guard';
 
-export class ConsumerPool {
-    private topicAdministrator: TopicAdministrator;
-    private consumers: Map<string, Consumer> = new Map();
+export class ActionConsumer {
+    private consumer: Consumer;
     private observersByTransaction: Map<
         string,
         Map<string, Array<ActionObserver<IAction>>>
     > = new Map();
+    private subscriptions = new Set<string>();
 
     constructor(
         private kafka: Kafka,
         private rootTopic: string,
-        private consumerConfig: Omit<ConsumerConfig, 'groupId' | 'allowAutoTopicCreation'> = {},
-        topicAdministrator?: TopicAdministrator
+        private consumerConfig: Omit<ConsumerConfig, 'groupId' | 'allowAutoTopicCreation'> = {}
     ) {
-        this.topicAdministrator = topicAdministrator || new TopicAdministrator(kafka);
+        this.consumer = this.kafka.consumer({
+            groupId: `${this.rootTopic}-${uuid.v4()}`,
+            allowAutoTopicCreation: true,
+            ...this.consumerConfig
+        });
     }
 
-    public async streamActionsFromTopic(topic: string) {
-        if (this.consumers.has(topic)) {
+    public async streamActionsFromTopic(newTopic: string) {
+        if (this.subscriptions.has(newTopic)) {
             return;
         }
 
-        const consumer = this.kafka.consumer({
-            groupId: `${this.rootTopic}-${uuid.v4()}`,
-            ...this.consumerConfig
-        });
-
-        await consumer.connect();
-
-        try {
-            await consumer.subscribe({topic});
-        } catch (error) {
-            if (isKafkaJSProtocolError(error) && error.type === 'UNKNOWN_TOPIC_OR_PARTITION') {
-                await this.topicAdministrator.createTopic(topic);
-            } else {
-                throw error;
-            }
-        }
-
-        this.consumers.set(topic, consumer);
-
-        await consumer.run({
+        await this.consumer.connect();
+        await this.consumer.stop();
+        await this.consumer.subscribe({topic: newTopic});
+        await this.consumer.run({
             autoCommit: true,
             autoCommitThreshold: 1,
-            eachMessage: async ({message}) => {
+            eachMessage: async ({topic, message}) => {
                 const action = transformKafkaMessageToAction<any>(topic, message);
 
                 // if this is a transactionId we actually care about, broadcast
@@ -59,15 +44,14 @@ export class ConsumerPool {
                 }
             }
         });
+
+        this.subscriptions.add(newTopic);
     }
 
-    public async disconnectConsumers() {
-        for (const consumer of this.consumers.values()) {
-            await consumer.disconnect();
-        }
-
+    public async disconnect() {
+        await this.consumer.stop();
+        await this.consumer.disconnect();
         this.observersByTransaction.clear();
-        this.consumers.clear();
     }
 
     public startTransaction(transactionId: string) {
