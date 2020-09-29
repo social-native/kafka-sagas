@@ -18,7 +18,7 @@ describe(ActionConsumer.name, function() {
 
             await seedTopic(topic, [preseededMessage]);
 
-            const pool = new ActionConsumer(kafka, 'consumer_pool_test');
+            const pool = new ActionConsumer(kafka, 'action_consumer_test');
             const receivedMessages: IAction[] = [];
             pool.startTransaction(transactionId);
 
