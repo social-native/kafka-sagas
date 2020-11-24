@@ -42,6 +42,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
     private topicAdminstrator: TopicAdministrator;
     private consumerPool: ConsumerPool;
     private throttledProducer: ThrottledProducer;
+    private backgroundHeartbeat?: NodeJS.Timeout;
 
     constructor({
         kafka,
@@ -191,20 +192,27 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 isRunning,
                 isStale
             }) => {
-                const backgroundHeartbeat = setInterval(async () => {
-                    try {
-                        await heartbeat();
-                    } catch (error) {
-                        this.logger.error(error, error.message);
-                    }
-                }, this.config.heartbeatInterval);
-
                 for (const message of messages) {
                     if (!isRunning() || isStale()) {
                         break;
                     }
 
                     try {
+                        await heartbeat();
+
+                        this.backgroundHeartbeat = setInterval(async () => {
+                            try {
+                                await heartbeat();
+                            } catch (error) {
+                                this.logger.error({step: 'Heartbeat', ...error}, error.message);
+
+                                if (this.backgroundHeartbeat) {
+                                    clearInterval(this.backgroundHeartbeat);
+                                    this.backgroundHeartbeat = undefined;
+                                }
+                            }
+                        }, this.config.heartbeatInterval);
+
                         if (this.config.consumptionTimeoutMs === -1) {
                             await this.eachMessage(runner, {topic, partition, message});
                         } else {
@@ -217,6 +225,11 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                                 )
                             );
                         }
+
+                        clearInterval(this.backgroundHeartbeat);
+                        this.backgroundHeartbeat = undefined;
+
+                        await heartbeat();
                     } catch (e) {
                         await commitOffsetsIfNecessary();
                         throw e;
@@ -227,12 +240,20 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                     await commitOffsetsIfNecessary();
                 }
 
-                clearInterval(backgroundHeartbeat);
+                if (this.backgroundHeartbeat) {
+                    clearInterval(this.backgroundHeartbeat);
+                }
+
+                this.backgroundHeartbeat = undefined;
             }
         });
     }
 
     public async disconnect() {
+        if (this.backgroundHeartbeat) {
+            clearInterval(this.backgroundHeartbeat);
+        }
+
         await this.consumer.disconnect();
         await this.consumerPool.disconnectConsumers();
         await this.throttledProducer.disconnect();
