@@ -231,6 +231,11 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
                         await heartbeat();
                     } catch (e) {
+                        if (this.backgroundHeartbeat) {
+                            clearInterval(this.backgroundHeartbeat);
+                            this.backgroundHeartbeat = undefined;
+                        }
+
                         await commitOffsetsIfNecessary();
                         throw e;
                     }
@@ -242,9 +247,8 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
                 if (this.backgroundHeartbeat) {
                     clearInterval(this.backgroundHeartbeat);
+                    this.backgroundHeartbeat = undefined;
                 }
-
-                this.backgroundHeartbeat = undefined;
             }
         });
     }
@@ -252,6 +256,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
     public async disconnect() {
         if (this.backgroundHeartbeat) {
             clearInterval(this.backgroundHeartbeat);
+            this.backgroundHeartbeat = undefined;
         }
 
         await this.consumer.disconnect();
