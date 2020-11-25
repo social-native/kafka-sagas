@@ -127,7 +127,6 @@ export class ThrottledProducer {
         const batchId = retryBatchId || uuid.v4();
 
         if (!outgoingRecords.length) {
-            this.logger.debug({batchId}, 'No records to flush');
             this.isFlushing = false;
             return;
         }
