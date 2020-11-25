@@ -64,7 +64,7 @@
         "@types/uuid": "^3.4.6",
         "dotenv-cli": "^3.0.0",
         "jest": "^24.9.0",
-        "nodemon": "^1.18.10",
+        "nodemon": "^2.0.6",
         "prettier": "~1.19.1",
         "rimraf": "^2.6.3",
         "rollup": "^1.2.2",
