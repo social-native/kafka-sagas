@@ -63,6 +63,7 @@ export class ConsumerPool {
 
     public async disconnectConsumers() {
         for (const consumer of this.consumers.values()) {
+            await consumer.stop();
             await consumer.disconnect();
         }
 

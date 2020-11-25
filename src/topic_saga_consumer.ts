@@ -260,6 +260,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             this.backgroundHeartbeat = undefined;
         }
 
+        await this.consumer.stop();
         await this.consumer.disconnect();
         await this.consumerPool.disconnectConsumers();
         await this.throttledProducer.disconnect();
