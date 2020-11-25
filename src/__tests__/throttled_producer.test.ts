@@ -36,7 +36,9 @@ describe(ThrottledProducer.name, function() {
 
                 await consumer.run({
                     eachMessage: async ({message}: {message: KafkaMessage}) => {
-                        receivedMessage = JSON.parse(message.value.toString());
+                        receivedMessage = message.value
+                            ? JSON.parse(message.value.toString())
+                            : undefined;
                     }
                 });
 
@@ -182,7 +184,9 @@ describe(ThrottledProducer.name, function() {
                 await consumer.connect();
                 await consumer.run({
                     eachMessage: async ({message}) => {
-                        receivedMessages.push(JSON.parse(message.value.toString()));
+                        receivedMessages.push(
+                            message.value ? JSON.parse(message.value.toString()) : undefined
+                        );
                     }
                 });
 
