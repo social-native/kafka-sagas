@@ -27,6 +27,7 @@ import {ConsumptionTimeoutError} from './consumption_timeout_error';
 export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Record<string, any>> {
     public eventEmitter = new EventEmitter() as TypedEmitter<{
         comitted_offsets: (...args: any[]) => void;
+        started_saga: (...args: any[]) => void;
         completed_saga: (...args: any[]) => void;
         consumed_message: (consumptionEvent: IConsumptionEvent<Payload>) => void;
     }>;
@@ -284,6 +285,19 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
         try {
             const externalContext = await this.getContext(message);
+
+            this.eventEmitter.emit('started_saga', {
+                headers: parseHeaders(message.headers),
+                ...externalContext,
+                effects: new EffectBuilder(action.transaction_id),
+                originalMessage: {
+                    key: message.key,
+                    value: message.value,
+                    offset: message.offset,
+                    timestamp: message.timestamp,
+                    partition
+                }
+            });
 
             await runner.runSaga(
                 action,
