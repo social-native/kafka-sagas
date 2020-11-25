@@ -1,5 +1,4 @@
 export {TopicSagaConsumer} from './topic_saga_consumer';
-export {TopicEventEmitter} from './topic_event_emitter';
 export {TopicAdministrator} from './topic_administrator';
 export {ConsumerPool} from './consumer_pool';
 export {ThrottledProducer} from './throttled_producer';

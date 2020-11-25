@@ -11,7 +11,7 @@ export function transformKafkaMessageToAction<Payload>(
 ): IAction<Payload> {
     const {headers, value} = message;
 
-    const parsedValue = valueParser(value.toString());
+    const parsedValue = value ? valueParser(value.toString()) : value;
 
     if (!isTransactionMessage<Payload>(parsedValue)) {
         throw new Error('Received a misshapen payload');
