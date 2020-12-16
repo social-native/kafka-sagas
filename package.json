@@ -52,7 +52,7 @@
         "kafkajs": "1.15.0",
         "pino": "^5.15.5",
         "@types/pino": "^5.15.5",
-        "uuid": "^3.3.3",
+        "uuid": "^8.3.2",
         "typed-emitter": "^1.2.0"
     },
     "peerDependencies": {
