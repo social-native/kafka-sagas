@@ -71,9 +71,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             /** How often should heartbeats be sent back to the broker? */
             heartbeatInterval: 3000,
 
-            /** How many partitions should be consumed concurrently? */
-            partitionConcurrency: 1,
-
             /**
              * Is this a special consumer group?
              * Use case: Provide a custom consumerGroup if this saga is not the primary consumer of an event.
@@ -110,7 +107,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             producerBatchSize: 2000,
             consumptionTimeoutMs: 30000,
             heartbeatInterval: 3000,
-            partitionConcurrency: 1,
             ...config
         };
 
@@ -182,7 +178,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         await this.consumer.run({
             autoCommit: true,
             autoCommitThreshold: 1,
-            partitionsConsumedConcurrently: this.config.partitionConcurrency,
             eachBatchAutoResolve: true,
             // tslint:disable-next-line: cyclomatic-complexity
             eachBatch: async ({

@@ -258,79 +258,6 @@ describe(TopicSagaConsumer.name, function() {
     );
 
     it(
-        'can consume concurrently via a single instance',
-        async function() {
-            const consumptionEvents: Array<IConsumptionEvent<unknown>> = [];
-            const topic = uuid.v4();
-            const topicAdministrator = new TopicAdministrator(kafka, {numPartitions: 10});
-            await topicAdministrator.createTopic(topic);
-            const consumer = new TopicSagaConsumer<DefaultPayload>({
-                kafka,
-                *saga(_, {effects: {delay}}) {
-                    // adding a small consumer delay ensures messages are feathered out
-                    yield delay(10);
-                },
-                topic,
-                topicAdministrator: new TopicAdministrator(kafka, {numPartitions: 10}),
-                config: {partitionConcurrency: 10}
-            });
-
-            consumer.eventEmitter.on('consumed_message', event => {
-                consumptionEvents.push(event);
-            });
-
-            await consumer.run();
-
-            const producer = kafka.producer();
-            await producer.connect();
-
-            for (let i = 0; i < 100; i++) {
-                await producer.send({
-                    topic,
-                    messages: [
-                        createActionMessage({
-                            action: {
-                                transaction_id: uuid.v4(),
-                                payload: {id: uuid.v4()},
-                                topic
-                            }
-                        })
-                    ]
-                });
-            }
-
-            await producer.disconnect();
-
-            await new Bluebird(resolve => {
-                const intervalId = setInterval(() => {
-                    if (consumptionEvents.length >= sampleMessages.length) {
-                        clearInterval(intervalId);
-                        setTimeout(resolve, 1000);
-                    }
-                }, 1000);
-            });
-
-            await consumer.disconnect();
-            await topicAdministrator.deleteTopic(topic);
-
-            const distinctPartitions = consumptionEvents.reduce((partitions, event) => {
-                if (!partitions.includes(event.partition)) {
-                    return [...partitions, event.partition];
-                }
-
-                return partitions;
-            }, [] as number[]);
-
-            // expect messages to feather out among partitions
-            expect(distinctPartitions.length).toBeGreaterThan(1);
-
-            // expect the number produced to be the number received
-            expect(consumptionEvents.length).toEqual(100);
-        },
-        DEFAULT_TEST_TIMEOUT * 2
-    );
-
-    it(
         'correctly handles a long/indefinitely running saga',
         async function() {
             const consumptionEvents: Array<IConsumptionEvent<unknown>> = [];
@@ -347,7 +274,6 @@ describe(TopicSagaConsumer.name, function() {
                     topic,
                     topicAdministrator: new TopicAdministrator(kafka, {numPartitions: 10}),
                     config: {
-                        partitionConcurrency: 1,
                         heartbeatInterval: 3000,
                         consumptionTimeoutMs: -1
                     }
