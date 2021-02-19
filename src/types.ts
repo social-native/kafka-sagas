@@ -249,9 +249,6 @@ export interface ITopicSagaConsumerConfig {
      */
     consumptionTimeoutMs: number;
 
-    /** How many partitions should be consumed concurrently? */
-    partitionConcurrency: number;
-
     /** When batching produced messages (with the PUT effect), how many should be flushed at a time? */
     producerBatchSize: number;
 
