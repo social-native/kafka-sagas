@@ -56,10 +56,10 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         middlewares = [],
         config = {
             /** How often should produced message batches be sent out? */
-            producerFlushIntervalMs: 200,
+            producerFlushIntervalMs: 100,
 
             /** When batching produced messages (with the PUT effect), how many should be flushed at a time? */
-            producerBatchSize: 2000,
+            producerBatchSize: 1000,
             /**
              * How much time should be given to a saga to complete
              * before a consumer is considered unhealthy and killed?
@@ -69,7 +69,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             consumptionTimeoutMs: 30000,
 
             /** How often should heartbeats be sent back to the broker? */
-            heartbeatInterval: 3000,
+            heartbeatInterval: 500,
 
             /**
              * Is this a special consumer group?
@@ -95,7 +95,8 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             groupId: config.consumerGroup || topic,
             allowAutoTopicCreation: false,
             retry: {retries: 0},
-            heartbeatInterval: config.heartbeatInterval
+            heartbeatInterval: config.heartbeatInterval,
+            maxWaitTimeInMs: 1
         });
 
         this.saga = saga;
@@ -103,10 +104,10 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         this.getContext = getContext;
         this.middlewares = middlewares;
         this.config = {
-            producerFlushIntervalMs: 200,
-            producerBatchSize: 2000,
+            producerFlushIntervalMs: 100,
+            producerBatchSize: 1000,
             consumptionTimeoutMs: 30000,
-            heartbeatInterval: 3000,
+            heartbeatInterval: 500,
             ...config
         };
 

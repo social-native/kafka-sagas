@@ -30,6 +30,9 @@ export class ConsumerPool {
 
         const consumer = this.kafka.consumer({
             groupId: `${this.rootTopic}-${uuid.v4()}`,
+            allowAutoTopicCreation: false,
+            heartbeatInterval: 500,
+            maxWaitTimeInMs: 1,
             ...this.consumerConfig
         });
 
