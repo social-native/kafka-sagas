@@ -273,7 +273,7 @@ describe(TopicSagaConsumer.name, function() {
                     },
                     topic,
                     topicAdministrator: new TopicAdministrator(kafka, {numPartitions: 10}),
-                    config: {
+                    consumerConfig: {
                         heartbeatInterval: 3000,
                         consumptionTimeoutMs: -1
                     }
