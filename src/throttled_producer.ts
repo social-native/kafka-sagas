@@ -1,5 +1,5 @@
-import {Producer, Kafka, CompressionTypes, ProducerConfig} from 'kafkajs';
-import {IAction, IQueuedRecord} from './types';
+import {Producer, Kafka, CompressionTypes} from 'kafkajs';
+import {IAction, IQueuedRecord, SagaProducerConfig} from './types';
 import {createActionMessage} from './create_action_message';
 import {isKafkaJSProtocolError} from './type_guard';
 import Bluebird from 'bluebird';
@@ -18,10 +18,7 @@ export class ThrottledProducer {
 
     constructor(
         protected kafka: Kafka,
-        protected producerConfig: Omit<
-            ProducerConfig,
-            'allowAutoTopicCreation' | 'maxInFlightRequests' | 'idempotent'
-        > & {maxOutgoingBatchSize?: number; flushIntervalMs?: number} = {
+        protected producerConfig: SagaProducerConfig = {
             maxOutgoingBatchSize: 10000,
             flushIntervalMs: 1000
         },

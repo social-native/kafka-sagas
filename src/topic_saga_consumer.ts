@@ -1,4 +1,4 @@
-import {Kafka, Consumer, KafkaMessage, EachMessagePayload} from 'kafkajs';
+import {Kafka, Consumer, KafkaMessage, EachMessagePayload, ConsumerConfig} from 'kafkajs';
 import Bluebird from 'bluebird';
 import pino from 'pino';
 import EventEmitter from 'events';
@@ -15,8 +15,9 @@ import {
     ILoggerConfig,
     Middleware,
     IEffectDescription,
-    ITopicSagaConsumerConfig,
-    IConsumptionEvent
+    IConsumptionEvent,
+    SagaProducerConfig,
+    SagaConsumerConfig
 } from './types';
 import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
@@ -32,18 +33,20 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         consumed_message: (consumptionEvent: IConsumptionEvent<Payload>) => void;
     }>;
 
-    private config: ITopicSagaConsumerConfig;
-    private consumer: Consumer;
-    private saga: Saga<Payload, SagaContext<Context>>;
-    private topic: string;
-    private getContext: (message: KafkaMessage) => Promise<Context>;
-    private logger: ReturnType<typeof pino>;
-    private middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
+    protected consumer: Consumer;
+    protected saga: Saga<Payload, SagaContext<Context>>;
+    protected topic: string;
+    protected getContext: (message: KafkaMessage) => Promise<Context>;
+    protected logger: ReturnType<typeof pino>;
+    protected middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
+    protected consumerConfig: ConsumerConfig;
+    protected producerConfig: SagaProducerConfig;
+    protected consumptionTimeoutMs: number;
 
-    private topicAdminstrator: TopicAdministrator;
-    private consumerPool: ConsumerPool;
-    private throttledProducer: ThrottledProducer;
-    private backgroundHeartbeat?: NodeJS.Timeout;
+    protected topicAdminstrator: TopicAdministrator;
+    protected consumerPool: ConsumerPool;
+    protected throttledProducer: ThrottledProducer;
+    protected backgroundHeartbeat?: NodeJS.Timeout;
 
     constructor({
         kafka,
@@ -54,12 +57,20 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         },
         loggerConfig,
         middlewares = [],
-        config = {
-            /** How often should produced message batches be sent out? */
-            producerFlushIntervalMs: 100,
+        consumerConfig = {
+            /** How often should heartbeats be sent back to the broker? */
+            heartbeatInterval: 500,
 
-            /** When batching produced messages (with the PUT effect), how many should be flushed at a time? */
-            producerBatchSize: 1000,
+            /** Allows main consumer and action channel consumers to create new topics. */
+            allowAutoTopicCreation: false,
+
+            /**
+             * Is this a special consumer group?
+             * Use case: Provide a custom consumerGroup if this saga is not the primary consumer of an event.
+             * For instance, you may want to have multiple different reactions to an event aside from the primary work
+             * to kick off notifactions.
+             */
+            groupId: topic,
             /**
              * How much time should be given to a saga to complete
              * before a consumer is considered unhealthy and killed?
@@ -68,48 +79,60 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
              */
             consumptionTimeoutMs: 30000,
 
-            /** How often should heartbeats be sent back to the broker? */
-            heartbeatInterval: 500,
-
             /**
-             * Is this a special consumer group?
-             * Use case: Provide a custom consumerGroup if this saga is not the primary consumer of an event.
-             * For instance, you may want to have multiple different reactions to an event aside from the primary work
-             * to kick off notifactions.
+             * How long should the broker wait before responding in the case of too small a number of records to return?
              */
-            consumerGroup: undefined
+            maxWaitTimeInMs: 100
+        },
+        producerConfig = {
+            /** Allows producer to create new topics. */
+            allowAutoTopicCreation: false,
+            /** How often should produced message batches be sent out? */
+            flushIntervalMs: 100,
+
+            /** When batching produced messages (with the PUT effect), how many should be flushed at a time? */
+            maxOutgoingBatchSize: 1000
         },
         topicAdministrator
     }: {
         kafka: Kafka;
         topic: string;
         saga: Saga<Payload, SagaContext<Context>>;
-
-        config?: Partial<ITopicSagaConsumerConfig>;
+        consumerConfig?: Partial<SagaConsumerConfig>;
+        producerConfig?: Partial<SagaProducerConfig>;
         getContext?: (message: KafkaMessage) => Promise<Context>;
         topicAdministrator?: TopicAdministrator;
         loggerConfig?: ILoggerConfig;
         middlewares?: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
     }) {
-        this.consumer = kafka.consumer({
-            groupId: config.consumerGroup || topic,
+        const {consumptionTimeoutMs, ...kafkaConsumerConfig} = consumerConfig;
+
+        this.consumerConfig = {
+            groupId: topic,
             allowAutoTopicCreation: false,
             retry: {retries: 0},
-            heartbeatInterval: config.heartbeatInterval,
-            maxWaitTimeInMs: 1
-        });
+            heartbeatInterval: 500,
+            maxWaitTimeInMs: 100,
+            ...kafkaConsumerConfig
+        };
+
+        this.consumptionTimeoutMs = consumptionTimeoutMs || 30000;
+
+        this.producerConfig = {
+            /** Allows producer to create new topics. */
+            allowAutoTopicCreation: false,
+            /** How often should produced message batches be sent out? */
+            flushIntervalMs: 100,
+
+            /** When batching produced messages (with the PUT effect), how many should be flushed at a time? */
+            maxOutgoingBatchSize: 1000,
+            ...producerConfig
+        };
 
         this.saga = saga;
         this.topic = topic;
         this.getContext = getContext;
         this.middlewares = middlewares;
-        this.config = {
-            producerFlushIntervalMs: 100,
-            producerBatchSize: 1000,
-            consumptionTimeoutMs: 30000,
-            heartbeatInterval: 500,
-            ...config
-        };
 
         this.logger = getLoggerFromConfig(loggerConfig).child({
             package: 'snpkg-snapi-kafka-sagas'
@@ -117,21 +140,20 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
 
         this.topicAdminstrator = topicAdministrator || new TopicAdministrator(kafka);
 
+        this.consumer = kafka.consumer(this.consumerConfig);
+
         this.consumerPool = new ConsumerPool(
             kafka,
             topic,
-            {retry: {retries: 0}},
+            {
+                retry: {retries: 0},
+                heartbeatInterval: kafkaConsumerConfig.heartbeatInterval || 500,
+                maxWaitTimeInMs: kafkaConsumerConfig.maxWaitTimeInMs || 100
+            },
             this.topicAdminstrator
         );
 
-        this.throttledProducer = new ThrottledProducer(
-            kafka,
-            {
-                flushIntervalMs: config.producerFlushIntervalMs,
-                maxOutgoingBatchSize: config.producerBatchSize
-            },
-            this.logger
-        );
+        this.throttledProducer = new ThrottledProducer(kafka, this.producerConfig, this.logger);
 
         this.run = this.run.bind(this);
         this.disconnect = this.disconnect.bind(this);
@@ -208,17 +230,17 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                                     this.backgroundHeartbeat = undefined;
                                 }
                             }
-                        }, this.config.heartbeatInterval);
+                        }, this.consumerConfig.heartbeatInterval || 500);
 
-                        if (this.config.consumptionTimeoutMs === -1) {
+                        if (this.consumptionTimeoutMs === -1) {
                             await this.eachMessage(runner, {topic, partition, message});
                         } else {
                             await Bluebird.resolve(
                                 this.eachMessage(runner, {topic, partition, message})
                             ).timeout(
-                                this.config.consumptionTimeoutMs,
+                                this.consumptionTimeoutMs,
                                 new ConsumptionTimeoutError(
-                                    `Message consumption timed out after ${this.config.consumptionTimeoutMs} milliseconds.`
+                                    `Message consumption timed out after ${this.consumptionTimeoutMs} milliseconds.`
                                 )
                             );
                         }

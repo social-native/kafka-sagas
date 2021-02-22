@@ -32,7 +32,7 @@ export class ConsumerPool {
             groupId: `${this.rootTopic}-${uuid.v4()}`,
             allowAutoTopicCreation: false,
             heartbeatInterval: 500,
-            maxWaitTimeInMs: 1,
+            maxWaitTimeInMs: 100,
             ...this.consumerConfig
         });
 
