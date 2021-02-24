@@ -31,12 +31,28 @@ export class ThrottledProducer {
     }
 
     // tslint:disable-next-line: cyclomatic-complexity
-    public putAction = async <Action extends IAction>(action: Action) => {
+    public putAction = async <Action extends IAction>(
+        action: Action,
+        messageConfig: {
+            /**
+             * If using transactionId as a message key, messages in a transaction will be processed in order.
+             */
+            useTransactionIdAsKey?: boolean;
+        } = {
+            useTransactionIdAsKey: false
+        }
+    ) => {
         if (!this.isConnected) {
             throw new Error('You must .connect before producing actions');
         }
 
         return new Promise<void>((resolve, reject) => {
+            const message = createActionMessage({action});
+
+            if (messageConfig.useTransactionIdAsKey) {
+                message.key = action.transaction_id;
+            }
+
             this.recordQueue = [
                 ...this.recordQueue,
                 {
