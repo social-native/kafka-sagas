@@ -48,6 +48,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
     protected throttledProducer: ThrottledProducer;
     protected backgroundHeartbeat?: NodeJS.Timeout;
 
+    // tslint:disable-next-line: cyclomatic-complexity
     constructor({
         kafka,
         topic,
@@ -108,7 +109,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         const {consumptionTimeoutMs, ...kafkaConsumerConfig} = consumerConfig;
 
         this.consumerConfig = {
-            groupId: topic,
+            groupId: consumerConfig.groupId || topic,
             allowAutoTopicCreation: false,
             retry: {retries: 0},
             heartbeatInterval: 500,
