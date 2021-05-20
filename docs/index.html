@@ -66,49 +66,37 @@
 					<h1>Kafka Sagas 🌼</h1>
 				</a>
 				<p>Kafka-sagas is a package that allows you to use eerily similar semantics to <a href="https://redux-saga.js.org/">Redux-Sagas</a> built on top of <a href="https://kafka.js.org/">KafkaJS</a>. With Kafka-Sagas, Kafka topics are treated as streams that a saga can dispatch actions into, as well as tapped for particular actions to initiate a saga.</p>
+				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
+					<h2><a href="https://social-native.github.io/kafka-sagas/index.html">API Reference</a></h2>
+				</a>
 				<ul>
 					<li><a href="#kafka-sagas-">Kafka Sagas 🌼</a><ul>
+							<li><a href="#api-reference">API Reference</a></li>
 							<li><a href="#usage">Usage</a></li>
-							<li><a href="#1-install">1. Install</a></li>
-							<li><a href="#2-make-sure-peer-dependencies-are-installed">2. Make sure peer dependencies are installed</a></li>
-							<li><a href="#api-reference">API Reference</a><ul>
-									<li><a href="#whats-a-saga">What&#39;s A Saga?</a></li>
-									<li><a href="#whats-a-consumer">What&#39;s A Consumer?</a></li>
-									<li><a href="#whats-an-action">What&#39;s An Action?</a></li>
-									<li><a href="#whats-an-effect">What&#39;s an Effect?</a></li>
-									<li><a href="#whats-a-transaction">What&#39;s A Transaction?</a></li>
-								</ul>
-							</li>
-							<li><a href="#advanced">Advanced</a><ul>
-									<li><a href="#communication-between-sagas">Communication between sagas</a></li>
-									<li><a href="#production-speed">Production speed</a></li>
-									<li><a href="#auto-topic-creation">Auto Topic Creation</a></li>
-									<li><a href="#concurrency">Concurrency</a></li>
-								</ul>
-							</li>
+							<li><a href="#glossary">Glossary</a></li>
+							<li><a href="#advanced">Advanced</a></li>
 						</ul>
 					</li>
 				</ul>
 				<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
 					<h2>Usage</h2>
 				</a>
-				<a href="#1-install" id="1-install" style="color: inherit; text-decoration: none;">
-					<h2>1. Install</h2>
-				</a>
+				<ol>
+					<li>Install</li>
+				</ol>
 				<pre><code class="language-typescript">npm install --save kafka-sagas</code></pre>
-				<a href="#2-make-sure-peer-dependencies-are-installed" id="2-make-sure-peer-dependencies-are-installed" style="color: inherit; text-decoration: none;">
-					<h2>2. Make sure peer dependencies are installed</h2>
-				</a>
+				<ol start="2">
+					<li>Make sure peer dependencies are installed</li>
+				</ol>
 				<pre><code class="language-typescript">npm install --save kafkajs</code></pre>
-				<a href="#api-reference" id="api-reference" style="color: inherit; text-decoration: none;">
-					<h2><a href="https://social-native.github.io/kafka-sagas/index.html">API Reference</a></h2>
+				<a href="#glossary" id="glossary" style="color: inherit; text-decoration: none;">
+					<h2>Glossary</h2>
 				</a>
-				<a href="#what39s-a-saga" id="what39s-a-saga" style="color: inherit; text-decoration: none;">
-					<h3>What&#39;s A Saga?</h3>
-				</a>
-				<p>A saga is a generator function that receives a payload from a topic and runs some effects as a response. Effects performed by the saga will all be executed within the same transaction as the initiating action.</p>
-				<p>Example:</p>
-				<pre><code class="language-ts"><span class="hljs-keyword">const</span> topics = {
+				<details>
+					<summary>Saga</summary>
+					<p>A saga is a generator function that receives a payload from a topic and runs some effects as a response. Effects performed by the saga will all be executed within the same transaction as the initiating action.</p>
+					<p>Example:</p>
+					<pre><code class="language-ts"><span class="hljs-keyword">const</span> topics = {
     <span class="hljs-attr">BEGIN</span>: <span class="hljs-string">&#x27;BEGIN&#x27;</span>,
     <span class="hljs-attr">STARTED</span>: <span class="hljs-string">&#x27;STARTED&#x27;</span>,
     <span class="hljs-attr">COMPLETED</span>: <span class="hljs-string">&#x27;COMPLETED&#x27;</span>,
@@ -157,40 +145,40 @@
         });
     }
 };</code></pre>
-				<a href="#what39s-a-consumer" id="what39s-a-consumer" style="color: inherit; text-decoration: none;">
-					<h3>What&#39;s A Consumer?</h3>
-				</a>
-				<p>A consumer, in this realm, is a <a href="https://www.confluent.io/blog/tutorial-getting-started-with-the-new-apache-kafka-0-9-consumer-client/#:~:text=In%20Kafka%2C%20each%20topic%20is,sharing%20a%20common%20group%20identifier.">Kafka consumer</a>. You may choose to have one or many consumers within a single group. In order to do so, simply create another TopicSagaConsumer with the same topic.</p>
-				<a href="#what39s-an-action" id="what39s-an-action" style="color: inherit; text-decoration: none;">
-					<h3>What&#39;s An Action?</h3>
-				</a>
-				<p>An action is an event sent to a saga consumer that includes information about the topic, transactionId, and a payload. Under the hood, actions are just specialized kafka messages.</p>
-				<a href="#what39s-an-effect" id="what39s-an-effect" style="color: inherit; text-decoration: none;">
-					<h3>What&#39;s an Effect?</h3>
-				</a>
-				<p>An effect is a side-effect a saga may perform within a transaction. Effects may be either intercepted by or stubbed out by using middleware.</p>
-				<a href="#what39s-a-transaction" id="what39s-a-transaction" style="color: inherit; text-decoration: none;">
-					<h3>What&#39;s A Transaction?</h3>
-				</a>
-				<p>A transaction is a string of events that share a transaction_id. By being in the same transaction, we are able to create consumers under-the-hood to other topics while only receiving messages from those topics that are in the current transaction we are working within.</p>
+				</details>
+				<details>
+					<summary>Consumer</summary>
+					<p>A consumer, in this realm, is a <a href="https://www.confluent.io/blog/tutorial-getting-started-with-the-new-apache-kafka-0-9-consumer-client/#:~:text=In%20Kafka%2C%20each%20topic%20is,sharing%20a%20common%20group%20identifier.">Kafka consumer</a>. You may choose to have one or many consumers within a single group. In order to do so, simply create another TopicSagaConsumer with the same topic.</p>
+				</details>
+				<details>
+					<summary>Action</summary>
+					An action is an event sent to a saga consumer that includes information about the topic, transactionId, and a payload. Under the hood, actions are just specialized kafka messages.
+				</details>
+				<details>
+					<summary>Effect</summary>
+					An effect is a side-effect a saga may perform within a transaction. Effects may be either intercepted by or stubbed out by using middleware.
+				</details>
+				<details>
+					<summary>Transaction</summary>
+					<p>A transaction is a string of events that share a transaction_id. By being in the same transaction, we are able to create consumers under-the-hood to other topics while only receiving messages from those topics that are in the current transaction we are working within.</p>
+				</details>
 				<a href="#advanced" id="advanced" style="color: inherit; text-decoration: none;">
 					<h2>Advanced</h2>
 				</a>
-				<a href="#communication-between-sagas" id="communication-between-sagas" style="color: inherit; text-decoration: none;">
-					<h3>Communication between sagas</h3>
-				</a>
-				<p>The following diagram illustrates how 3 independently deployed sagas can interact and react to each other.
-				<img src="https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png" alt="3 sagas communicate"></p>
-				<a href="#production-speed" id="production-speed" style="color: inherit; text-decoration: none;">
-					<h3>Production speed</h3>
-				</a>
-				<p>Due to <a href="https://github.com/tulios/kafkajs/issues/598">this bug</a>, the underlying producer batches messages into sets of 10,000 and sends a batch of 10,000 messages per second. This isn&#39;t currently configurable, but it is my understanding that this should be no trouble for a Kafka cluster. This means <code>PUT</code> effects may take up to a second to resolve. See the <code>ThrottledProducer</code> class to understand the finer workings of the producer.</p>
-				<a href="#auto-topic-creation" id="auto-topic-creation" style="color: inherit; text-decoration: none;">
-					<h3>Auto Topic Creation</h3>
-				</a>
-				<p>By default, a TopicSagaConsumer will automatically create a topic if it attempts to subscribe to nonexistent one. If you would like to control how topics are created by both the primary consumer and underlying consumers and producers, instantiate the TopicSagaConsumer with your own TopicAdministrator instance.</p>
-				<p>The following example creates <strong>three</strong> topics with 10 partitions each:</p>
-				<pre><code class="language-ts"><span class="hljs-keyword">const</span> topic = <span class="hljs-string">&#x27;some_topic_that_does_not_exist_yet&#x27;</span>;
+				<details>
+					<summary>Communication Between Sagas</summary>
+					<p>The following diagram illustrates how 3 independently deployed sagas can interact and react to each other.
+					<img src="https://kafka-sagas-documentation.s3.amazonaws.com/3+Sagas+Communicate.png" alt="3 sagas communicate"></p>
+				</details>
+				<details>
+					<summary>Production Speed</summary>
+					<p>Due to <a href="https://github.com/tulios/kafkajs/issues/598">this bug</a>, the underlying producer batches messages into sets of 10,000 and sends a batch of 10,000 messages per second. This isn&#39;t currently configurable, but it is my understanding that this should be no trouble for a Kafka cluster. This means <code>PUT</code> effects may take up to a second to resolve. See the <code>ThrottledProducer</code> class to understand the finer workings of the producer.</p>
+				</details>
+				<details>
+					<summary>Auto Topic Creation</summary>
+					<p>By default, a TopicSagaConsumer will automatically create a topic if it attempts to subscribe to nonexistent one. If you would like to control how topics are created by both the primary consumer and underlying consumers and producers, instantiate the TopicSagaConsumer with your own TopicAdministrator instance.</p>
+					<p>The following example creates <strong>three</strong> topics with 10 partitions each:</p>
+					<pre><code class="language-ts"><span class="hljs-keyword">const</span> topic = <span class="hljs-string">&#x27;some_topic_that_does_not_exist_yet&#x27;</span>;
 
 <span class="hljs-keyword">const</span> topicAdministrator = <span class="hljs-keyword">new</span> TopicAdministrator(kafka, {
     <span class="hljs-attr">numPartitions</span>: <span class="hljs-number">10</span>
@@ -217,16 +205,17 @@
  * The some_topic_that_does_not_exist_yet topic is created during the consumer startup.
  */</span>
 <span class="hljs-keyword">await</span> topicConsumer.run();</code></pre>
-				<p>The topics in the above example will be created in the following order, since the saga won&#39;t execute until messages are flowing in:</p>
-				<ol>
-					<li>some_topic_that_does_not_exist_yet</li>
-					<li>some_other_non_existent_topic</li>
-					<li>a_third_nonexistent_topic</li>
+					<p>The topics in the above example will be created in the following order, since the saga won&#39;t execute until messages are flowing in:</p>
+					<ol>
+						<li>some_topic_that_does_not_exist_yet</li>
+						<li>some_other_non_existent_topic</li>
+				<li>a_third_nonexistent_topic </details>
+				</li>
 				</ol>
-				<a href="#concurrency" id="concurrency" style="color: inherit; text-decoration: none;">
-					<h3>Concurrency</h3>
-				</a>
-				<p>By instantiating multiple <code>TopicSagaConsumer</code> instances, you are able consume from the same topic concurrently, given there are partitions to support the number of consumers. This is a scenario you would encountere if you were running multiple Kubernetes pods each of which instantiate a single consumer. In the future, concurrency as a config will be available.</p>
+				<details>
+					<summary>Concurrency</summary>
+					<p>By instantiating multiple <code>TopicSagaConsumer</code> instances, you are able consume from the same topic concurrently, given there are partitions to support the number of consumers. This is a scenario you would encountere if you were running multiple Kubernetes pods each of which instantiate a single consumer. In the future, concurrency as a config will be available.</p>
+				</details>
 			</div>
 		</div>
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
