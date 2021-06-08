@@ -11,13 +11,22 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
     - [put](#put)
     - [actionChannel](#actionchannel)
       - [Using a topic as input](#using-a-topic-as-input)
+      - [Using a topic+predicate as input](#using-a-topicpredicate-as-input)
+      - [Injecting a buffer](#injecting-a-buffer)
     - [take](#take)
       - [Using an action channel as input](#using-an-action-channel-as-input)
       - [Using a topic as input](#using-a-topic-as-input-1)
       - [Using a topic + predicate as input](#using-a-topic--predicate-as-input)
     - [callFn](#callfn)
+      - [Using a plain function as input](#using-a-plain-function-as-input)
+      - [Using an async function as input](#using-an-async-function-as-input)
+      - [Using a callable saga as input](#using-a-callable-saga-as-input)
     - [all](#all)
+      - [With an array as input](#with-an-array-as-input)
+      - [With an object as input](#with-an-object-as-input)
     - [race](#race)
+      - [With an array as input](#with-an-array-as-input-1)
+      - [With an object as input](#with-an-object-as-input-1)
     - [delay](#delay)
   - [Recipes](#recipes)
     - [Communication with another saga (and timeout if it doesn't respond in time)](#communication-with-another-saga-and-timeout-if-it-doesnt-respond-in-time)
@@ -92,6 +101,123 @@ const saga = function*<Payload>(
         });
     }
 };
+```
+
+4. Run it using a `TopicSagaConsumer` or your own wrapper for `SagaRunner`:
+
+```ts
+import type {IBaseSagaContext} from 'kafka-sagas';
+import {TopicAdministrator, TopicSagaConsumer, Saga} from 'kafka-sagas';
+import stubEffectsMiddleware from './test_middleware';
+import {kafka} from './clients';
+
+type Payload = {toppings: string[]};
+type ResultPayload = Payload & {result: string};
+type ErrorPayload = Payload & {error: Error};
+type CustomContext = IBaseSagaContext & UnPromisify<ReturnType<typeof getContext>>;
+
+async function getContext() {
+    return {
+        graphQlClient: new GraphQLClient()
+    };
+}
+
+const saga: Saga<Payload, CustomContext> = function*(action, context) {
+    try {
+        // write an action to the STARTED channel
+        yield put<Payload>('PIZZA_STARTED', action.payload);
+
+        // do some work
+        yield callFn(async function() {
+            console.log('Ding! Pizza is ready');
+        });
+
+        // write an action to the COMPLETED channel
+        yield put<ResultPayload>('PIZZA_COMPLETED', {
+            ...action.payload,
+            success: 'true'
+        });
+    } catch (error) {
+        console.error(error);
+
+        // write an action to the FAILED channel
+        yield put<ErrorPayload>('PIZZA_FAILED', {
+            ...action.payload,
+            error
+        });
+    }
+}
+
+async function createSagaConsumer<Payload>(topic: string, saga: Saga<Payload, CustomContext>) {
+    const topicAdministrator = new TopicAdministrator(kafka, {
+        replicationFactor: environment.kafka.brokers.length,
+        numPartitions: config.numPartitions || environment.numPartitions
+    });
+
+    const topicSagaConsumer = new TopicSagaConsumer({
+        kafka,
+        topic,
+        /** the result of getContext will be merged on top of IBaseSagaContext */
+        getContext,
+        /** Optional class that can be used to control auto topic creation */
+        topicAdministrator,
+        /** Your saga */
+        saga,
+        /** Optional middleware to intercept effects before they are run. These are executed left-to-right. */
+        middlewares: [stubEffectsMiddleware],
+        /** Optional configuration used for the kafka consumer that will receive messages from the topic */
+        consumerConfig: {
+            consumptionTimeoutMs: 30000,
+            heartbeatInterval: 500,
+            allowAutoTopicCreation: true
+        },
+        /** Optional configuration to control producer (used by the `put` effect) behavior */
+        producerConfig: {
+            maxOutgoingBatchSize: 1000,
+            flushIntervalMs: 100,
+            allowAutoTopicCreation: true
+        }
+    });
+
+    try {
+        /**
+         * This will connect the kafka consumer and begin running the saga on actions received from the topic.
+         * It will await up to the point of beginning that process and then continue execution of this function while continuing
+         * to consume messages with the saga.
+         */
+        await topicSagaConsumer.run();
+
+        /**
+         * Create a hook to gracefully exit the saga by allowing the current one to complete before continuing with process death.
+         */
+        ['SIGTERM', 'SIGINT', 'SIGUSR2'].map(type => {
+            process.once(type as any, async () => {
+                try {
+                    await topicSagaConsumer.disconnect();
+                } finally {
+                    process.kill(process.pid, type);
+                }
+            });
+        });
+
+        return topicSagaConsumer;
+    } catch (error) {
+        /** Handle any uncaught errors */
+        await topicSagaConsumer.disconnect();
+        throw error;
+    }
+}
+
+async function main() {
+    try {
+        const consumer = await createSagaConsumer('PIZZA_BEGIN', saga);
+    } catch (error) {
+        console.error(error);
+        process.exit(1);
+    }
+}
+
+main();
 ```
 
 A saga is implemented using a [generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*). This library attempts to bring an interface similar to AWS lambda, so you could think of sagas as analogous to `exports.handler`. As shown in the above example, two arguments are expected during each run of a saga (which would be executed per each message received on the input topic from kafka).
@@ -221,11 +347,17 @@ function* mySaga(action, context) {
 
 #### Using a topic as input
 
-```ts
-function* () {
+Given a topic as input, `actionChannel` will start streaming actions from the topic into its buffer. Underneath the hood, this creates an Kafka consumer and adds it to a pool.
 
+```ts
+function* listenForPizza(action, context) {
+    const channel = yield actionChannel('FETCH_TOPPINGS');
+    /** Buffer actions for ten seconds */
+    yield delay(10 * 1000);
 }
 ```
+
+#### Using a topic+predicate as input
 
 Action channels can also take predicate functions that allow you to filter only for actions that match. In the following example, we create a channel that will only buffer actions if `payload.toppings` includes `pepperonis`:
 
@@ -242,6 +374,33 @@ function* waitForPepperoniPizza(action, context) {
 }
 ```
 
+#### Injecting a buffer
+
+Optionally, an actionChannel can be given an ActionChannelBuffer to store actions received. This opens the door for some interesting techniques:
+
+```ts
+import {ActionChannelBuffer, SagaRunner} from 'kafka-sagas';
+
+const buffer = new ActionChannelBuffer();
+
+function* tenSecondsOfActions(action, context) {
+    const channel = yield actionChannel('FETCH_TOPPINGS', buffer);
+    /** Buffer actions for ten seconds */
+    yield delay(10 * 1000);
+}
+
+async function run() {
+    await new SagaRunner().runSaga(tenSecondsOfActions, {});
+
+    while (buffer.size) {
+        const action = await buffer.take();
+        console.log(action);
+    }
+}
+```
+
+In the above example, we open a channel and listen for ten seconds, storing actions in a buffer we made. Afterwards, we take each action out of the buffer and log it. Such a technique could be used for processing streams in 10 second batches.
+
 ### take
 
 `take`, given either a stream or channel to watch, will give back the first message it receives on that channel.
@@ -254,12 +413,12 @@ Given an action channel, `take` will pull the oldest action out of the channel's
 function* waitForPepperoniPizza(action, context) {
     const {put, take, actionChannel} = context.effects;
 
-    yield put('PIZZA_CREATE_BEGIN', {toppings: ['pepperonis']});
-
     const pepperoniChannel = yield actionChannel({
         pattern: 'PIZZA_CREATE_SUCCESS',
         predicate: action => action.payload.toppings.includes('pepperonis')
     });
+
+    yield put('PIZZA_CREATE_BEGIN', {toppings: ['pepperonis']});
 
     const {payload: pizza} = yield take(pepperoniChannel);
 
@@ -273,6 +432,10 @@ Given a topic, `take` will immediately return the first action it receives from 
 
 ```ts
 function* dontWaitForPepperoniPizza(action, context) {
+    const {
+        effects: {take, put}
+    } = context;
+
     const {payload: pizza} = yield take('PIZZA_CREATE_SUCCESS');
 
     yield put('PEPPERONI_PIZZA_CREATE_SUCCESS', pizza);
@@ -285,6 +448,10 @@ Given a topic+predicate, `take` will behave the same as if it were given just a 
 
 ```ts
 function* dontWaitForPepperoniPizza(action, context) {
+    const {
+        effects: {take, put}
+    } = context;
+
     const {payload: pizza} = yield take({
         pattern: 'PIZZA_CREATE_SUCCESS',
         predicate: action => action.payload.toppings.includes('pepperonis')
@@ -296,11 +463,182 @@ function* dontWaitForPepperoniPizza(action, context) {
 
 ### callFn
 
+`callFn` allows calling plain javascript functions, async functions, and generator functions (which will be treated like sagas). Like other effects, this will not happen until the call effect is `yield`ed. **Note that arguments must be given as an array.**
+
+**Why not just call the function directly?**
+In sagas, promises are not awaited, nor would yielding them cause them to be; _promises are not effects_. Additionally, calling a function may have some side effects, so wrapping these in an effect gives us the ability to use middleware to stub these function calls out.
+
+#### Using a plain function as input
+
+```ts
+function* callMyFunction(action, context) {
+    const {
+        effects: {callFn}
+    } = context;
+
+    /** yield will return `7` */
+    const seven: ReturnType<typeof addFour> = yield callFn(addFour, [3]);
+}
+
+const addFour = function(num: number) {
+    return num + 4;
+};
+```
+
+#### Using an async function as input
+
+Async/promise-returning functions will be awaited by callFn.
+
+```ts
+/** Utility type to infer promise resolve type */
+export type UnPromisify<T> = T extends Promise<infer U> ? U : T;
+
+function* callMyFunction(action, context) {
+    const {
+        effects: {callFn}
+    } = context;
+
+    /** yield will return `7` because callFn will `await` the called function's response. */
+    const seven: UnPromisify<ReturnType<typeof addFour>> = yield callFn(addFour, [3]);
+
+    /** yield will return `10` because callFn will await the promise the called function returned */
+    const ten: UnPromisify<ReturnType<typeof addThree>> = yield callFn(addThree, [seven]);
+}
+
+const addFour = async function(num: number) {
+    return num + 4;
+};
+
+const addThree = function(num: number) {
+    return new Promise(resolve => {
+        resolve(num + 3);
+        return;
+    });
+};
+```
+
+#### Using a callable saga as input
+
+Callable sagas allow you to break a complex saga down into smaller ones without needing to communicate between them using Kafka. The effects in a callable saga are subject to the same middleware as provided to the runner of the root saga.
+
+```ts
+import {CallableSaga, IBaseSagaContext} from 'kafka-sagas';
+
+function* callMyFunction(action, context) {
+    const {
+        effects: {callFn}
+    } = context;
+
+    const {payload: pizza} = action;
+
+    yield callFn(notifyPizzaEnqueued, [pizza, context]);
+}
+
+const notifyPizzaEnqueued: CallableSaga<{toppings: string[]}, IBaseSagaContext, void> = function*(
+    payload,
+    context
+) {
+    const {effects} = context;
+
+    for (const topping of payload.toppings) {
+        yield callFn(async function() {
+            console.log('Topping requested', topping);
+        });
+    }
+};
+```
+
 ### all
+
+Similar to `Bluebird.all`, yielding the `all` effect on an array or object of unyielded effects will wait for all of the provided effects to complete before continuing.
+
+#### With an array as input
+
+In this example, the saga will take at least a full 10 seconds (the longest running effect) to complete.
+
+```ts
+function* waitForBatchOfDelays(action, context) {
+    const {
+        effects: {all, delay}
+    } = context;
+
+    yield all([
+        delay(1000),
+        delay(3000),
+        delay(10000) // <-- simulating a long awaited response
+    ]);
+}
+```
+
+#### With an object as input
+
+Similar to the above, this example will take at least a full ten seconds to complete.
+
+```ts
+function* waitForBatchOfDelays(action, context) {
+    const {
+        effects: {all, delay}
+    } = context;
+
+    const {timeoutOneSecond} = yield all({
+        timeoutOneSecond: delay(1000),
+        timeoutThreeSeconds: delay(3000),
+        timeoutTenSeconds: delay(10000)
+    });
+}
+```
 
 ### race
 
+#### With an array as input
+
+In the following example, the saga will complete in at least one second because `'fastest'` won the `race`.
+
+```ts
+function* waitForBatchOfDelays(action, context) {
+    const {
+        effects: {race, delay}
+    } = context;
+
+    /** 'fastest' won, so `race` will complete in one second and the result will be 'fastest'. */
+    const winner = yield race([delay(1000, 'fastest'), delay(3000, 'fast'), delay(10000, 'slow')]);
+}
+```
+
+#### With an object as input
+
+Similar to the above, this example will take at least a one second to complete.
+
+```ts
+function* waitForBatchOfDelays(action, context) {
+    const {
+        effects: {all, delay}
+    } = context;
+
+    const {
+        timeoutOneSecond, // 'a'
+        timeoutThreeSeconds, // undefined
+        timeoutTenSeconds // undefined
+    } = yield race({
+        timeoutOneSecond: delay(1000, 'a'),
+        timeoutThreeSeconds: delay(3000, 'b'),
+        timeoutTenSeconds: delay(10000, 'c')
+    });
+}
+```
+
 ### delay
+
+`delay` will wait the provided length in milliseconds before responding with what is given on the second (optional) argument. In the following example, the saga will take at least 10 seconds to complete since two consecutive delays are being waited on.
+
+```ts
+function* waitThreeSeconds(action, context) {
+    const {delay} = context.effects;
+
+    const thisIsTrue = yield delay(3000, true);
+    const thisIsIundefined = yield delay(7000);
+}
+```
 
 ## Recipes
 
