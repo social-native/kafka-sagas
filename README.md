@@ -306,7 +306,7 @@ function* dontWaitForPepperoniPizza(action, context) {
 }
 ```
 
-In the second example, from the moment `take` is called and onward, the first actiopn received from the `'PIZZA_CREATE_SUCCESS'` stream that matches the predicate is returned.
+In the second example, from the moment `take` is called and onward, the first action received from the `'PIZZA_CREATE_SUCCESS'` stream that matches the predicate is returned.
 
 ### callFn
 
