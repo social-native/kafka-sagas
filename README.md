@@ -241,7 +241,7 @@ function* createPizza(action, context) {
         /** Let consumers that care know we started work on this pizza */
         yield put('PIZZA_CREATE_STARTED', action.payload);
         /** `callFn` will execute the function provided and await its response if it is async */
-        const pizza = yield callFn(createPizza, action.payload.toppings);
+        const pizza = yield callFn(createPizza, [action.payload.toppings]);
         /** Success! send the pizza out on the "success" channel for consumers of that channel (topic) to see. */
         yield put('PIZZA_CREATE_SUCCESS', {pizza});
     } catch (error) {
