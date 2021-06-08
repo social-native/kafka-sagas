@@ -10,11 +10,17 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
   - [Effects](#effects)
     - [put](#put)
     - [actionChannel](#actionchannel)
+      - [Using a topic as input](#using-a-topic-as-input)
     - [take](#take)
+      - [Using an action channel as input](#using-an-action-channel-as-input)
+      - [Using a topic as input](#using-a-topic-as-input-1)
+      - [Using a topic + predicate as input](#using-a-topic--predicate-as-input)
     - [callFn](#callfn)
     - [all](#all)
     - [race](#race)
     - [delay](#delay)
+  - [Recipes](#recipes)
+    - [Communication with another saga (and timeout if it doesn't respond in time)](#communication-with-another-saga-and-timeout-if-it-doesnt-respond-in-time)
   - [Glossary](#glossary)
   - [Advanced](#advanced)
 
@@ -213,45 +219,11 @@ function* mySaga(action, context) {
 
 `actionChannel` can be given a stream to watch for messages. As messages arrive from that stream, it will add them to a buffer (which has FIFO queue semantics), until something comes along and pops the message off of the buffer. Action channels should be established before sending a message to some other saga in order to listen _before_ enqueuing work. Doing so ensures you will not miss the response. A typical example of kicking off another saga and waiting for it to respond:
 
+#### Using a topic as input
+
 ```ts
-function* enqueuePizza(action, context) {
-    const {actionChannel, race, take, put, delay} = context.effects;
+function* () {
 
-    const successChannel = yield actionChannel('PIZZA_CREATE_SUCCESS');
-    const failureChannel = yield actionChannel('PIZZA_CREATE_FAILED');
-
-    yield put('CREATE_PIZZA_BEGIN', {toppings: ['pepperonis']});
-
-    /**
-     * `race` will return the first effect to respond.
-     */
-    const {succeeded, failed, timedOut} = yield race({
-        /** `take` will pull the first action out of an action channel. If the channel hasn't buffered one yet, it will wait until it does. */
-        succeeded: take(successChannel),
-        failed: take(failureChannel),
-        /** `delay` will wait the given milliseconds and then respond with the second (optional) argument */
-        timedOut: delay(2000, true)
-    });
-}
-
-function* createPizza(action, context) {
-    const {callFn} = context.effects;
-
-    try {
-        /** Let consumers that care know we started work on this pizza */
-        yield put('PIZZA_CREATE_STARTED', action.payload);
-        /** `callFn` will execute the function provided and await its response if it is async */
-        const pizza = yield callFn(createPizza, [action.payload.toppings]);
-        /** Success! send the pizza out on the "success" channel for consumers of that channel (topic) to see. */
-        yield put('PIZZA_CREATE_SUCCESS', {pizza});
-    } catch (error) {
-        /** Failed! send the error out on the failed channel for consumers of that channel to see. */
-        yield put('PIZZA_CREATE_FAILED', {error});
-    }
-}
-
-async function createPizza(toppings) {
-    await axios.put('https://pizza.api', {toppings});
 }
 ```
 
@@ -274,7 +246,9 @@ function* waitForPepperoniPizza(action, context) {
 
 `take`, given either a stream or channel to watch, will give back the first message it receives on that channel.
 
-Example usage of `take` waiting for an action channel and then `put`ing into another one:
+#### Using an action channel as input
+
+Given an action channel, `take` will pull the oldest action out of the channel's buffer, or if one has not arrived yet, will wait until one does.
 
 ```ts
 function* waitForPepperoniPizza(action, context) {
@@ -293,7 +267,21 @@ function* waitForPepperoniPizza(action, context) {
 }
 ```
 
-Example usage of `take` waiting for _subsequent_ actions by not using an actionChannel:
+#### Using a topic as input
+
+Given a topic, `take` will immediately return the first action it receives from that topic, when it does, similar to when given an action channel. The difference between these two inputs is that an action channel allows listening for and buffering actions in the background while doing other things in the saga.
+
+```ts
+function* dontWaitForPepperoniPizza(action, context) {
+    const {payload: pizza} = yield take('PIZZA_CREATE_SUCCESS');
+
+    yield put('PEPPERONI_PIZZA_CREATE_SUCCESS', pizza);
+}
+```
+
+#### Using a topic + predicate as input
+
+Given a topic+predicate, `take` will behave the same as if it were given just a topic, however, it will only return once it sees an action that also matches the predicate, i.e., calling the provided function on the action returns `true`.
 
 ```ts
 function* dontWaitForPepperoniPizza(action, context) {
@@ -306,8 +294,6 @@ function* dontWaitForPepperoniPizza(action, context) {
 }
 ```
 
-In the second example, from the moment `take` is called and onward, the first action received from the `'PIZZA_CREATE_SUCCESS'` stream that matches the predicate is returned.
-
 ### callFn
 
 ### all
@@ -315,6 +301,84 @@ In the second example, from the moment `take` is called and onward, the first ac
 ### race
 
 ### delay
+
+## Recipes
+
+### Communication with another saga (and timeout if it doesn't respond in time)
+
+In the example, below, we perform an "actionchannel-put-take" cycle, where we:
+
+1. Open a channel to start listening for responses from another saga.
+2. Enqueue some work for that saga to begin.
+3. Race `take`s on the response channels and the delay effect to ensure we don't wait forever in case neither of the channels respond.
+
+**Why?**
+Typical Kafka brokers will assume a consumer is unhealthy if it does not commit a message within 30 seconds. This means that an entire transaction is beholden to the time limit of the topmost saga, in this case `enqueuePepperoniPizza`. In order to give ourselves some time to handle the timeout, we use the delay effect with a delay timeout of something ~10 seconds less than the timeout.
+
+In this scenario, you may want to initiate a rollback in case the saga you've kicked off is simply taking a long time.
+
+```ts
+/**
+ * A saga to enqueue creation of pepperoni pizza.
+ */
+function* enqueuePepperoniPizza(action, context) {
+    const {actionChannel, race, take, put, delay} = context.effects;
+
+    const successChannel = yield actionChannel('PIZZA_CREATE_SUCCESS');
+    const failureChannel = yield actionChannel('PIZZA_CREATE_FAILED');
+
+    yield put('CREATE_PIZZA_BEGIN', {toppings: ['pepperonis']});
+
+    /**
+     * `race` will return the first effect to respond.
+     */
+    const {succeeded, failed, timedOut} = yield race({
+        /** `take` will pull the first action out of an action channel. If the channel hasn't buffered one yet, it will wait until it does. */
+        succeeded: take(successChannel),
+        failed: take(failureChannel),
+        /** `delay` will wait the given milliseconds and then respond with the second (optional) argument */
+        timedOut: delay(20000, true)
+    });
+}
+
+/**
+ * A saga to create a pizza given a set of toppings.
+ */
+
+/**
+ * Extracts the returntype of a promise-returning function.
+ */
+import {Awaited} from 'types/promise';
+
+function* createPizza(action, context) {
+    const {callFn} = context.effects;
+
+    try {
+        /** Let consumers that care know we started work on this pizza */
+        yield put('PIZZA_CREATE_STARTED', action.payload);
+        /**
+         * `callFn` will execute the function provided and await its response if it is async.
+         *
+         * Since we are in a generator function and return types are nondeterministic, we must make type assertions ourselves.
+         */
+        const pizza: Awaited<typeof createPizza> = yield callFn(createPizza, [
+            action.payload.toppings
+        ]);
+        /** Success! send the pizza out on the "success" channel for consumers of that channel (topic) to see. */
+        yield put('PIZZA_CREATE_SUCCESS', {pizza});
+    } catch (error) {
+        /** Failed! send the error out on the failed channel for consumers of that channel to see. */
+        yield put('PIZZA_CREATE_FAILED', {error});
+    }
+}
+
+/**
+ * The function that actually creates a pizza.
+ */
+async function createPizza(toppings) {
+    return await axios.put('https://pizza.api', {toppings});
+}
+```
 
 ## Glossary
 
