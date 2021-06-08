@@ -7,7 +7,6 @@ Kafka-sagas is a package that allows you to use eerily similar semantics to [Red
 - [Kafka Sagas 🌼](#kafka-sagas-)
   - [API Reference](#api-reference)
   - [Usage](#usage)
-  - [Lifecycle](#lifecycle)
   - [Effects](#effects)
     - [put](#put)
     - [actionChannel](#actionchannel)
@@ -90,20 +89,6 @@ const saga = function*<Payload>(
 ```
 
 A saga is implemented using a [generator function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function*). This library attempts to bring an interface similar to AWS lambda, so you could think of sagas as analogous to `exports.handler`. As shown in the above example, two arguments are expected during each run of a saga (which would be executed per each message received on the input topic from kafka).
-
-## Lifecycle
-
-1. TopicSagaConsumer creates a KafkaConsumer using the provided configuration.
-2. TopicSagaConsumer creates an instance of `SagaRunner`, which is a class that can execute the saga to completion.
-3. SagaRunner iterates over each `yield` of the generator:
-
-```ts
-type Payload = {};
-
-function* mySaga(action, context) {
-    yield put();
-}
-```
 
 ## Effects
 
