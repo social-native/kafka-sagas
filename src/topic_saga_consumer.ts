@@ -59,7 +59,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         middlewares = [],
         consumerConfig = {
             /** How often should heartbeats be sent back to the broker? */
-            heartbeatInterval: 500,
+            heartbeatInterval: 3000,
 
             /** Allows main consumer and action channel consumers to create new topics. */
             allowAutoTopicCreation: false,
@@ -77,7 +77,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
              *
              * Providing -1 will allow a saga to run indefinitely.
              */
-            consumptionTimeoutMs: 30000,
+            consumptionTimeoutMs: 60000,
 
             /**
              * How long should the broker wait before responding in the case of too small a number of records to return?
@@ -111,12 +111,12 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             groupId: topic,
             allowAutoTopicCreation: false,
             retry: {retries: 0},
-            heartbeatInterval: 500,
+            heartbeatInterval: 3000,
             maxWaitTimeInMs: 100,
             ...kafkaConsumerConfig
         };
 
-        this.consumptionTimeoutMs = consumptionTimeoutMs || 30000;
+        this.consumptionTimeoutMs = consumptionTimeoutMs || 60000;
 
         this.producerConfig = {
             /** Allows producer to create new topics. */
@@ -232,18 +232,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                             }
                         }, this.consumerConfig.heartbeatInterval || 500);
 
-                        if (this.consumptionTimeoutMs === -1) {
-                            await this.eachMessage(runner, {topic, partition, message});
-                        } else {
-                            await Bluebird.resolve(
-                                this.eachMessage(runner, {topic, partition, message})
-                            ).timeout(
-                                this.consumptionTimeoutMs,
-                                new ConsumptionTimeoutError(
-                                    `Message consumption timed out after ${this.consumptionTimeoutMs} milliseconds.`
-                                )
-                            );
-                        }
+                        await this.eachMessage(runner, {topic, partition, message});
 
                         clearInterval(this.backgroundHeartbeat);
                         this.backgroundHeartbeat = undefined;
@@ -318,21 +307,28 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 }
             });
 
-            await runner.runSaga(
-                action,
-                {
-                    headers: parseHeaders(message.headers),
-                    ...externalContext,
-                    effects: new EffectBuilder(action.transaction_id),
-                    originalMessage: {
-                        key: message.key,
-                        value: message.value,
-                        offset: message.offset,
-                        timestamp: message.timestamp,
-                        partition
-                    }
-                },
-                this.saga
+            await Bluebird.resolve(
+                runner.runSaga(
+                    action,
+                    {
+                        headers: parseHeaders(message.headers),
+                        ...externalContext,
+                        effects: new EffectBuilder(action.transaction_id),
+                        originalMessage: {
+                            key: message.key,
+                            value: message.value,
+                            offset: message.offset,
+                            timestamp: message.timestamp,
+                            partition
+                        }
+                    },
+                    this.saga
+                )
+            ).timeout(
+                this.consumptionTimeoutMs,
+                new ConsumptionTimeoutError(
+                    `Message consumption timed out after ${this.consumptionTimeoutMs} milliseconds.`
+                )
             );
 
             this.eventEmitter.emit('consumed_message', {

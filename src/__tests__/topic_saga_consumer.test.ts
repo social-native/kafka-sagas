@@ -315,6 +315,6 @@ describe(TopicSagaConsumer.name, function() {
                 await consumer.disconnect();
             });
         },
-        DEFAULT_TEST_TIMEOUT * 3
+        DEFAULT_TEST_TIMEOUT * 5
     );
 });
