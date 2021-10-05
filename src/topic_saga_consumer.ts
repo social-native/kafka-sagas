@@ -1,8 +1,8 @@
 import {Kafka, Consumer, KafkaMessage, EachMessagePayload, ConsumerConfig} from 'kafkajs';
 import Bluebird from 'bluebird';
-import pino from 'pino';
 import EventEmitter from 'events';
 import TypedEmitter from 'typed-emitter';
+import pino from 'pino';
 
 import {EffectBuilder} from './effect_builder';
 import {ConsumerPool} from './consumer_pool';
@@ -12,18 +12,20 @@ import {SagaRunner} from './saga_runner';
 import {
     SagaContext,
     Saga,
-    ILoggerConfig,
     Middleware,
     IEffectDescription,
     IConsumptionEvent,
     SagaProducerConfig,
-    SagaConsumerConfig
+    SagaConsumerConfig,
+    ICompensationConfig,
+    Logger
 } from './types';
-import {getLoggerFromConfig} from './logger';
 import {parseHeaders} from './parse_headers';
 import {TopicAdministrator} from './topic_administrator';
 import {isKafkaJSProtocolError} from './type_guard';
 import {ConsumptionTimeoutError} from './consumption_timeout_error';
+import {Compensator} from './compensator';
+import {ICompensationEffectDescription} from '.';
 
 export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Record<string, any>> {
     public eventEmitter = new EventEmitter() as TypedEmitter<{
@@ -34,13 +36,15 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
     }>;
 
     protected consumer: Consumer;
+    protected compensator: Compensator<SagaContext<Context>>;
     protected saga: Saga<Payload, SagaContext<Context>>;
     protected topic: string;
     protected getContext: (message: KafkaMessage) => Promise<Context>;
-    protected logger: ReturnType<typeof pino>;
+    protected logger: Logger;
     protected middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
     protected consumerConfig: ConsumerConfig;
     protected producerConfig: SagaProducerConfig;
+    protected compensationConfig: ICompensationConfig;
     protected consumptionTimeoutMs: number;
 
     protected topicAdminstrator: TopicAdministrator;
@@ -56,8 +60,11 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         getContext = async () => {
             return {} as Context;
         },
-        loggerConfig,
+        logger,
         middlewares = [],
+        compensationConfig = {
+            async: false
+        },
         consumerConfig = {
             /** How often should heartbeats be sent back to the broker? */
             heartbeatInterval: 3000,
@@ -101,10 +108,11 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         saga: Saga<Payload, SagaContext<Context>>;
         consumerConfig?: Partial<SagaConsumerConfig>;
         producerConfig?: Partial<SagaProducerConfig>;
+        compensationConfig?: Partial<ICompensationConfig>;
         getContext?: (message: KafkaMessage) => Promise<Context>;
         topicAdministrator?: TopicAdministrator;
-        loggerConfig?: ILoggerConfig;
         middlewares?: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
+        logger?: Logger;
     }) {
         const {consumptionTimeoutMs, ...kafkaConsumerConfig} = consumerConfig;
 
@@ -115,6 +123,11 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             heartbeatInterval: 3000,
             maxWaitTimeInMs: 100,
             ...kafkaConsumerConfig
+        };
+
+        this.compensationConfig = {
+            async: false,
+            ...compensationConfig
         };
 
         this.consumptionTimeoutMs = consumptionTimeoutMs || 60000;
@@ -141,9 +154,17 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         this.getContext = getContext;
         this.middlewares = middlewares;
 
-        this.logger = getLoggerFromConfig(loggerConfig).child({
-            package: 'snpkg-snapi-kafka-sagas'
-        });
+        this.logger = logger
+            ? logger.child({
+                  kafka_saga: true,
+                  topic
+              })
+            : pino({
+                  base: {
+                      kafka_saga: true,
+                      topic
+                  }
+              });
 
         this.topicAdminstrator = topicAdministrator || new TopicAdministrator(kafka);
 
@@ -161,6 +182,11 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         );
 
         this.throttledProducer = new ThrottledProducer(kafka, this.producerConfig, this.logger);
+
+        this.compensator = new Compensator<SagaContext<Context>>(
+            this.consumerPool,
+            this.throttledProducer
+        );
 
         this.run = this.run.bind(this);
         this.disconnect = this.disconnect.bind(this);
@@ -298,13 +324,38 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             'Beginning consumption of message'
         );
 
-        try {
-            const externalContext = await this.getContext(message);
+        const externalContext = await this.getContext(message);
 
+        /**
+         * Do not include `addCompensation` hook by default to prevent
+         * adding compensation while already compensating, creating
+         * undefined behavior.
+         */
+        const context: SagaContext<Context> = {
+            ...externalContext,
+            headers: parseHeaders(message.headers),
+            effects: new EffectBuilder(action.transaction_id),
+            originalMessage: {
+                key: message.key,
+                value: message.value,
+                offset: message.offset,
+                timestamp: message.timestamp,
+                partition
+            }
+        };
+
+        /** Compensation is per each distinct workload. */
+        // tslint:disable-next-line: max-line-length
+        const compensationId = `${action.topic}-part_${partition}-offset_${message.offset}-trx_${action.transaction_id}`;
+
+        this.compensator.initializeCompensationChain(compensationId);
+        const addCompensation = (effect: ICompensationEffectDescription<any>) =>
+            this.compensator.addCompensation(compensationId, effect);
+
+        try {
             this.eventEmitter.emit('started_saga', {
                 headers: parseHeaders(message.headers),
                 ...externalContext,
-                effects: new EffectBuilder(action.transaction_id),
                 originalMessage: {
                     key: message.key,
                     value: message.value,
@@ -318,16 +369,8 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 runner.runSaga(
                     action,
                     {
-                        headers: parseHeaders(message.headers),
-                        ...externalContext,
-                        effects: new EffectBuilder(action.transaction_id),
-                        originalMessage: {
-                            key: message.key,
-                            value: message.value,
-                            offset: message.offset,
-                            timestamp: message.timestamp,
-                            partition
-                        }
+                        ...context,
+                        addCompensation
                     },
                     this.saga
                 );
@@ -342,6 +385,8 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             } else {
                 await task();
             }
+
+            this.compensator.removeCompensationChain(compensationId);
 
             this.eventEmitter.emit('consumed_message', {
                 partition,
@@ -362,6 +407,9 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             );
         } catch (error) {
             this.consumerPool.stopTransaction(action.transaction_id);
+
+            await this.compensator.compensate(compensationId, context);
+
             this.logger.error(
                 {
                     transaction_id: action.transaction_id,

@@ -10,9 +10,14 @@ import {
     ICombinatatorEffectDescription,
     IPredicateRecord,
     IDelayEffectDescription,
-    IKafkaJSProtocolError
+    ICompensationEffectDescription,
+    IKafkaJSProtocolError,
+    ICompensationPlan,
+    ImmediateCompensationPlan,
+    KafkaSagaCompensationPlan
 } from './types';
 import {EffectDescriptionKind} from './enums';
+import {CompensationPlanKind} from '.';
 
 export function isTransactionMessage<Payload>(
     messageValue: IAction | any
@@ -30,6 +35,12 @@ export function isPutEffectDescription<Payload = any>(
     effectDescription: IEffectDescription
 ): effectDescription is IPutEffectDescription<Payload> {
     return effectDescription.kind === EffectDescriptionKind.PUT;
+}
+
+export function isCompensationEffectDescription<Payload = any>(
+    effectDescription: IEffectDescription
+): effectDescription is ICompensationEffectDescription<Payload> {
+    return effectDescription.kind === EffectDescriptionKind.ADD_COMPENSATION;
 }
 
 export function isCallEffectDescription(
@@ -117,4 +128,16 @@ export function isGenerator(possibleGenerator: any): possibleGenerator is Genera
 
 export function isKafkaJSProtocolError(error: unknown): error is IKafkaJSProtocolError {
     return error && typeof error === 'object' && (error as any).name === 'KafkaJSProtocolError';
+}
+
+export function isImmediateCompensationPlan<Payload = unknown>(
+    plan: ICompensationPlan<Payload>
+): plan is ImmediateCompensationPlan<Payload> {
+    return plan.kind === CompensationPlanKind.IMMEDIATE;
+}
+
+export function isKafkaSagaCompensationPlan<Payload = unknown>(
+    plan: ICompensationPlan<Payload>
+): plan is KafkaSagaCompensationPlan<Payload> {
+    return plan.kind === CompensationPlanKind.KAFKA_SAGA;
 }

@@ -4,6 +4,7 @@ import {IHeaders, ProducerRecord, KafkaMessage, ConsumerConfig, ProducerConfig} 
 import {EffectBuilder} from './effect_builder';
 import {SagaRunner} from './saga_runner';
 import {EffectDescriptionKind} from './enums';
+import {CompensationPlanKind} from '.';
 
 /**
  * Aliases
@@ -48,8 +49,13 @@ export type AllCombinatorEffect<Payload> = (
     effects: ICombinatatorEffectDescription<IAction<Payload>>['effects']
 ) => ICombinatatorEffectDescription<IAction<Payload>>;
 
-// Effect Components
+export type CompensationEffect<Payload, Plan extends ICompensationPlan<Payload>> = (
+    plan: Plan
+) => ICompensationEffectDescription<Payload, Plan>;
 
+/**
+ * Effect Components
+ */
 export interface IPredicateRecord<Action extends IAction> {
     pattern: ActionChannelInput<Action>;
     predicate(action: Action): boolean;
@@ -63,6 +69,27 @@ export type ActionChannelInput<Action extends IAction> =
 export type TakePattern<Action extends IAction = IAction> =
     | ActionChannelInput<Action>
     | IActionChannelEffectDescription<Action>;
+
+export interface ICompensationPlan<Payload extends DefaultPayload = DefaultPayload> {
+    kind: CompensationPlanKind;
+    payload: Payload;
+}
+
+/**
+ * An action in the current transaction will be sent to some other kafka saga via at the topic provided.
+ */
+export type KafkaSagaCompensationPlan<Payload> = Omit<ICompensationPlan<Payload>, 'kind'> & {
+    kind: CompensationPlanKind.KAFKA_SAGA;
+    topic: string;
+};
+
+/**
+ * The compensation will occur immediately after catching.
+ */
+export type ImmediateCompensationPlan<Payload> = Omit<ICompensationPlan<Payload>, 'kind'> & {
+    kind: CompensationPlanKind.IMMEDIATE;
+    handler: (payload: Payload) => void | Promise<void> | Generator<IEffectDescription, void, any>;
+};
 
 /**
  * Buffers
@@ -139,6 +166,14 @@ export interface ICombinatatorEffectDescription<Action extends IAction> extends 
     kind: EffectDescriptionKind.COMBINATOR;
 }
 
+export interface ICompensationEffectDescription<
+    Payload,
+    Plan extends ICompensationPlan<Payload> = ICompensationPlan<Payload>
+> extends IEffectDescription {
+    plan: Plan;
+    kind: EffectDescriptionKind.ADD_COMPENSATION;
+}
+
 export interface IEffectDescription {
     transactionId: string;
     kind: EffectDescriptionKind;
@@ -176,6 +211,7 @@ export interface IBaseSagaContext {
         partition: number;
         timestamp: KafkaMessage['timestamp'];
     };
+    addCompensation?: (effect: ICompensationEffectDescription<any>) => any;
 }
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;
@@ -206,10 +242,28 @@ export type PromiseResolver<ResolvedValue> = (
 
 export type ActionObserver<Action extends IAction> = (action: Action) => void;
 
-export interface ILoggerConfig {
-    logOptions?: pino.LoggerOptions;
-    logger?: ReturnType<typeof pino>;
+export interface ILogFn {
+    (msg: string, ...args: any[]): void;
+    (obj: object, msg?: string, ...args: any[]): void;
 }
+
+// tslint:disable-next-line: interface-over-type-literal
+export type Logger = {
+    child: (bindings: {
+        level?: LogLevel | string;
+        serializers?: {[key: string]: LogSerializerFn};
+        [key: string]: any;
+    }) => Logger;
+    fatal: ILogFn;
+    error: ILogFn;
+    warn: ILogFn;
+    info: ILogFn;
+    debug: ILogFn;
+    trace: ILogFn;
+};
+
+export type LogSerializerFn = (value: any) => any;
+export type LogLevel = 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace';
 
 /**
  * Actions
@@ -246,6 +300,14 @@ export type SagaProducerConfig = Omit<ProducerConfig, 'maxInFlightRequests' | 'i
     maxOutgoingBatchSize: number;
     flushIntervalMs: number;
 };
+
+export interface ICompensationConfig {
+    /**
+     * If set to true, all compensation will occur in parallel.
+     * Otherwise, compensation occurs from right to left.
+     */
+    async: boolean;
+}
 
 export interface IConsumptionEvent<Payload> {
     partition: number;

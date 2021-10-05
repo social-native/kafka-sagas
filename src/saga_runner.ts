@@ -20,7 +20,8 @@ import {
     isTakeActionChannelEffectDescription,
     isEffectCombinatorDescription,
     isDelayEffectDescription,
-    isGenerator
+    isGenerator,
+    isCompensationEffectDescription
 } from './type_guard';
 
 export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
@@ -30,8 +31,8 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
     ) => Promise<any>;
 
     constructor(
-        private consumerPool: ConsumerPool,
-        private throttledProducer: ThrottledProducer,
+        protected consumerPool: ConsumerPool,
+        protected throttledProducer: ThrottledProducer,
         middlewares: Array<Middleware<IEffectDescription, Context>> = []
     ) {
         const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
@@ -153,9 +154,20 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
 
             return result;
         }
+
+        if (isCompensationEffectDescription(effectDescription)) {
+            if (!context.addCompensation) {
+                throw new Error(
+                    'Trying to add compensation but no callback was given to register compensation plans.'
+                );
+            }
+
+            context.addCompensation(effectDescription);
+            return;
+        }
     };
 
-    protected async runGeneratorFsm<Returned = any | undefined>(
+    public async runGeneratorFsm<Returned = any | undefined>(
         machine: Generator,
         context: Context,
         {

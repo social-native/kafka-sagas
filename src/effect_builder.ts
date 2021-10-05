@@ -11,7 +11,9 @@ import {
     ITakeActionChannelEffectDescription,
     TakePattern,
     IActionChannelEffectDescription,
-    DelayEffect
+    DelayEffect,
+    ICompensationPlan,
+    CompensationEffect
 } from './types';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 
@@ -33,6 +35,16 @@ export class EffectBuilder {
         this.all = this.all.bind(this);
         this.race = this.race.bind(this);
     }
+
+    public addCompensation = <Payload, Plan extends ICompensationPlan<Payload>>(
+        plan: Plan
+    ): ReturnType<CompensationEffect<Payload, Plan>> => {
+        return {
+            kind: EffectDescriptionKind.ADD_COMPENSATION,
+            plan,
+            transactionId: this.transactionId
+        };
+    };
 
     public put = <Payload>(
         ...args: Parameters<PutEffect<Payload>>

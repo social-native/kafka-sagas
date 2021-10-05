@@ -1,9 +1,9 @@
 import {Producer, Kafka, CompressionTypes} from 'kafkajs';
-import {IAction, IQueuedRecord, SagaProducerConfig} from './types';
+import pino from 'pino';
+import {IAction, IQueuedRecord, SagaProducerConfig, Logger} from './types';
 import {createActionMessage} from './create_action_message';
 import {isKafkaJSProtocolError} from './type_guard';
 import Bluebird from 'bluebird';
-import pino from 'pino';
 import uuid from 'uuid';
 
 export class ThrottledProducer {
@@ -14,7 +14,7 @@ export class ThrottledProducer {
     private intervalTimeout: NodeJS.Timeout;
     private recordQueue: IQueuedRecord[] = [];
     private isFlushing = false;
-    private logger: pino.Logger;
+    private logger: Logger;
 
     constructor(
         protected kafka: Kafka,
@@ -22,11 +22,12 @@ export class ThrottledProducer {
             maxOutgoingBatchSize: 10000,
             flushIntervalMs: 1000
         },
-        logger?: pino.Logger
+        logger?: Logger
     ) {
         this.logger = logger
             ? logger.child({class: 'KafkaSagasThrottledProducer'})
             : pino().child({class: 'KafkaSagasThrottledProducer'});
+
         this.createProducer();
     }
 
