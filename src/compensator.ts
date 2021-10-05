@@ -70,6 +70,7 @@ export class Compensator<Context extends IBaseSagaContext> {
         if (this.config.async) {
             /** Since it's in async mode, order doesn't matter. */
             await Promise.all(chain.map(effect => this.executeCompensationEffect(effect, context)));
+            return;
         }
 
         /**
