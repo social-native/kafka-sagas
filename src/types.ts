@@ -1,5 +1,3 @@
-import pino from 'pino';
-
 import {IHeaders, ProducerRecord, KafkaMessage, ConsumerConfig, ProducerConfig} from 'kafkajs';
 import {EffectBuilder} from './effect_builder';
 import {SagaRunner} from './saga_runner';
