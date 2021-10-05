@@ -48,6 +48,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
     protected throttledProducer: ThrottledProducer;
     protected backgroundHeartbeat?: NodeJS.Timeout;
 
+    // tslint:disable-next-line: cyclomatic-complexity
     constructor({
         kafka,
         topic,
@@ -117,6 +118,12 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         };
 
         this.consumptionTimeoutMs = consumptionTimeoutMs || 60000;
+
+        if (this.consumptionTimeoutMs !== -1 && this.consumptionTimeoutMs < 0) {
+            throw new Error(
+                `Invalid consumptionTimeoutMs provided: ${consumptionTimeoutMs}. Must be either -1 or a positive integer.`
+            );
+        }
 
         this.producerConfig = {
             /** Allows producer to create new topics. */
@@ -307,7 +314,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 }
             });
 
-            await Bluebird.resolve(
+            const task = () =>
                 runner.runSaga(
                     action,
                     {
@@ -323,13 +330,18 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                         }
                     },
                     this.saga
-                )
-            ).timeout(
-                this.consumptionTimeoutMs,
-                new ConsumptionTimeoutError(
-                    `Message consumption timed out after ${this.consumptionTimeoutMs} milliseconds.`
-                )
-            );
+                );
+
+            if (this.consumptionTimeoutMs !== -1) {
+                await Bluebird.resolve(task()).timeout(
+                    this.consumptionTimeoutMs,
+                    new ConsumptionTimeoutError(
+                        `Message consumption timed out after ${this.consumptionTimeoutMs} milliseconds.`
+                    )
+                );
+            } else {
+                await task();
+            }
 
             this.eventEmitter.emit('consumed_message', {
                 partition,

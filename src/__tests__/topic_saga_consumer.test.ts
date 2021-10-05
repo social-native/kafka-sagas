@@ -312,5 +312,5 @@ describe(TopicSagaConsumer.name, function() {
 
             await consumer.disconnect();
         });
-    }, 100000);
+    }, 50000);
 });
