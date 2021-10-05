@@ -257,64 +257,60 @@ describe(TopicSagaConsumer.name, function() {
         DEFAULT_TEST_TIMEOUT * 2
     );
 
-    it(
-        'correctly handles a long/indefinitely running saga',
-        async function() {
-            const consumptionEvents: Array<IConsumptionEvent<unknown>> = [];
+    it('correctly handles a long/indefinitely running saga', async function() {
+        const consumptionEvents: Array<IConsumptionEvent<unknown>> = [];
 
-            await withTopicCleanup(
-                [uuid.v4()],
-                false
-            )(async function([topic]) {
-                const consumer = new TopicSagaConsumer<DefaultPayload>({
-                    kafka,
-                    *saga(_, {effects: {delay}}) {
-                        yield delay(40000);
-                    },
-                    topic,
-                    topicAdministrator: new TopicAdministrator(kafka, {numPartitions: 10}),
-                    consumerConfig: {
-                        heartbeatInterval: 3000,
-                        consumptionTimeoutMs: -1
-                    }
-                });
-
-                consumer.eventEmitter.on('consumed_message', event => {
-                    consumptionEvents.push(event);
-                });
-
-                await consumer.run();
-
-                const producer = kafka.producer();
-                await producer.connect();
-
-                await producer.send({
-                    topic,
-                    messages: [
-                        createActionMessage({
-                            action: {
-                                transaction_id: uuid.v4(),
-                                payload: {id: uuid.v4()},
-                                topic
-                            }
-                        })
-                    ]
-                });
-
-                await producer.disconnect();
-
-                await new Bluebird(resolve => {
-                    const intervalId = setInterval(() => {
-                        if (consumptionEvents.length) {
-                            clearInterval(intervalId);
-                            resolve();
-                        }
-                    }, 1000);
-                });
-
-                await consumer.disconnect();
+        await withTopicCleanup(
+            [uuid.v4()],
+            false
+        )(async function([topic]) {
+            const consumer = new TopicSagaConsumer<DefaultPayload>({
+                kafka,
+                *saga(_, {effects: {delay}}) {
+                    yield delay(40000);
+                },
+                topic,
+                topicAdministrator: new TopicAdministrator(kafka, {numPartitions: 10}),
+                consumerConfig: {
+                    heartbeatInterval: 3000,
+                    consumptionTimeoutMs: -1
+                }
             });
-        },
-        DEFAULT_TEST_TIMEOUT * 3
-    );
+
+            consumer.eventEmitter.on('consumed_message', event => {
+                consumptionEvents.push(event);
+            });
+
+            await consumer.run();
+
+            const producer = kafka.producer();
+            await producer.connect();
+
+            await producer.send({
+                topic,
+                messages: [
+                    createActionMessage({
+                        action: {
+                            transaction_id: uuid.v4(),
+                            payload: {id: uuid.v4()},
+                            topic
+                        }
+                    })
+                ]
+            });
+
+            await producer.disconnect();
+
+            await new Bluebird(resolve => {
+                const intervalId = setInterval(() => {
+                    if (consumptionEvents.length) {
+                        clearInterval(intervalId);
+                        resolve();
+                    }
+                }, 1000);
+            });
+
+            await consumer.disconnect();
+        });
+    }, 50000);
 });

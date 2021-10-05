@@ -61,7 +61,7 @@ describe(SagaRunner.name, function() {
                                 }
                             ]);
 
-                            await Bluebird.delay(300);
+                            await Bluebird.delay(2000);
 
                             expect(await channel.buffer.take()).toMatchSnapshot();
 
@@ -96,7 +96,7 @@ describe(SagaRunner.name, function() {
                                 }
                             ]);
 
-                            await Bluebird.delay(300);
+                            await Bluebird.delay(2000);
 
                             expect(await buffer.take()).toMatchSnapshot();
 
