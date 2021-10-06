@@ -44,7 +44,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
     protected middlewares: Array<Middleware<IEffectDescription, SagaContext<Context>>>;
     protected consumerConfig: ConsumerConfig;
     protected producerConfig: SagaProducerConfig;
-    protected compensationConfig: ICompensationConfig;
     protected consumptionTimeoutMs: number;
 
     protected topicAdminstrator: TopicAdministrator;
@@ -62,9 +61,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         },
         logger,
         middlewares = [],
-        compensationConfig = {
-            async: false
-        },
         consumerConfig = {
             /** How often should heartbeats be sent back to the broker? */
             heartbeatInterval: 3000,
@@ -123,11 +119,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             heartbeatInterval: 3000,
             maxWaitTimeInMs: 100,
             ...kafkaConsumerConfig
-        };
-
-        this.compensationConfig = {
-            async: false,
-            ...compensationConfig
         };
 
         this.consumptionTimeoutMs = consumptionTimeoutMs || 60000;
@@ -349,8 +340,6 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
         const compensationId = `${action.topic}-part_${partition}-offset_${message.offset}-trx_${action.transaction_id}`;
 
         this.compensator.initializeCompensationChain(compensationId);
-        const addCompensation = (effect: ICompensationEffectDescription<any>) =>
-            this.compensator.addCompensation(compensationId, effect);
 
         try {
             this.eventEmitter.emit('started_saga', {
@@ -365,26 +354,58 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                 }
             });
 
-            const task = () =>
-                runner.runSaga(
-                    action,
-                    {
-                        ...context,
-                        addCompensation
-                    },
-                    this.saga
-                );
+            let didCompleteSaga: boolean = false;
+            let isCompensating: boolean = false;
+
+            const tasks: Array<() => Promise<void>> = [
+                async () => {
+                    runner.runSaga(
+                        action,
+                        {
+                            ...context,
+                            compensation: {
+                                add: (effect: ICompensationEffectDescription<any>) =>
+                                    this.compensator.addCompensation(compensationId, effect),
+                                runAll: async (
+                                    config: ICompensationConfig = {
+                                        dontReverse: false,
+                                        parallel: false
+                                    }
+                                ) => {
+                                    isCompensating = true;
+
+                                    await this.compensator.compensate(
+                                        compensationId,
+                                        config,
+                                        context
+                                    );
+
+                                    // Reset chain to an empty state.
+                                    this.compensator.initializeCompensationChain(compensationId);
+                                },
+                                viewChain: () => this.compensator.getChain(compensationId)
+                            }
+                        },
+                        this.saga
+                    );
+
+                    didCompleteSaga = true;
+                }
+            ];
 
             if (this.consumptionTimeoutMs !== -1) {
-                await Bluebird.resolve(task()).timeout(
-                    this.consumptionTimeoutMs,
-                    new ConsumptionTimeoutError(
-                        `Message consumption timed out after ${this.consumptionTimeoutMs} milliseconds.`
-                    )
-                );
-            } else {
-                await task();
+                tasks.push(async () => {
+                    await Bluebird.delay(this.consumptionTimeoutMs);
+
+                    if (!didCompleteSaga && !isCompensating) {
+                        throw new ConsumptionTimeoutError(
+                            `Message consumption timed out after ${this.consumptionTimeoutMs} milliseconds.`
+                        );
+                    }
+                });
             }
+
+            await Bluebird.race(tasks.map(task => task()));
 
             this.compensator.removeCompensationChain(compensationId);
 
@@ -407,8 +428,7 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
             );
         } catch (error) {
             this.consumerPool.stopTransaction(action.transaction_id);
-
-            await this.compensator.compensate(compensationId, context);
+            this.compensator.removeCompensationChain(compensationId);
 
             this.logger.error(
                 {

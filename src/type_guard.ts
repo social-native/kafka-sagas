@@ -14,10 +14,10 @@ import {
     IKafkaJSProtocolError,
     ICompensationPlan,
     ImmediateCompensationPlan,
-    KafkaSagaCompensationPlan
+    KafkaSagaCompensationPlan,
+    IRunCompensationChainEffectDescription
 } from './types';
-import {EffectDescriptionKind} from './enums';
-import {CompensationPlanKind} from '.';
+import {CompensationPlanKind, EffectDescriptionKind} from './enums';
 
 export function isTransactionMessage<Payload>(
     messageValue: IAction | any
@@ -41,6 +41,12 @@ export function isCompensationEffectDescription<Payload = any>(
     effectDescription: IEffectDescription
 ): effectDescription is ICompensationEffectDescription<Payload> {
     return effectDescription.kind === EffectDescriptionKind.ADD_COMPENSATION;
+}
+
+export function isRunCompensationChainEffectDescription(
+    effectDescription: IEffectDescription
+): effectDescription is IRunCompensationChainEffectDescription {
+    return effectDescription.kind === EffectDescriptionKind.RUN_COMPENSATION;
 }
 
 export function isCallEffectDescription(

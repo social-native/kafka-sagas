@@ -51,6 +51,10 @@ export type CompensationEffect<Payload, Plan extends ICompensationPlan<Payload>>
     plan: Plan
 ) => ICompensationEffectDescription<Payload, Plan>;
 
+export type RunCompensationEffect = (
+    config?: ICompensationConfig
+) => IRunCompensationChainEffectDescription;
+
 /**
  * Effect Components
  */
@@ -172,6 +176,11 @@ export interface ICompensationEffectDescription<
     kind: EffectDescriptionKind.ADD_COMPENSATION;
 }
 
+export interface IRunCompensationChainEffectDescription extends IEffectDescription {
+    config: ICompensationConfig;
+    kind: EffectDescriptionKind.RUN_COMPENSATION;
+}
+
 export interface IEffectDescription {
     transactionId: string;
     kind: EffectDescriptionKind;
@@ -209,7 +218,11 @@ export interface IBaseSagaContext {
         partition: number;
         timestamp: KafkaMessage['timestamp'];
     };
-    addCompensation?: (effect: ICompensationEffectDescription<any>) => any;
+    compensation?: {
+        add: (effect: ICompensationEffectDescription<any>) => any;
+        runAll: (config: ICompensationConfig) => Promise<void>;
+        viewChain: () => Array<ICompensationEffectDescription<any>>;
+    };
 }
 
 export type SagaContext<Extension = Record<string, any>> = IBaseSagaContext & Extension;
@@ -304,7 +317,12 @@ export interface ICompensationConfig {
      * If set to true, all compensation will occur in parallel.
      * Otherwise, compensation occurs from right to left.
      */
-    async: boolean;
+    parallel: boolean;
+
+    /**
+     * Compensation runs in reverse. If this is set to true, it will run from beginning to end instead.
+     */
+    dontReverse: boolean;
 }
 
 export interface IConsumptionEvent<Payload> {

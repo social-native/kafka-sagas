@@ -13,7 +13,6 @@ import {ConsumerPool, IBaseSagaContext, ICompensationPlan, SagaRunner} from '.';
 
 export class Compensator<Context extends IBaseSagaContext> {
     protected sagaRunner: SagaRunner<any, Context>;
-    protected config: ICompensationConfig;
     protected compensationChains: Map<
         string,
         Array<
@@ -27,14 +26,8 @@ export class Compensator<Context extends IBaseSagaContext> {
     constructor(
         protected consumerPool: ConsumerPool,
         protected producer: ThrottledProducer,
-        config: Partial<ICompensationConfig> = {async: false},
         logger?: Logger
     ) {
-        this.config = {
-            async: false,
-            ...config
-        };
-
         this.compensationChains = new Map();
 
         this.logger = logger
@@ -59,7 +52,8 @@ export class Compensator<Context extends IBaseSagaContext> {
         this.logger.debug({id}, 'Added compensation to chain');
     }
 
-    public async compensate(id: string, context: Context) {
+    // tslint:disable-next-line: cyclomatic-complexity
+    public async compensate(id: string, config: ICompensationConfig, context: Context) {
         const chain = this.compensationChains.get(id);
 
         if (!chain || !chain.length) {
@@ -67,7 +61,7 @@ export class Compensator<Context extends IBaseSagaContext> {
             return;
         }
 
-        if (this.config.async) {
+        if (config.parallel) {
             /** Since it's in async mode, order doesn't matter. */
             await Promise.all(chain.map(effect => this.executeCompensationEffect(effect, context)));
             return;
@@ -77,11 +71,31 @@ export class Compensator<Context extends IBaseSagaContext> {
          * Create a copy of `chain` and reverse that
          * since `Array.reverse` is destructive.
          */
-        const reversed = [...chain].reverse();
+        const chainToRun = config.dontReverse ? chain : [...chain].reverse();
 
-        for (const effect of reversed) {
+        for (const effect of chainToRun) {
             await this.executeCompensationEffect(effect, context);
         }
+    }
+
+    public getChain(
+        id: string
+    ): ReadonlyArray<
+        ICompensationEffectDescription<any, any> & {
+            headers?: Record<keyof IHeaders, string | undefined>;
+        }
+    > {
+        const chain = this.compensationChains.get(id);
+
+        if (!chain) {
+            return [];
+        }
+
+        const readOnlyChain: ReadonlyArray<ICompensationEffectDescription<any, any> & {
+            headers?: Record<keyof IHeaders, string | undefined>;
+        }> = [...chain];
+
+        return readOnlyChain;
     }
 
     public removeCompensationChain(id: string) {

@@ -21,7 +21,8 @@ import {
     isEffectCombinatorDescription,
     isDelayEffectDescription,
     isGenerator,
-    isCompensationEffectDescription
+    isCompensationEffectDescription,
+    isRunCompensationChainEffectDescription
 } from './type_guard';
 
 export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
@@ -156,14 +157,24 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
         }
 
         if (isCompensationEffectDescription(effectDescription)) {
-            if (!context.addCompensation) {
+            if (!context.compensation) {
                 throw new Error(
-                    'Trying to add compensation but no callback was given to register compensation plans.'
+                    'Trying to add compensation but compensation is not available to this context.'
                 );
             }
 
-            context.addCompensation(effectDescription);
+            context.compensation.add(effectDescription);
             return;
+        }
+
+        if (isRunCompensationChainEffectDescription(effectDescription)) {
+            if (!context.compensation) {
+                throw new Error(
+                    'Trying to run compensation chain but compensation is not available to this context.'
+                );
+            }
+
+            await context.compensation.runAll(effectDescription.config);
         }
     };
 
