@@ -7,6 +7,5 @@ module.exports = {
     moduleFileExtensions: ['ts', 'js', 'json'],
     modulePaths: ['<rootDir>/src'],
     testRegex: '(/__tests__/.*|(\\.|/))test.ts?$',
-    verbose: false,
-    setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts']
+    verbose: false
 };
