@@ -123,7 +123,7 @@ export class Compensator<Context extends IBaseSagaContext> {
 
         if (isKafkaSagaCompensationPlan(plan)) {
             await this.producer.connect();
-            await this.producer.putAction<IAction<Payload>>({
+            await this.producer.putAction<IAction<Payload | undefined>>({
                 topic: plan.topic,
                 payload: plan.payload,
                 transaction_id: transactionId,

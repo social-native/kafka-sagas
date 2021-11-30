@@ -74,7 +74,7 @@ export type TakePattern<Action extends IAction = IAction> =
 
 export interface ICompensationPlan<Payload extends DefaultPayload = DefaultPayload> {
     kind: CompensationPlanKind;
-    payload: Payload;
+    payload?: Payload;
 }
 
 /**
@@ -90,7 +90,7 @@ export type KafkaSagaCompensationPlan<Payload> = Omit<ICompensationPlan<Payload>
  */
 export type ImmediateCompensationPlan<Payload> = Omit<ICompensationPlan<Payload>, 'kind'> & {
     kind: CompensationPlanKind.IMMEDIATE;
-    handler: (payload: Payload) => void | Promise<void> | Generator<IEffectDescription, void, any>;
+    handler: (payload?: Payload) => void | Promise<void> | Generator<IEffectDescription, void, any>;
 };
 
 /**

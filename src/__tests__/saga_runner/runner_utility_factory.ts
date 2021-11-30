@@ -3,6 +3,8 @@ import {kafka} from '../test_clients';
 import {ThrottledProducer} from '../../throttled_producer';
 import {EffectBuilder} from '../../effect_builder';
 import {SagaRunner} from '../../saga_runner';
+import {Compensator} from '../../compensator';
+import {ICompensationConfig, ICompensationEffectDescription} from '../..';
 
 export async function runnerUtilityFactory() {
     const transactionId = 'static-transaction-id';
@@ -13,8 +15,10 @@ export async function runnerUtilityFactory() {
     consumerPool.startTransaction(transactionId);
     await throttledProducer.connect();
 
-    const runner = new SagaRunner(consumerPool, throttledProducer);
+    const runner = new SagaRunner<unknown, any>(consumerPool, throttledProducer);
     const effectBuilder = new EffectBuilder(transactionId);
+    const compensator = new Compensator(consumerPool, throttledProducer);
+    const compensationId = 'static-compensation-id';
 
     return {
         transactionId,
@@ -35,6 +39,33 @@ export async function runnerUtilityFactory() {
                 offset: '1',
                 partition: 1,
                 timestamp: (new Date().valueOf() / 1000).toString()
+            },
+            compensation: {
+                add: (effect: ICompensationEffectDescription<any>) =>
+                    compensator.addCompensation(compensationId, effect),
+                runAll: async (
+                    config: ICompensationConfig = {
+                        dontReverse: false,
+                        parallel: false
+                    }
+                ) => {
+                    await compensator.compensate(compensationId, config, {
+                        effects: effectBuilder,
+                        headers: {},
+                        originalMessage: {
+                            key: Buffer.from('key'),
+                            value: Buffer.from('value'),
+                            offset: '1',
+                            partition: 1,
+                            timestamp: (new Date().valueOf() / 1000).toString()
+                        }
+                    });
+
+                    // Reset chain to an empty state.
+                    compensator.initializeCompensationChain(compensationId);
+                },
+                clearAll: () => compensator.initializeCompensationChain(compensationId),
+                viewChain: () => compensator.getChain(compensationId)
             }
         },
         async closePools() {
