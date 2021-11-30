@@ -95,7 +95,7 @@ export class Compensator<Context extends IBaseSagaContext> {
             headers?: Record<keyof IHeaders, string | undefined>;
         }> = [...chain];
 
-        return readOnlyChain;
+        return Object.freeze(readOnlyChain);
     }
 
     public removeCompensationChain(id: string) {
