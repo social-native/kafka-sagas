@@ -23,7 +23,7 @@ describe(SagaRunner.name, function() {
 
                 await runner.runEffect(effectBuilder.clearCompensation(), context);
 
-                expect(mockHandler.mock.calls).toMatchInlineSnapshot();
+                expect(mockHandler.mock.calls).toMatchInlineSnapshot(`Array []`);
             },
             DEFAULT_TEST_TIMEOUT
         );
