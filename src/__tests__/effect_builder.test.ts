@@ -239,10 +239,10 @@ describe(EffectBuilder.name, function() {
     });
 
     describe('#addCompensation', function() {
-        it.todo('stores the compensation hook for later execution', async function() {});
+        it.todo('stores the compensation hook for later execution');
     });
 
     describe('#runCompensation', function() {
-        it.todo('runs the compensation chain', async function() {});
+        it.todo('runs the compensation chain');
     });
 });
