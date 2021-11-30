@@ -181,6 +181,14 @@ export interface IRunCompensationChainEffectDescription extends IEffectDescripti
     kind: EffectDescriptionKind.RUN_COMPENSATION;
 }
 
+export interface IClearCompensationChainEffectDescription extends IEffectDescription {
+    kind: EffectDescriptionKind.CLEAR_COMPENSATION;
+}
+
+export interface IViewCompensationChainEffectDescription extends IEffectDescription {
+    kind: EffectDescriptionKind.VIEW_COMPENSATION;
+}
+
 export interface IEffectDescription {
     transactionId: string;
     kind: EffectDescriptionKind;
@@ -221,7 +229,8 @@ export interface IBaseSagaContext {
     compensation?: {
         add: (effect: ICompensationEffectDescription<any>) => any;
         runAll: (config: ICompensationConfig) => Promise<void>;
-        viewChain: () => Array<ICompensationEffectDescription<any>>;
+        clearAll: () => Promise<void>;
+        viewChain: () => ReadonlyArray<ICompensationEffectDescription<any>>;
     };
 }
 

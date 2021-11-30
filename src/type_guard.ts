@@ -15,7 +15,9 @@ import {
     ICompensationPlan,
     ImmediateCompensationPlan,
     KafkaSagaCompensationPlan,
-    IRunCompensationChainEffectDescription
+    IRunCompensationChainEffectDescription,
+    IClearCompensationChainEffectDescription,
+    IViewCompensationChainEffectDescription
 } from './types';
 import {CompensationPlanKind, EffectDescriptionKind} from './enums';
 
@@ -47,6 +49,18 @@ export function isRunCompensationChainEffectDescription(
     effectDescription: IEffectDescription
 ): effectDescription is IRunCompensationChainEffectDescription {
     return effectDescription.kind === EffectDescriptionKind.RUN_COMPENSATION;
+}
+
+export function isClearCompensationEffectDescription(
+    effectDescription: IEffectDescription
+): effectDescription is IClearCompensationChainEffectDescription {
+    return effectDescription.kind === EffectDescriptionKind.CLEAR_COMPENSATION;
+}
+
+export function isViewCompensationEffectDescription(
+    effectDescription: IEffectDescription
+): effectDescription is IViewCompensationChainEffectDescription {
+    return effectDescription.kind === EffectDescriptionKind.VIEW_COMPENSATION;
 }
 
 export function isCallEffectDescription(

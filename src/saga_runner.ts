@@ -22,7 +22,9 @@ import {
     isDelayEffectDescription,
     isGenerator,
     isCompensationEffectDescription,
-    isRunCompensationChainEffectDescription
+    isRunCompensationChainEffectDescription,
+    isClearCompensationEffectDescription,
+    isViewCompensationEffectDescription
 } from './type_guard';
 
 export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
@@ -175,6 +177,28 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
             }
 
             await context.compensation.runAll(effectDescription.config);
+            return;
+        }
+
+        if (isClearCompensationEffectDescription(effectDescription)) {
+            if (!context.compensation) {
+                throw new Error(
+                    'Trying to clear compensation chain but compensation is not available to this context.'
+                );
+            }
+
+            await context.compensation.clearAll();
+            return;
+        }
+
+        if (isViewCompensationEffectDescription(effectDescription)) {
+            if (!context.compensation) {
+                throw new Error(
+                    'Trying to view compensation chain but compensation is not available to this context.'
+                );
+            }
+
+            return context.compensation.viewChain();
         }
     };
 

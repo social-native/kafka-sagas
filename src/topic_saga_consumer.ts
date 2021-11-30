@@ -383,6 +383,8 @@ export class TopicSagaConsumer<Payload, Context extends Record<string, any> = Re
                                     // Reset chain to an empty state.
                                     this.compensator.initializeCompensationChain(compensationId);
                                 },
+                                clearAll: () =>
+                                    this.compensator.initializeCompensationChain(compensationId),
                                 viewChain: () => this.compensator.getChain(compensationId)
                             }
                         },

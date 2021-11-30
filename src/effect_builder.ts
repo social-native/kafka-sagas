@@ -15,7 +15,9 @@ import {
     ICompensationPlan,
     CompensationEffect,
     IRunCompensationChainEffectDescription,
-    ICompensationConfig
+    ICompensationConfig,
+    IClearCompensationChainEffectDescription,
+    IViewCompensationChainEffectDescription
 } from './types';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 
@@ -38,6 +40,7 @@ export class EffectBuilder {
         this.race = this.race.bind(this);
         this.addCompensation = this.addCompensation.bind(this);
         this.runCompensation = this.runCompensation.bind(this);
+        this.clearCompensation = this.clearCompensation.bind(this);
     }
 
     public addCompensation = <Payload, Plan extends ICompensationPlan<Payload>>(
@@ -60,6 +63,20 @@ export class EffectBuilder {
             config,
             transactionId: this.transactionId,
             kind: EffectDescriptionKind.RUN_COMPENSATION
+        };
+    };
+
+    public clearCompensation = (): IClearCompensationChainEffectDescription => {
+        return {
+            transactionId: this.transactionId,
+            kind: EffectDescriptionKind.CLEAR_COMPENSATION
+        };
+    };
+
+    public viewCompensationChain = (): IViewCompensationChainEffectDescription => {
+        return {
+            transactionId: this.transactionId,
+            kind: EffectDescriptionKind.VIEW_COMPENSATION
         };
     };
 
