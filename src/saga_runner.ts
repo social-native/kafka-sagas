@@ -20,7 +20,11 @@ import {
     isTakeActionChannelEffectDescription,
     isEffectCombinatorDescription,
     isDelayEffectDescription,
-    isGenerator
+    isGenerator,
+    isCompensationEffectDescription,
+    isRunCompensationChainEffectDescription,
+    isClearCompensationEffectDescription,
+    isViewCompensationEffectDescription
 } from './type_guard';
 
 export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> {
@@ -30,8 +34,8 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
     ) => Promise<any>;
 
     constructor(
-        private consumerPool: ConsumerPool,
-        private throttledProducer: ThrottledProducer,
+        protected consumerPool: ConsumerPool,
+        protected throttledProducer: ThrottledProducer,
         middlewares: Array<Middleware<IEffectDescription, Context>> = []
     ) {
         const initialNext: Next<IEffectDescription, Context> = async (effect, ctx) => {
@@ -153,9 +157,52 @@ export class SagaRunner<InitialActionPayload, Context extends IBaseSagaContext> 
 
             return result;
         }
+
+        if (isCompensationEffectDescription(effectDescription)) {
+            if (!context.compensation) {
+                throw new Error(
+                    'Trying to add compensation but compensation is not available to this context.'
+                );
+            }
+
+            context.compensation.add(effectDescription);
+            return;
+        }
+
+        if (isRunCompensationChainEffectDescription(effectDescription)) {
+            if (!context.compensation) {
+                throw new Error(
+                    'Trying to run compensation chain but compensation is not available to this context.'
+                );
+            }
+
+            await context.compensation.runAll(effectDescription.config);
+            return;
+        }
+
+        if (isClearCompensationEffectDescription(effectDescription)) {
+            if (!context.compensation) {
+                throw new Error(
+                    'Trying to clear compensation chain but compensation is not available to this context.'
+                );
+            }
+
+            await context.compensation.clearAll();
+            return;
+        }
+
+        if (isViewCompensationEffectDescription(effectDescription)) {
+            if (!context.compensation) {
+                throw new Error(
+                    'Trying to view compensation chain but compensation is not available to this context.'
+                );
+            }
+
+            return context.compensation.viewChain();
+        }
     };
 
-    protected async runGeneratorFsm<Returned = any | undefined>(
+    public async runGeneratorFsm<Returned = any | undefined>(
         machine: Generator,
         context: Context,
         {

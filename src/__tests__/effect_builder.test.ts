@@ -1,9 +1,14 @@
 import {EffectBuilder} from '../effect_builder';
 import {EphemeralBuffer, ActionChannelBuffer} from '../buffers';
+import {CompensationPlanKind, ImmediateCompensationPlan, KafkaSagaCompensationPlan} from '..';
 
 // tslint:disable-next-line: no-empty
 describe(EffectBuilder.name, function() {
     const builder = new EffectBuilder('test-transaction-id');
+
+    afterEach(() => {
+        builder.clearCompensation();
+    });
 
     describe('#put', function() {
         it('returns a put effect description', function() {
@@ -232,6 +237,89 @@ describe(EffectBuilder.name, function() {
                     },
                   },
                   "kind": "COMBINATOR",
+                  "transactionId": "test-transaction-id",
+                }
+            `);
+        });
+    });
+
+    describe('#addCompensation', function() {
+        it('returns an addCompensation effect description', function() {
+            expect([
+                builder.addCompensation<any, ImmediateCompensationPlan<any>>({
+                    kind: CompensationPlanKind.IMMEDIATE,
+                    payload: {
+                        test: '123'
+                    },
+                    handler: jest.fn()
+                }),
+                builder.addCompensation<any, KafkaSagaCompensationPlan<any>>({
+                    kind: CompensationPlanKind.KAFKA_SAGA,
+                    payload: {
+                        testing: '2345'
+                    },
+                    topic: 'SOME_TOPIC'
+                })
+            ]).toMatchInlineSnapshot(`
+                Array [
+                  Object {
+                    "kind": "ADD_COMPENSATION",
+                    "plan": Object {
+                      "handler": [MockFunction],
+                      "kind": "IMMEDIATE",
+                      "payload": Object {
+                        "test": "123",
+                      },
+                    },
+                    "transactionId": "test-transaction-id",
+                  },
+                  Object {
+                    "kind": "ADD_COMPENSATION",
+                    "plan": Object {
+                      "kind": "KAFKA_SAGA",
+                      "payload": Object {
+                        "testing": "2345",
+                      },
+                      "topic": "SOME_TOPIC",
+                    },
+                    "transactionId": "test-transaction-id",
+                  },
+                ]
+            `);
+        });
+    });
+
+    describe('#runCompensation', function() {
+        it('returns a run compensation effect description', function() {
+            expect(builder.runCompensation()).toMatchInlineSnapshot(`
+                Object {
+                  "config": Object {
+                    "dontReverse": false,
+                    "parallel": false,
+                  },
+                  "kind": "RUN_COMPENSATION",
+                  "transactionId": "test-transaction-id",
+                }
+            `);
+        });
+    });
+
+    describe('#clearCompensation', function() {
+        it('returns a clear compensation effect description', function() {
+            expect(builder.clearCompensation()).toMatchInlineSnapshot(`
+                Object {
+                  "kind": "CLEAR_COMPENSATION",
+                  "transactionId": "test-transaction-id",
+                }
+            `);
+        });
+    });
+
+    describe('#viewCompensation', function() {
+        it('returns a view compensation effect description', function() {
+            expect(builder.viewCompensationChain()).toMatchInlineSnapshot(`
+                Object {
+                  "kind": "VIEW_COMPENSATION",
                   "transactionId": "test-transaction-id",
                 }
             `);

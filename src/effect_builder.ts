@@ -11,7 +11,13 @@ import {
     ITakeActionChannelEffectDescription,
     TakePattern,
     IActionChannelEffectDescription,
-    DelayEffect
+    DelayEffect,
+    ICompensationPlan,
+    CompensationEffect,
+    IRunCompensationChainEffectDescription,
+    ICompensationConfig,
+    IClearCompensationChainEffectDescription,
+    IViewCompensationChainEffectDescription
 } from './types';
 import {ActionChannelBuffer, EphemeralBuffer} from './buffers';
 
@@ -32,7 +38,47 @@ export class EffectBuilder {
         this.actionChannel = this.actionChannel.bind(this);
         this.all = this.all.bind(this);
         this.race = this.race.bind(this);
+        this.addCompensation = this.addCompensation.bind(this);
+        this.runCompensation = this.runCompensation.bind(this);
+        this.clearCompensation = this.clearCompensation.bind(this);
     }
+
+    public addCompensation = <Payload, Plan extends ICompensationPlan<Payload>>(
+        plan: Plan
+    ): ReturnType<CompensationEffect<Payload, Plan>> => {
+        return {
+            kind: EffectDescriptionKind.ADD_COMPENSATION,
+            plan,
+            transactionId: this.transactionId
+        };
+    };
+
+    public runCompensation = (
+        config: ICompensationConfig = {
+            dontReverse: false,
+            parallel: false
+        }
+    ): IRunCompensationChainEffectDescription => {
+        return {
+            config,
+            transactionId: this.transactionId,
+            kind: EffectDescriptionKind.RUN_COMPENSATION
+        };
+    };
+
+    public clearCompensation = (): IClearCompensationChainEffectDescription => {
+        return {
+            transactionId: this.transactionId,
+            kind: EffectDescriptionKind.CLEAR_COMPENSATION
+        };
+    };
+
+    public viewCompensationChain = (): IViewCompensationChainEffectDescription => {
+        return {
+            transactionId: this.transactionId,
+            kind: EffectDescriptionKind.VIEW_COMPENSATION
+        };
+    };
 
     public put = <Payload>(
         ...args: Parameters<PutEffect<Payload>>
